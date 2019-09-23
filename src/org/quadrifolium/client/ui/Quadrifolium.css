@@ -1,0 +1,438 @@
+body{
+  font-size:    1em;
+  font-family:  georgia, serif;
+  text-align:   left;
+  color:        #444;
+  background:   #FFF;
+  padding:      0;
+  margin:       0;
+}
+
+html { 
+	font-size:100%; 
+} // for IE
+
+.quadrifoliumBody {
+  display: block;	
+}
+
+h1 {
+  font-size:   3em;
+  font-weight: bold;
+  text-align:  center;
+  font-style:  italic;
+  color:       black;
+  margin:      0px 0px 0px;
+}  
+
+table td, select {
+	font-family: georgia, serif;
+	font-size:   13px;
+}
+
+.header{
+  display:          block;
+  width:            100%;
+  font-size:        1.33em;
+  color:            white;
+  background-color: #331F00;
+  height:           2em;
+  // line-height:      0.25em;
+}
+
+.successWelcomeLabel{
+	text-align: center;
+	width:      100%;
+	// margin-top: 0.5em;
+}
+
+.workspace{
+	font-size: 1em;
+  color:     black;
+  left:      0px;
+  width:     100%;
+  height:    40em;
+}
+
+.footer{
+  color:      black ;
+  font-size:  1em;
+  font-style: italic;
+}
+
+/** ------ Login header ------ */
+
+.logintable {
+  position:   absolute;
+  top:        0px;
+  right:      0px;
+  font-size:  2em;
+  color:      #FFFFFF;
+}
+
+/** --------- Workshop --------- */
+
+.worshopWorkspace {
+	display:   block;
+  width:     100%;
+  height:    100%;
+}
+
+.editButton {
+	display:  inline-block;
+  float:    right;
+}
+
+.elementEditButton {
+	display:    inline-block;
+	float:      left;
+	width:      22px;
+	height:     22px;
+	background: #FFF;
+	float:      right;
+}
+.elementEditButton-up {
+  width:      22px;
+  height:     22px;
+  background: #FFF;
+  float:      right;
+}
+
+.chapterCaption {
+	display:  inline-block;
+  float:    left;
+}
+
+/** --------- Workshop, lemmas --------- */
+
+.lemmasWorshopPanel {
+	display:   block;
+  width:     100%;
+  height:    100%;
+}
+
+.lemmasCommand {
+	display:          block;
+	background-color: #FFFBA8;
+  width:            auto;
+  height:           2em;
+  margin:           5px;
+  border:           3px;
+  padding:          3px;
+}
+
+.lemmasCommandControl {
+	display:          inline-block;
+	background-color: #FFFBA8;
+	align:            right;
+	border:           solid 1px #980c10;
+	background:       #00B050;
+}
+
+.lemmasCellTree {
+	overflow: scroll;
+}
+
+/** --------- Workshop, semantics --------- */
+
+.semanticsWorshopPanel {
+	display:   block;
+  width:     100%;
+  height:    100%;
+}
+
+.semanticsCommand {
+	display:          block;
+	background-color: #7777FF;
+  width:            auto;
+  height:           2em;
+  margin:           5px;
+  border:           3px;
+  padding:          3px;
+}
+
+
+
+/** --------- Workshop, definitions --------- */
+
+.definitionsCommand {
+	display:          block;
+	background-color: #CDEE6A;
+  width:            auto;
+  height:           2em;
+  margin:           5px;
+  border:           3px;
+  padding:          3px;
+}
+
+.addDefinitionLang {
+	display:          inline-block;
+	width:            100px;
+	height:           1.5em;
+	right:            2px;
+}
+
+.addDefinitionText {
+	display:          inline-block;
+	width:            40em;
+	height:           3em;
+	right:            2px;
+}
+
+/** --------- Welcome --------- */
+
+.welcomeWorkspace{
+	display:   block;
+  width:     100%;
+  height:    100%;
+}
+
+.logo {
+	display:       block;
+	width:         515px;
+	margin-left:   auto;
+	margin-right:  auto;
+	margin-top:    5px;
+	margin-bottom: 5px;
+}
+
+/* research panel */
+
+.researchPanel {
+	display:          block;
+	width:            100%;
+	height:           2em;
+	background-color: #331F00;
+	margin-top:       5px;
+}
+
+.researchBox {
+	position:         absolute;
+	width:            300px;
+	height:           1.5em;
+	margin-top:       1px;
+	/* margin-left:      2px; */
+	left:             2px;
+}
+
+.researchButton {
+	position:         absolute;
+	width:            150px;
+	left:             310px;
+	margin-top:       4px;
+}
+
+.selectedTerm {
+	position:         absolute;
+	left:             470px;
+	right:            110px;
+	width:            auto;
+	height:           1.5em;
+	margin-top:       2px;
+}
+
+.selectedTermLabel {
+	color:            white;
+	text-align:       center;
+}
+
+.researchLanguageList {
+	position:         absolute;
+	display:          inline-block;
+	width:            100px;
+	height:           1.5em;
+	margin-top:       4px;
+	/* margin-right:     2px; */
+	right:            2px;
+}
+
+/* display panel */
+
+.displayPanel {
+	display:          block;
+	width:            100%;
+	height:           100%;
+}
+
+/* semantic network panel */
+
+.semanticTable {
+	display:          inline-block;
+	width:            50%;
+	height:           auto;
+}
+
+/* buttons for fit scores */
+
+.fitbutton {
+  outline: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+.fitbutton:hover {
+  text-decoration: none;
+}
+.fitbutton:active {
+  position: relative;
+  top: 1px;
+}
+
+/* fit red */
+.fitred {
+	color: #faddde;
+	border: solid 1px #980c10;
+	background: #ff0000;
+}
+.fitred:hover {
+	background: #b61318;
+}
+.fitred:active {
+	color: #de898c;
+}
+
+/* fit pale green */
+.fitpalegreen {
+	color: #000000;
+	border: solid 1px #980c10;
+	background: #30E628;
+}
+.fitpalegreen:hover {
+	background: #30E628;
+}
+.fitpalegreen:active {
+	color: #faddde;
+}
+
+/* fit green */
+.fitgreen {
+	color: #faddde;
+	border: solid 1px #980c10;
+	background: #00B050;
+}
+.fitgreen:hover {
+	background: #00B050;
+}
+.fitgreen:active {
+	color: #de898c;
+}
+
+/* fit white */
+.fitwhite {
+	color: #606060;
+	border: solid 1px #b7b7b7;
+	background: #fff;
+}
+.fitwhite:hover {
+	background: #ededed;
+}
+.fitwhite:active {
+	color: #999;
+}
+
+/* inspired by http://webdesignerwall.com/tutorials/css3-gradient-buttons */
+
+.button {
+  /* vertical-align: baseline; */
+  /* margin: 0 2px; */
+  outline: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  /* font: 14px/100% Arial, Helvetica, sans-serif; */
+  /* padding: .5em 2em .55em; */
+  text-shadow: 0 1px 1px rgba(0,0,0,.3);
+  -webkit-border-radius: .5em; 
+  -moz-border-radius: .5em;
+  border-radius: .5em;
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  -moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+.button:hover {
+  text-decoration: none;
+}
+.button:active {
+  position: relative;
+  top: 1px;
+}
+
+.bigrounded {
+  -webkit-border-radius: 2em;
+  -moz-border-radius: 2em;
+  border-radius: 2em;
+}
+.medium {
+  font-size: 12px;
+  padding: .4em 1.5em .42em;
+}
+.small {
+  font-size: 11px;
+  padding: .2em 1em .275em;
+}
+
+/* orange */
+.orange {
+  color: #fef4e9;
+  border: solid 1px #da7c0c;
+  background: #f78d1d;
+  background: -webkit-gradient(linear, left top, left bottom, from(#faa51a), to(#f47a20));
+  background: -moz-linear-gradient(top,  #faa51a,  #f47a20);
+  filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#faa51a', endColorstr='#f47a20');
+}
+.orange:hover {
+  background: #f47c20;
+  background: -webkit-gradient(linear, left top, left bottom, from(#f88e11), to(#f06015));
+  background: -moz-linear-gradient(top,  #f88e11,  #f06015);
+  filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f88e11', endColorstr='#f06015');
+}
+.orange:active {
+  color: #fcd3a5;
+  background: -webkit-gradient(linear, left top, left bottom, from(#f47a20), to(#faa51a));
+  background: -moz-linear-gradient(top,  #f47a20,  #faa51a);
+  filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f47a20', endColorstr='#faa51a');
+}
+
+/* red */
+.red {
+	color: #faddde;
+	border: solid 1px #980c10;
+	background: #d81b21;
+	background: -webkit-gradient(linear, left top, left bottom, from(#ed1c24), to(#aa1317));
+	background: -moz-linear-gradient(top,  #ed1c24,  #aa1317);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ed1c24', endColorstr='#aa1317');
+}
+.red:hover {
+	background: #b61318;
+	background: -webkit-gradient(linear, left top, left bottom, from(#c9151b), to(#a11115));
+	background: -moz-linear-gradient(top,  #c9151b,  #a11115);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#c9151b', endColorstr='#a11115');
+}
+.red:active {
+	color: #de898c;
+	background: -webkit-gradient(linear, left top, left bottom, from(#aa1317), to(#ed1c24));
+	background: -moz-linear-gradient(top,  #aa1317,  #ed1c24);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#aa1317', endColorstr='#ed1c24');
+}
+
+/* white */
+.white {
+	color: #606060;
+	border: solid 1px #b7b7b7;
+	background: #fff;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
+	background: -moz-linear-gradient(top,  #fff,  #ededed);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#ededed');
+}
+.white:hover {
+	background: #ededed;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dcdcdc));
+	background: -moz-linear-gradient(top,  #fff,  #dcdcdc);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dcdcdc');
+}
+.white:active {
+	color: #999;
+	background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
+	background: -moz-linear-gradient(top,  #ededed,  #fff);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#ffffff');
+}
