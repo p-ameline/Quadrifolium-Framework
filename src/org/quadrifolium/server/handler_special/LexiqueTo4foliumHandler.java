@@ -34,7 +34,7 @@ import com.google.inject.Provider;
 
 public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo4foliumAction, LexiqueTo4foliumResult>
 {
-	private int _iUserId ;
+	private SessionElements _sessionElements ;
 	
 	@Inject
 	public LexiqueTo4foliumHandler(final Logger logger,
@@ -60,29 +60,27 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		
 		// Check session elements
 		//
-		SessionElements sessionElements = action.getSessionElements() ;
+		_sessionElements = action.getSessionElements() ;
 		SessionsManager sessionManager = new SessionsManager() ;
-		if (false == sessionManager.checkTokenAndHeartbeat(sessionElements))
+		if (false == sessionManager.checkTokenAndHeartbeat(_sessionElements))
 			return new LexiqueTo4foliumResult("Invalid session elements.") ;
-		
-		_iUserId = sessionElements.getPersonId() ;
 		
 		// Start processing
 		//
 		try 
 		{
-			Logger.trace(sFunctionName + ": entering.", _iUserId, Logger.TraceLevel.DETAIL) ;
+			Logger.trace(sFunctionName + ": entering.", _sessionElements.getPersonId(), Logger.TraceLevel.DETAIL) ;
 			
 			// String sResult = processLexique() ;
 			String sResul2 = processSavoir() ;
 			
-			Logger.trace(sFunctionName + ": leaving with result = " + sResul2, _iUserId, Logger.TraceLevel.DETAIL) ;
+			Logger.trace(sFunctionName + ": leaving with result = " + sResul2, _sessionElements.getPersonId(), Logger.TraceLevel.DETAIL) ;
 			
 			return new LexiqueTo4foliumResult(sResul2) ; 
 		}
 		catch (Exception cause) 
 		{
-			Logger.trace(sFunctionName + ": exception ; cause: " + cause.getMessage(), _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFunctionName + ": exception ; cause: " + cause.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			throw new ActionException(cause) ;
 		}
   }
@@ -96,7 +94,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 	{
 		String sFunctionName = "LexiqueTo4foliumHandler.processLexique" ;
 		
-		Logger.trace(sFunctionName + ": entering.", _iUserId, Logger.TraceLevel.DETAIL) ;
+		Logger.trace(sFunctionName + ": entering.", _sessionElements.getPersonId(), Logger.TraceLevel.DETAIL) ;
 		
 		String sResult = "OK" ;
 		
@@ -107,7 +105,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		
 		try 
 		{
-			dbConnector = new DBConnector(false, _iUserId) ;
+			dbConnector = new DBConnector(false, _sessionElements.getPersonId()) ;
 			
 			// Prepare sql query and execute it
 			//
@@ -115,7 +113,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 			
 			if (false == dbConnector.executePreparedStatement())
 			{
-				Logger.trace(sFunctionName + ": execute statement failed, leaving.", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFunctionName + ": execute statement failed, leaving.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 				return "Lexique query failled, leaving" ;
 			}
 			
@@ -124,12 +122,12 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 			ResultSet rs = dbConnector.getResultSet() ;
 			if (null == rs)
 			{
-				Logger.trace(sFunctionName + ": no result found, leaving.", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFunctionName + ": no result found, leaving.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 				return "Lexique is empty" ;
 			}
 			
-			dbConnectorBis = new DBConnector(false, _iUserId) ;
-			LexiconManager lexiconManager = new LexiconManager(_iUserId, dbConnectorBis) ;
+			dbConnectorBis = new DBConnector(false, _sessionElements.getPersonId()) ;
+			LexiconManager lexiconManager = new LexiconManager(_sessionElements.getPersonId(), dbConnectorBis) ;
 			
 			long lRowCount = 0 ;
 			
@@ -142,7 +140,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		    	// Get an OntologyLexicon object from the result
 		    	//
 		    	OntologyLexicon lexicon = new OntologyLexicon() ;
-		    	LexiconManager.fillDataFromResultSet(rs, lexicon, _iUserId) ;
+		    	LexiconManager.fillDataFromResultSet(rs, lexicon, _sessionElements.getPersonId()) ;
 		    	
 		    	// If this entry from the Lexique has not already been processed
 		    	//
@@ -164,18 +162,18 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 	    }
 			catch (SQLException e)
 	    {
-	    	Logger.trace(sFunctionName + ": error parsing results ; stackTrace:" + e.getStackTrace(), _iUserId, Logger.TraceLevel.ERROR) ;
+	    	Logger.trace(sFunctionName + ": error parsing results ; stackTrace:" + e.getStackTrace(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 	    	sResult = "Error parsing the Lexique" ;
 	    }
 			
 	    dbConnector.closeResultSet() ;
 	    dbConnector.closePreparedStatement() ;
 			
-	    Logger.trace(sFunctionName + ": leaving. " + lRowCount + " rows found.", _iUserId, Logger.TraceLevel.DETAIL) ;
+	    Logger.trace(sFunctionName + ": leaving. " + lRowCount + " rows found.", _sessionElements.getPersonId(), Logger.TraceLevel.DETAIL) ;
 		}
 		catch (Exception cause) 
 		{
-			Logger.trace(sFunctionName +  ": exception ; cause: " + cause.getMessage(), _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFunctionName +  ": exception ; cause: " + cause.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			sResult = "Exception when processing lexique" ;
 		}
 		finally
@@ -212,11 +210,11 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		
 		try
 		{
-			dbConnector2 = new DBConnector(false, _iUserId) ;
+			dbConnector2 = new DBConnector(false, _sessionElements.getPersonId()) ;
 		
 			if ((null == dbConnector2) || (null == lexicon))
 			{
-				Logger.trace(sFunctionName +  ": bad parameters, leaving", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFunctionName +  ": bad parameters, leaving", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 				return ;
 			}
 		
@@ -236,12 +234,12 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		
 			// Get the new lemma code
 			//
-			LemmaManager lemmaManager = new LemmaManager(_iUserId, dbConnector2) ;
+			LemmaManager lemmaManager = new LemmaManager(_sessionElements, dbConnector2) ;
 			String sLemmaCode = lemmaManager.getNextLemmaCode(sQConceptCode) ;
 			
 			if ("".equals(sLemmaCode))
 			{
-				Logger.trace(sFunctionName +  ": lemma \"" + lexicon.getLabel() + "\" could not be inserted since no code could be affected to it, leaving", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFunctionName +  ": lemma \"" + lexicon.getLabel() + "\" could not be inserted since no code could be affected to it, leaving", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 				return ;
 			}
 		
@@ -253,7 +251,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		
 			// Update the lexicon
 			//
-			LexiconManager lexiconManager = new LexiconManager(_iUserId, dbConnector2) ;
+			LexiconManager lexiconManager = new LexiconManager(_sessionElements.getPersonId(), dbConnector2) ;
 			lexicon.setLemma(sLemmaCode) ;
 			lexiconManager.updateData(lexicon) ;
 		
@@ -320,7 +318,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		String sSingularLabel = lexicon.getDisplayLabelForNoon(OntologyLexicon.Declination.singular, "fr") ;
 		String sPluralLabel   = lexicon.getDisplayLabelForNoon(OntologyLexicon.Declination.plural, "fr") ;
 		
-		FlexManager flexManager = new FlexManager(_iUserId, dbConnector) ;
+		FlexManager flexManager = new FlexManager(_sessionElements, dbConnector) ;
 		
 		// If singular inflection exists, then add it to the flex table
 		//
@@ -391,7 +389,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		String sPluralMasculine   = lexicon.getDisplayLabelForAdjective(OntologyLexicon.Gender.MPGender, "fr") ;
 		String sPluralFeminine    = lexicon.getDisplayLabelForAdjective(OntologyLexicon.Gender.FPGender, "fr") ;
 		
-		FlexManager flexManager = new FlexManager(_iUserId, dbConnector) ;
+		FlexManager flexManager = new FlexManager(_sessionElements, dbConnector) ;
 		
 		// If singular inflections exist, then add them to the flex table
 		//
@@ -579,7 +577,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		
 		Triple newTriple = new Triple(-1, sSubject, sPredicate, sObject) ;
 		
-		TripleManager tripleManager = new TripleManager(_iUserId, dbConnector) ;
+		TripleManager tripleManager = new TripleManager(_sessionElements, dbConnector) ;
 		if (false == tripleManager.insertData(newTriple))
 			return -1 ;
 		
@@ -598,7 +596,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		if ((null == dbConnector) || (null == sText) || "".equals(sText))
 			return "" ;
 		
-		FreeTextManager freeTextManager = new FreeTextManager(_iUserId, dbConnector) ;
+		FreeTextManager freeTextManager = new FreeTextManager(_sessionElements, dbConnector) ;
 		
 		return freeTextManager.insertData(sConceptCode, sText, sLanguage) ;
 	}
@@ -635,7 +633,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 	{
 		String sFunctionName = "LexiqueTo4foliumHandler.processSavoir" ;
 		
-		Logger.trace(sFunctionName + ": entering.", _iUserId, Logger.TraceLevel.DETAIL) ;
+		Logger.trace(sFunctionName + ": entering.", _sessionElements.getPersonId(), Logger.TraceLevel.DETAIL) ;
 		
 		String sResult = "OK" ;
 		
@@ -646,7 +644,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		
 		try 
 		{
-			dbConnector = new DBConnector(false, _iUserId) ;
+			dbConnector = new DBConnector(false, _sessionElements.getPersonId()) ;
 			
 			// Prepare sql query and execute it
 			//
@@ -654,7 +652,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 			
 			if (false == dbConnector.executePreparedStatement())
 			{
-				Logger.trace(sFunctionName + ": execute statement failed, leaving.", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFunctionName + ": execute statement failed, leaving.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 				return "Savoir query failled, leaving" ;
 			}
 			
@@ -663,14 +661,14 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 			ResultSet rs = dbConnector.getResultSet() ;
 			if (null == rs)
 			{
-				Logger.trace(sFunctionName + ": no result found, leaving.", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFunctionName + ": no result found, leaving.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 				return "Savoir is empty" ;
 			}
 			
-			dbConnectorBis = new DBConnector(false, _iUserId) ;
+			dbConnectorBis = new DBConnector(false, _sessionElements.getPersonId()) ;
 			
 			
-			TripleManager tripleManager = new TripleManager(_iUserId, dbConnectorBis) ;
+			TripleManager tripleManager = new TripleManager(_sessionElements, dbConnectorBis) ;
 			
 			long lRowCount = 0 ;
 			
@@ -683,7 +681,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		    	// Get an OntologyLexicon object from the result
 		    	//
 		    	OntologySavoir triple = new OntologySavoir() ;
-		    	SavoirManager.fillDataFromResultSet(rs, triple, _iUserId) ;
+		    	SavoirManager.fillDataFromResultSet(rs, triple, _sessionElements.getPersonId()) ;
 		    	
 		    	Triple newTriple = new Triple() ;
 		    	
@@ -695,18 +693,18 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 	    }
 			catch (SQLException e)
 	    {
-	    	Logger.trace(sFunctionName + ": error parsing results ; stackTrace:" + e.getStackTrace(), _iUserId, Logger.TraceLevel.ERROR) ;
+	    	Logger.trace(sFunctionName + ": error parsing results ; stackTrace:" + e.getStackTrace(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 	    	sResult = "Error parsing Savoir" ;
 	    }
 			
 	    dbConnector.closeResultSet() ;
 	    dbConnector.closePreparedStatement() ;
 			
-	    Logger.trace(sFunctionName + ": leaving. " + lRowCount + " rows found.", _iUserId, Logger.TraceLevel.DETAIL) ;
+	    Logger.trace(sFunctionName + ": leaving. " + lRowCount + " rows found.", _sessionElements.getPersonId(), Logger.TraceLevel.DETAIL) ;
 		}
 		catch (Exception cause) 
 		{
-			Logger.trace(sFunctionName +  ": exception ; cause: " + cause.getMessage(), _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFunctionName +  ": exception ; cause: " + cause.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			sResult = "Exception when processing Savoir" ;
 		}
 		finally
@@ -733,7 +731,7 @@ public class LexiqueTo4foliumHandler extends QuadrifoliumActionHandler<LexiqueTo
 		
 		// First, check if both concepts that correspond to qualifie and qualifiant can be found as Quadrifolium concepts 
 		//
-		LexiconManager lexiconManager = new LexiconManager(_iUserId, dbConnector) ;
+		LexiconManager lexiconManager = new LexiconManager(_sessionElements.getPersonId(), dbConnector) ;
 		
 		String sSubject = lexiconManager.get4foliumConcept(triple.getQualifie()) ;
 		if ("".equals(sSubject))

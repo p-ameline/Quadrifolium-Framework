@@ -1,5 +1,7 @@
 package org.quadrifolium.shared.rpc4ontology;
 
+import org.quadrifolium.shared.rpc_util.SessionElements;
+
 import net.customware.gwt.dispatch.shared.Action;
 
 /**
@@ -7,18 +9,19 @@ import net.customware.gwt.dispatch.shared.Action;
  */
 public class GetSemanticTriplesAction implements Action<GetSemanticTriplesResult> 
 {
-  private int    _iUserId ;
-  private String _sDisplayLanguage ;
-	private String _sConceptCode ;
+	private SessionElements _sessionElements ;
+	
+  private String          _sDisplayLanguage ;
+	private String          _sConceptCode ;
 
 	/**
 	 * Plain vanilla constructor
 	 */
-	public GetSemanticTriplesAction(final int iUserId, final String sDisplayLanguage, final String sConceptCode) 
+	public GetSemanticTriplesAction(final SessionElements sessionElements, final String sDisplayLanguage, final String sConceptCode) 
 	{
 		super() ;
 		
-		_iUserId          = iUserId ;
+		_sessionElements  = sessionElements ;
 		_sDisplayLanguage = sDisplayLanguage ;
 		_sConceptCode     = sConceptCode ;
 	}
@@ -30,13 +33,13 @@ public class GetSemanticTriplesAction implements Action<GetSemanticTriplesResult
 	{
 		super() ;
 		
-		_iUserId          = -1 ;
+		_sessionElements  = null ;
 		_sDisplayLanguage = "" ;
 		_sConceptCode     = "" ;
 	}
 
-	public int getUserId() {
-		return _iUserId ;
+	public SessionElements getSessionElements() {
+		return _sessionElements ;
 	}
 	
 	public String getDisplayLanguage() {

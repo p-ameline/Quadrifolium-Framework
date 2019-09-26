@@ -214,7 +214,7 @@ public class GetDefinitionsTriplesForConceptHandler extends QuadrifoliumActionHa
 			return false ;
 		}
 		
-		FreeTextManager freeTextManager = new FreeTextManager(_iUserId, dbConnector) ;
+		FreeTextManager freeTextManager = new FreeTextManager(null, dbConnector) ;
 		
 		for (TripleWithLabel triple : aTriples) 
 		{

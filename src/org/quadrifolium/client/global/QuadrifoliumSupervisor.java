@@ -9,6 +9,7 @@ import org.quadrifolium.shared.database.Language;
 import org.quadrifolium.shared.database.Lexicon;
 import org.quadrifolium.shared.database.Person;
 import org.quadrifolium.shared.ontology.LanguageTag;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 
 /**
  * Class in charge of global information
@@ -22,7 +23,8 @@ public class QuadrifoliumSupervisor {
 	protected Person                 _user ;
 	protected String                 _sUserCipherPassword ;
 	protected String                 _sUserCipherKey ;
-	protected String                 _sSessionToken ;
+	
+	protected SessionElements        _sessionElements ;
 	
 	protected ArrayList<Language>    _UserLanguages ;
 	protected Language               _UserSelectedLanguage ;
@@ -41,11 +43,11 @@ public class QuadrifoliumSupervisor {
 		_sClientVersion      = "0.1" ;
 		_sServerVersion      = "" ;
 		
-		_sSessionToken       = "" ;
 		_sUserCipherPassword = "" ;
 		_sUserCipherKey      = "" ;
 		
 		_user                = new Person() ;
+		_sessionElements     = null ;
 		
 		_sUserLanguage       = "" ;
 		_UserLanguages       = new ArrayList<Language>() ;
@@ -65,11 +67,11 @@ public class QuadrifoliumSupervisor {
 		_injector = injector;
 	}
 	
-	public String getSessionToken() {
-		return _sSessionToken ;
+	public SessionElements getSessionElements() {
+		return _sessionElements ;
 	}
-	public void setSessionToken(final String sSessionToken) {
-		_sSessionToken = sSessionToken ;
+	public void setSessionElements(final SessionElements sessionElements) {
+		_sessionElements = sessionElements ;
 	}
 		
 	public Person getUser() {

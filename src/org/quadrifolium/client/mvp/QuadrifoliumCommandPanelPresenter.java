@@ -273,7 +273,7 @@ public class QuadrifoliumCommandPanelPresenter extends WidgetPresenter<Quadrifol
 		
 	protected void lexiqueToQuadrifolium()
 	{
-		_dispatcher.execute(new LexiqueTo4foliumAction(_supervisor.getUserId(), _supervisor.getSessionToken()), new startProcessingCallback()) ;
+		_dispatcher.execute(new LexiqueTo4foliumAction(_supervisor.getSessionElements()), new startProcessingCallback()) ;
 	}
 	
 	/**

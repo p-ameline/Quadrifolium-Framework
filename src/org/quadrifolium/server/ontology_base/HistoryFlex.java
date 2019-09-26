@@ -3,9 +3,9 @@ package org.quadrifolium.server.ontology_base ;
 import org.quadrifolium.shared.ontology.Flex;
 
 /**
- * Lemma.java
+ * HistoryFlex.java
  *
- * The Flex class represents a specific flexed variation of a lemma
+ * The HistoryFlex class represents a versioned instance of a Flex
  * 
  * Author: PA
  * 
@@ -13,6 +13,7 @@ import org.quadrifolium.shared.ontology.Flex;
 public class HistoryFlex
 {
 	private int    _iId ;
+	
 	private int    _iFlexId ;
 	private String _sLabel ;
 	private String _sCode ;
@@ -37,6 +38,22 @@ public class HistoryFlex
 		_sLabel    = sLabel ;
 		_sCode     = sCode ;
 		_sLanguage = sLanguage ;
+	}
+	
+	/**
+	 * Constructor from a Flex
+	 */
+	public HistoryFlex(final Flex flex) 
+	{
+		reset() ;
+
+		if (null == flex)
+			return ;
+		
+		_iFlexId   = flex.getId() ;
+		_sLabel    = flex.getLabel() ;
+		_sCode     = flex.getCode() ;
+		_sLanguage = flex.getLanguage() ;
 	}
 	
 	/**

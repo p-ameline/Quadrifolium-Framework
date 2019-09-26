@@ -52,10 +52,6 @@ public class SessionsManager
 		if (null == _dbConnector)
 			return false ;
 
-		// First, close existing sessions (if any)
-		//
-		closePreviousSessions(iPersonId) ;
-		
 		_session.reset() ;
 		
 		_session.setPersonId(iPersonId) ;
@@ -67,6 +63,8 @@ public class SessionsManager
 		int iSessionId = createNewSession() ;
 		if (-1 == iSessionId)
 			return false ;
+		
+		_session.setSessionId(iSessionId) ;
 		
 		return true ;
 	}
@@ -93,30 +91,7 @@ public class SessionsManager
 		
 		updateSession() ;		
 	}
-	
-	/**
-	 * Delete all sessions records for a given PersonId    
-	 * 
-	 * @param sPersonId Person's Ldv identifier
-	 * 
-	 **/
-	private void closePreviousSessions(final int iPersonId)
-	{
-		if (false == checkConnectorAndPersonId(iPersonId, "closePreviousSessions"))
-			return ;
-		
-		String sqlText = "DELETE FROM sessions WHERE personid = ?" ;
-		
-		_dbConnector.prepareStatememt(sqlText, Statement.NO_GENERATED_KEYS) ;
-		_dbConnector.setStatememtInt(1, iPersonId) ;
-		
-		// Execute prepared statement 
-		//
-		_dbConnector.executeUpdatePreparedStatement(false) ;
-		
-		_dbConnector.closePreparedStatement() ;
-	}
-		
+			
 	/**
 	 * Check if database connector and PersonId are valid    
 	 * 
@@ -459,6 +434,15 @@ public class SessionsManager
 			Logger.trace("SessionsManager.fillDataFromResultSet: exception when processing results set: " + e.getMessage(), iUserId, Logger.TraceLevel.ERROR) ;
 		}
 	}
+	
+	/**
+	 * Return essential information as a SessionElements object   
+	 */
+	public SessionElements getSessionElements()
+	{
+		SessionElements sessionElements = new SessionElements(_session.getPersonId(), _session.getSessionId(), _session.getToken()) ;
+	  return sessionElements ;
+  }
 	
 	public String getToken() {
 	  return _session.getToken() ;

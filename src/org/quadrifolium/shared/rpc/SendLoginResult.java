@@ -1,27 +1,30 @@
 package org.quadrifolium.shared.rpc;
 
 import org.quadrifolium.shared.database.Person;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 
 import net.customware.gwt.dispatch.shared.Result;
 
 public class SendLoginResult implements Result 
 {
-	private String _sSessionToken ;
+	private SessionElements _sessionElements ;
+	
 	private Person _user ;
+	
 	private String _sMessage ;
 	private String _sVersion ;
 
 	/**
 	 * Plain vanilla constructor
 	 */
-	public SendLoginResult(final String sSessionToken, final String sMessage, final Person user, final String sVersion) 
+	public SendLoginResult(final SessionElements sessionElements, final String sMessage, final Person user, final String sVersion) 
 	{
 		super() ;
 		
-		_sSessionToken = sSessionToken ;
-		_user          = new Person(user) ;
-		_sMessage      = sMessage ;
-		_sVersion      = sVersion ;
+		_sessionElements = sessionElements ;
+		_user            = new Person(user) ;
+		_sMessage        = sMessage ;
+		_sVersion        = sVersion ;
 	}
 
 	/**
@@ -32,14 +35,14 @@ public class SendLoginResult implements Result
 	{
 		super() ;
 		
-		_sSessionToken = "" ;
-		_user          = new Person() ;
-		_sMessage      = "" ;
-		_sVersion      = "" ;
+		_sessionElements = null ;
+		_user            = new Person() ;
+		_sMessage        = "" ;
+		_sVersion        = "" ;
 	}
 
-	public String getSessionToken() {
-		return _sSessionToken ;
+	public SessionElements getSessionElements() {
+		return _sessionElements ;
 	}
 
 	public Person getUser() {

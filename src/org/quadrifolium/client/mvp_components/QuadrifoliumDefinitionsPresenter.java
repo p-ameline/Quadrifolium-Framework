@@ -383,7 +383,7 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 		
 		// Send the save query to the server
 		//
-		_dispatcher.execute(new SaveDefinitionAction(_supervisor.getUserId(), _supervisor.getConcept(), sLanguage, sText, _editedDefinition), new SaveDefinitionCallback()) ;
+		_dispatcher.execute(new SaveDefinitionAction(_supervisor.getSessionElements(), _supervisor.getConcept(), sLanguage, sText, _editedDefinition), new SaveDefinitionCallback()) ;
 	}
 	
 	/**

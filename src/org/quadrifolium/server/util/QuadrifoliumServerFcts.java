@@ -15,6 +15,7 @@ import org.quadrifolium.shared.ontology.Flex;
 import org.quadrifolium.shared.ontology.Lemma;
 import org.quadrifolium.shared.ontology.Triple;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 /**
@@ -232,7 +233,7 @@ public class QuadrifoliumServerFcts
 	 * 
 	 * @return The label if found, <code>""</code> if not
 	 */
-	public static String getLabelForCodeInBase(DBConnector dbConnector, final String sLanguage, final String sCode, int iUserId)
+	public static String getLabelForCodeInBase(DBConnector dbConnector, final String sLanguage, final String sCode, final SessionElements sessionElements)
 	{
 		String sFctName = "QuadrifoliumServerFcts.getLabelForCodeInBase" ;
 		
@@ -255,13 +256,13 @@ public class QuadrifoliumServerFcts
 		// The behavior depends from code category (concept, lemma or inflection)
 		//
 		if (QuadrifoliumFcts.isConceptCode(sCode))
-			return getLabelForConceptCodeInBase(dbConnector, sActiveLanguage, sCode, iUserId) ;
+			return getLabelForConceptCodeInBase(dbConnector, sActiveLanguage, sCode, sessionElements) ;
 		
 		if (QuadrifoliumFcts.isLemmaCode(sCode))
 		{
 			Lemma lemma = new Lemma() ;
 			
-			LemmaManager lemmaManager = new LemmaManager(iUserId, dbConnector) ;
+			LemmaManager lemmaManager = new LemmaManager(sessionElements, dbConnector) ;
 			if (lemmaManager.existData(sCode, lemma))
 				return lemma.getLabel() ;
 		}
@@ -270,13 +271,13 @@ public class QuadrifoliumServerFcts
 		{
 			Flex flex = new Flex() ;
 			
-			FlexManager flexManager = new FlexManager(iUserId, dbConnector) ;
+			FlexManager flexManager = new FlexManager(sessionElements, dbConnector) ;
 			if (flexManager.existData(sCode, flex))
 				return flex.getLabel() ;
 		}
 		
 		if (QuadrifoliumFcts.isFreeTextHeaderCode(sCode))
-			return getFreeTextForCodeInBase(dbConnector, sCode, iUserId) ;
+			return getFreeTextForCodeInBase(dbConnector, sCode, sessionElements) ;
 		
 		return "" ;
 	}
@@ -290,7 +291,7 @@ public class QuadrifoliumServerFcts
 	 * 
 	 * @return The label if found, <code>""</code> if not
 	 */
-	public static String getLabelForConceptCodeInBase(DBConnector dbConnector, final String sLanguage, final String sCode, int iUserId)
+	public static String getLabelForConceptCodeInBase(DBConnector dbConnector, final String sLanguage, final String sCode, final SessionElements sessionElements)
 	{
 		String sFctName = "QuadrifoliumServerFcts.getLabelForConceptCodeInBase" ;
 		
@@ -312,14 +313,14 @@ public class QuadrifoliumServerFcts
 		
 		// Get the code of the preferred lemma, if any
 		//
-		Lemma preferredLemma = getPreferredLemmaForConcept(dbConnector, sActiveLanguage, sCode, iUserId) ;
+		Lemma preferredLemma = getPreferredLemmaForConcept(dbConnector, sActiveLanguage, sCode, sessionElements) ;
 		
 		if (null == preferredLemma)
 			return "" ;
 		
 		// Get all inflections for this lemma
 		//
-		FlexManager flexManager = new FlexManager(iUserId, dbConnector) ;
+		FlexManager flexManager = new FlexManager(sessionElements, dbConnector) ;
 		
 		ArrayList<Flex> aFlexForLemma = new ArrayList<Flex>() ;
 		if ((false == flexManager.existDataForLemma(preferredLemma.getCode(), aFlexForLemma)) || aFlexForLemma.isEmpty())
@@ -346,7 +347,7 @@ public class QuadrifoliumServerFcts
 	 * 
 	 * @return The label if possible, <code>""</code> if not
 	 */
-	public static String getLabelForCode(DBConnector dbConnector, int iUserId, final String sLanguage, final String sCode, HashMap<String, String> aLabelsForCodes)
+	public static String getLabelForCode(DBConnector dbConnector, final SessionElements sessionElements, final String sLanguage, final String sCode, HashMap<String, String> aLabelsForCodes)
 	{
 		// First, check if this code is already in the buffer 
 		//
@@ -356,7 +357,7 @@ public class QuadrifoliumServerFcts
 			
 		// If not found in the buffer, get information from database
 		//
-		sLabel = QuadrifoliumServerFcts.getLabelForCodeInBase(dbConnector, sLanguage, sCode, iUserId) ;
+		sLabel = QuadrifoliumServerFcts.getLabelForCodeInBase(dbConnector, sLanguage, sCode, sessionElements) ;
 		if (false == "".equals(sLabel))
 		{
 			QuadrifoliumFcts.addLabelForCodeInBuffer(sCode, sLanguage, sLabel, aLabelsForCodes) ;
@@ -375,24 +376,24 @@ public class QuadrifoliumServerFcts
 	 * @param trait           Object to be completed
 	 * @param aLabelsForCodes Buffer of code-label pairs to speed process
 	 */
-	public static void fillTraitWithLabels(DBConnector dbConnector, int iUserId, final String sLanguage, TripleWithLabel trait, HashMap<String, String> aLabelsForCodes)
+	public static void fillTraitWithLabels(DBConnector dbConnector, final SessionElements sessionElements, final String sLanguage, TripleWithLabel trait, HashMap<String, String> aLabelsForCodes)
 	{
-		trait.setSubjectLabel(getLabelForCode(dbConnector, iUserId, sLanguage, trait.getSubject(), aLabelsForCodes)) ;
-		trait.setPredicateLabel(getLabelForCode(dbConnector, iUserId, sLanguage, trait.getPredicate(), aLabelsForCodes)) ;
-		trait.setObjectLabel(getLabelForCode(dbConnector, iUserId, sLanguage, trait.getObject(), aLabelsForCodes)) ;
+		trait.setSubjectLabel(getLabelForCode(dbConnector, sessionElements, sLanguage, trait.getSubject(), aLabelsForCodes)) ;
+		trait.setPredicateLabel(getLabelForCode(dbConnector, sessionElements, sLanguage, trait.getPredicate(), aLabelsForCodes)) ;
+		trait.setObjectLabel(getLabelForCode(dbConnector, sessionElements, sLanguage, trait.getObject(), aLabelsForCodes)) ;
 	}
 	
 	/**
 	 * Get the free text attached to a given code
 	 * 
 	 * @param dbconnector     Database connector to the Ontology
-	 * @param iUserId         User ID
+	 * @param sessionElements Session elements
 	 * @param sCode           Free text code
 	 * @param aLabelsForCodes Buffer of code-label pairs to speed process
 	 * 
 	 * @return The free text if found, <code>""</code> if not
 	 */
-	public static String getFreeTextForCode(DBConnector dbConnector, int iUserId, final String sCode, HashMap<String, String> aLabelsForCodes)
+	public static String getFreeTextForCode(DBConnector dbConnector, final SessionElements sessionElements, final String sCode, HashMap<String, String> aLabelsForCodes)
 	{
 		// First, check if this code is already in the buffer 
 		//
@@ -402,7 +403,7 @@ public class QuadrifoliumServerFcts
 			
 		// If not found in the buffer, get information from database
 		//
-		sLabel = QuadrifoliumServerFcts.getFreeTextForCodeInBase(dbConnector, sCode, iUserId) ;
+		sLabel = QuadrifoliumServerFcts.getFreeTextForCodeInBase(dbConnector, sCode, sessionElements) ;
 		if (false == "".equals(sLabel))
 		{
 			QuadrifoliumFcts.addLabelForCodeInBuffer(sCode, "", sLabel, aLabelsForCodes) ;
@@ -413,7 +414,9 @@ public class QuadrifoliumServerFcts
 	}
 	
 	/**
-	 * Get the preferred lemma for a concept code
+	 * Get the preferred lemma for a concept code<br>
+	 * <br>
+	 * This function is read only, hence it doesn't need a registered user.
 	 * 
 	 * @param dbConnector Database connector to the Ontology database
 	 * @param sLanguage   Language of the label to look for (if empty, English is assumed)
@@ -421,9 +424,15 @@ public class QuadrifoliumServerFcts
 	 * 
 	 * @return The Lemma if found, <code>null</code> if not
 	 */
-	public static Lemma getPreferredLemmaForConcept(DBConnector dbConnector, final String sLanguage, final String sCode, int iUserId)
+	public static Lemma getPreferredLemmaForConcept(DBConnector dbConnector, final String sLanguage, final String sCode, final SessionElements sessionElements)
 	{
 		String sFctName = "QuadrifoliumServerFcts.getLabelForConceptCodeInBase" ;
+		
+		// This function is read only, hence it doesn't need a registered user
+		//
+		int iUserId = -1 ;
+		if (null != sessionElements)
+			iUserId = sessionElements.getPersonId() ;
 		
 		// Check parameters
 		// 
@@ -443,7 +452,7 @@ public class QuadrifoliumServerFcts
 		
 		// Look for a triple that points to the preferred lemma for a term (such a triple can exists for each different language)
 		//
-		TripleManager tripleManager = new TripleManager(iUserId, dbConnector) ;
+		TripleManager tripleManager = new TripleManager(sessionElements, dbConnector) ;
 		
 		// Getting all preferred terms triples for this concept
 		//
@@ -452,7 +461,7 @@ public class QuadrifoliumServerFcts
 		
 		// A LemmaManager will be needed from there anyway  
 		//
-		LemmaManager lemmaManager = new LemmaManager(iUserId, dbConnector) ;
+		LemmaManager lemmaManager = new LemmaManager(sessionElements, dbConnector) ;
 		
 		// Check if there is a result for this specific language
 		//
@@ -600,13 +609,13 @@ public class QuadrifoliumServerFcts
 	/**
 	 * Get the free text for a code
 	 * 
-	 * @param dbConnector Database connector to the Ontology database
-	 * @param sCode       Code to get the free text for
-	 * @param iUserId     User identifier
+	 * @param dbConnector     Database connector to the Ontology database
+	 * @param sCode           Code to get the free text for
+	 * @param sessionElements Session elements
 	 * 
 	 * @return The free text if found, <code>""</code> if not
 	 */
-	public static String getFreeTextForCodeInBase(DBConnector dbConnector, final String sCode, int iUserId)
+	public static String getFreeTextForCodeInBase(DBConnector dbConnector, final String sCode, final SessionElements sessionElements)
 	{
 		String sFctName = "QuadrifoliumServerFcts.getFreeTextForCodeInBase" ;
 		
@@ -621,7 +630,7 @@ public class QuadrifoliumServerFcts
 		if (false == QuadrifoliumFcts.isFreeTextHeaderCode(sCode))
 			return "" ;
 		
-		FreeTextManager freeTextManager = new FreeTextManager(iUserId, dbConnector) ;
+		FreeTextManager freeTextManager = new FreeTextManager(sessionElements, dbConnector) ;
 		
 		return freeTextManager.getFreeTextLabel(sCode, null) ;
 	}

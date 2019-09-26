@@ -6,9 +6,14 @@ import java.sql.Statement;
 
 import org.quadrifolium.server.DBConnector;
 import org.quadrifolium.server.Logger;
+import org.quadrifolium.server.ontology_base.ChangeHistory;
 import org.quadrifolium.server.ontology_base.FreeTextModel;
+import org.quadrifolium.server.ontology_base.FreeTextModelHistory;
+import org.quadrifolium.server.ontology_base.ChangeHistory.ChangeType;
+import org.quadrifolium.server.ontology_base.ChangeHistory.TableType;
 import org.quadrifolium.server.util.QuadrifoliumServerFcts;
 import org.quadrifolium.shared.ontology.FreeText;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 /** 
@@ -19,20 +24,24 @@ public class FreeTextManager
 {	
 	public static final int TEXT_SIZE = 255 ;
 	
-	protected final DBConnector _dbConnector ;
-	protected final int         _iUserId ;
+	protected final DBConnector     _dbConnector ;
+	protected final SessionElements _sessionElements ;
 	
 	/**
-	 * Constructor 
+	 * Constructor
+	 * 
+	 * @param sessionElements Can be null if only using read only functions 
 	 */
-	public FreeTextManager(final int iUserId, final DBConnector dbConnector)
+	public FreeTextManager(final SessionElements sessionElements, final DBConnector dbConnector)
 	{
-		_dbConnector = dbConnector ;
-		_iUserId     = iUserId ;
+		_dbConnector     = dbConnector ;
+		_sessionElements = sessionElements ;
 	}
 
 	/**
-	 * Get the label of a free text in database from its code
+	 * Get the label of a free text in database from its code<br>
+	 * <br>
+	 * This function is read only, hence it doesn't need a registered user.
 	 * 
 	 * @param sFreeTextHeaderCode Code to get the free text attached to
 	 * @param sLanguage           Mandatory language, usually <code>""</code>
@@ -43,24 +52,30 @@ public class FreeTextManager
 	{
 		String sFctName = "FreeTextManager.getFreeTextLabel" ;
 		
+		// This function is read only, hence it doesn't need a registered user
+		//
+		int iUserId = -1 ;
+		if (null != _sessionElements)
+			iUserId = _sessionElements.getPersonId() ;
+		
 		if ((null == _dbConnector) || (null == sFreeTextHeaderCode) || "".equals(sFreeTextHeaderCode))
 		{
-			Logger.trace(sFctName + ": invalid parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid parameter", iUserId, Logger.TraceLevel.ERROR) ;
 			return null ;
 		}
 		
 		if (false == QuadrifoliumFcts.isFreeTextHeaderCode(sFreeTextHeaderCode))
 		{
-			Logger.trace(sFctName + ": invalid free text header code (\"" + sFreeTextHeaderCode + "\").", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid free text header code (\"" + sFreeTextHeaderCode + "\").", iUserId, Logger.TraceLevel.ERROR) ;
 			return null ;
 		}
 		
-		FreeTextModelManager manager = new FreeTextModelManager(_iUserId, _dbConnector) ;
+		FreeTextModelManager manager = new FreeTextModelManager(iUserId, _dbConnector) ;
 		
 		FreeTextModel firstSlice = new FreeTextModel() ; 
 		if (false == manager.existData(sFreeTextHeaderCode, firstSlice))
 		{
-			Logger.trace(sFctName + ": not free text found for code \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": not free text found for code \"" + sFreeTextHeaderCode + "\".", iUserId, Logger.TraceLevel.ERROR) ;
 			return null ;
 		}
 		
@@ -84,7 +99,7 @@ public class FreeTextManager
 			
 			if (false == manager.existData(sSliceId, firstSlice))
 			{
-				Logger.trace(sFctName + ": slice " + sSliceId + " not found for free text \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFctName + ": slice " + sSliceId + " not found for free text \"" + sFreeTextHeaderCode + "\".", iUserId, Logger.TraceLevel.ERROR) ;
 				return null ;
 			}
 			
@@ -95,7 +110,9 @@ public class FreeTextManager
 	}
 	
 	/**
-	 * Get a free text in database from its code
+	 * Get a free text in database from its code<br>
+	 * <br>
+	 * This function is read only, hence it doesn't need a registered user.
 	 * 
 	 * @param sFreeTextHeaderCode Code to get the free text attached to
 	 * 
@@ -105,24 +122,30 @@ public class FreeTextManager
 	{
 		String sFctName = "FreeTextManager.getFreeText" ;
 		
+		// This function is read only, hence it doesn't need a registered user
+		//
+		int iUserId = -1 ;
+		if (null != _sessionElements)
+			iUserId = _sessionElements.getPersonId() ;
+		
 		if ((null == _dbConnector) || (null == sFreeTextHeaderCode) || "".equals(sFreeTextHeaderCode))
 		{
-			Logger.trace(sFctName + ": invalid parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid parameter", iUserId, Logger.TraceLevel.ERROR) ;
 			return null ;
 		}
 		
 		if (false == QuadrifoliumFcts.isFreeTextHeaderCode(sFreeTextHeaderCode))
 		{
-			Logger.trace(sFctName + ": invalid free text header code (\"" + sFreeTextHeaderCode + "\").", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid free text header code (\"" + sFreeTextHeaderCode + "\").", iUserId, Logger.TraceLevel.ERROR) ;
 			return null ;
 		}
 		
-		FreeTextModelManager manager = new FreeTextModelManager(_iUserId, _dbConnector) ;
+		FreeTextModelManager manager = new FreeTextModelManager(iUserId, _dbConnector) ;
 		
 		FreeTextModel firstSlice = new FreeTextModel() ; 
 		if (false == manager.existData(sFreeTextHeaderCode, firstSlice))
 		{
-			Logger.trace(sFctName + ": not free text found for code \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": not free text found for code \"" + sFreeTextHeaderCode + "\".", iUserId, Logger.TraceLevel.ERROR) ;
 			return null ;
 		}
 		
@@ -146,7 +169,7 @@ public class FreeTextManager
 			
 			if (false == manager.existData(sSliceId, firstSlice))
 			{
-				Logger.trace(sFctName + ": slice " + sSliceId + " not found for free text \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFctName + ": slice " + sSliceId + " not found for free text \"" + sFreeTextHeaderCode + "\".", iUserId, Logger.TraceLevel.ERROR) ;
 				return null ;
 			}
 			
@@ -158,21 +181,31 @@ public class FreeTextManager
 	}
 	
 	/**
-	  * Insert a free text in database (as a chained list of free texts records)
-	  * 
-	  * @param sConceptCode Concept this free text is related to
-	  * @param sFreeText    Free text to record in database
-	  * @param sLanguage    Language of this text
-	  *
-	  * @return The code for this free text if everything went well or <code>""</code> if not 
-	  */
+	 * Insert a free text in database (as a chained list of free texts records)<br>
+	 * <br>
+	 * This function needs a registered user.
+	 * 
+	 * @param sConceptCode Concept this free text is related to
+	 * @param sFreeText    Free text to record in database
+	 * @param sLanguage    Language of this text
+	 *
+	 * @return The code for this free text if everything went well or <code>""</code> if not 
+	 */
 	public String insertData(final String sConceptCode, final String sFreeText, final String sLanguage)
 	{
 		String sFctName = "FreeTextManager.insertData" ;
 		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return "" ;
+		}
+		
 		if ((null == _dbConnector) || (null == sConceptCode) || (null == sFreeText) || "".equals(sConceptCode) || "".equals(sFreeText))
 		{
-			Logger.trace(sFctName + ": invalid parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid parameter.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return "" ;
 		}
 		
@@ -192,7 +225,7 @@ public class FreeTextManager
 		
 		int iSlicesCount = aSlices.length ;
 		
-		FreeTextModelManager manager = new FreeTextModelManager(_iUserId, _dbConnector) ;
+		FreeTextModelManager manager = new FreeTextModelManager(_sessionElements.getPersonId(), _dbConnector) ;
 		
 		FreeTextModel freeText = new FreeTextModel() ;
 		freeText.setLabel(aSlices[0]) ;
@@ -203,8 +236,8 @@ public class FreeTextManager
 		//
 		if (1 == iSlicesCount)
 		{
-			manager.insertData(freeText) ;
-			Logger.trace(sFctName +  ": user " + _iUserId + " successfuly recorded free text \"" + sFreeText + "\" for concept " + sConceptCode + " as text ID " + sHeaderCode, _iUserId, Logger.TraceLevel.STEP) ;
+			insertHistorizedData(freeText, manager) ;
+			Logger.trace(sFctName +  ": user " + _sessionElements.getPersonId() + " successfuly recorded free text \"" + sFreeText + "\" for concept " + sConceptCode + " as text ID " + sHeaderCode, _sessionElements.getPersonId(), Logger.TraceLevel.STEP) ;
 			return sHeaderCode ;
 		}
 		
@@ -216,7 +249,7 @@ public class FreeTextManager
 		String sNextCode = getNextFreeTextCode(sConceptCode) ;
 		freeText.setNext(sNextCode) ;
 		
-		manager.insertData(freeText) ;
+		insertHistorizedData(freeText, manager) ;
 		
 		// Record all other slices
 		//
@@ -235,36 +268,87 @@ public class FreeTextManager
 				slice.setNext(sNextCode) ;
 			}
 			
-			manager.insertData(slice) ;
+			insertHistorizedData(slice, manager) ;
 		}
 		
-		Logger.trace(sFctName +  ": user " + _iUserId + " successfuly recorded free text \"" + sFreeText + "\" for concept " + sConceptCode + " as text ID " + sHeaderCode + " (as " + iSlicesCount + " slices).", _iUserId, Logger.TraceLevel.STEP) ;
+		Logger.trace(sFctName +  ": user " + _sessionElements.getPersonId() + " successfuly recorded free text \"" + sFreeText + "\" for concept " + sConceptCode + " as text ID " + sHeaderCode + " (as " + iSlicesCount + " slices).", _sessionElements.getPersonId(), Logger.TraceLevel.STEP) ;
 		
 		return sHeaderCode ;
 	}
+
+	/**
+	 * Insert historized information
+	 * 
+	 * @param slice   New free text slice
+	 * @param manager Free text slices manager
+	 */
+	protected boolean insertHistorizedData(FreeTextModel slice, FreeTextModelManager manager)
+	{
+		if ((null == slice) || "".equals(slice.getLabel()) || (null == manager))
+			return false ;
+		
+		if (false == manager.insertData(slice))
+			return false ;
+		
+		return historize(slice, ChangeType.create) ;
+	}
 	
 	/**
-	  * Update a free text in database
-	  * 
-	  * @return true if successful, false if not
-	  * 
-	  * @param sFreeTextHeaderCode The code of the first free text from the chained list
-	  * @param sFreeText           Text to put in replacement of existing one (<code>""</code> or <code>null</code> means erase)
-	  * @param sLanguageTag        Language tag to put in replacement of existing one (<code>""</code> or <code>null</code> means keep existing one)
-	  */
+	 * Historize the change
+	 * 
+	 * @param slice      Free text slice to historize (new one for new and update, old one for delete)
+	 * @param changeType Modification type (add, update, delete)
+	 */
+	protected boolean historize(final FreeTextModel slice, ChangeHistory.ChangeType changeType)
+	{
+		// Create an historization object and save it
+		//
+		FreeTextModelHistory sliceHistory = new FreeTextModelHistory(slice) ;
+		
+		FreeTextHistoryManager historyManager = new FreeTextHistoryManager(_sessionElements.getPersonId(), _dbConnector) ;
+		if (false == historyManager.insertData(sliceHistory))
+			return false ;
+		
+		// Create a Change history record
+		//
+		ChangeHistory changeHistory = new ChangeHistory(_sessionElements.getSessionId(), "", TableType.freeText, changeType, slice.getId(), sliceHistory.getId()) ;
+		
+		ChangeHistoryManager changeManager = new ChangeHistoryManager(_sessionElements.getPersonId(), _dbConnector) ;
+		return changeManager.insertData(changeHistory) ;
+	}
+	
+	/**
+	 * Update a free text in database<br>
+	 * <br>
+	 * This function needs a registered user.
+	 * 
+	 * @return true if successful, false if not
+	 * 
+	 * @param sFreeTextHeaderCode The code of the first free text from the chained list
+	 * @param sFreeText           Text to put in replacement of existing one (<code>""</code> or <code>null</code> means erase)
+	 * @param sLanguageTag        Language tag to put in replacement of existing one (<code>""</code> or <code>null</code> means keep existing one)
+	 */
 	public boolean updateData(final String sFreeTextHeaderCode, final String sFreeText, final String sLanguageTag)
 	{
 		String sFctName = "FreeTextManager.updateData" ;
 		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
 		if ((null == _dbConnector) || (null == sFreeTextHeaderCode) || "".equals(sFreeTextHeaderCode))
 		{
-			Logger.trace(sFctName + ": invalid parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid parameter", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
 		if (false == QuadrifoliumFcts.isFreeTextHeaderCode(sFreeTextHeaderCode))
 		{
-			Logger.trace(sFctName + ": invalid free text header code (\"" + sFreeTextHeaderCode + "\").", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid free text header code (\"" + sFreeTextHeaderCode + "\").", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
@@ -273,12 +357,12 @@ public class FreeTextManager
 		if ((null == sFreeText) || "".equals(sFreeText))
 			return eraseData(sFreeTextHeaderCode) ;
 		
-		FreeTextModelManager manager = new FreeTextModelManager(_iUserId, _dbConnector) ;
+		FreeTextModelManager manager = new FreeTextModelManager(_sessionElements.getPersonId(), _dbConnector) ;
 		
 		FreeTextModel slice = new FreeTextModel() ; 
 		if (false == manager.existData(sFreeTextHeaderCode, slice))
 		{
-			Logger.trace(sFctName + ": No free text found for header code \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": No free text found for header code \"" + sFreeTextHeaderCode + "\".", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
@@ -331,7 +415,7 @@ public class FreeTextManager
 					
 				// Update record
 				//
-				if (false == manager.forceUpdateData(slice))
+				if (false == updateHistorizedData(slice, manager))
 					return false ;
 			}
 			
@@ -343,7 +427,7 @@ public class FreeTextManager
 				
 				// Update record
 				//
-				if (false == manager.forceUpdateData(slice))
+				if (false == updateHistorizedData(slice, manager))
 					return false ;
 			}
 			
@@ -366,15 +450,15 @@ public class FreeTextManager
 				{
 					if (false == manager.existData(sNextRecordedSlice, slice))
 					{
-						Logger.trace(sFctName + ": No free text found for code \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+						Logger.trace(sFctName + ": No free text found for code \"" + sFreeTextHeaderCode + "\".", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 						return false ;
 					}
 					
 					sNextRecordedSlice = slice.getNext() ;
 					
-					if (false == manager.deleteRecord(slice.getId()))
+					if (false == HistorizeDataDeletion(slice, manager))
 					{
-						Logger.trace(sFctName + ": Cannot delete free text for code \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+						Logger.trace(sFctName + ": Cannot delete free text for code \"" + sFreeTextHeaderCode + "\".", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 						return false ;
 					}
 				}
@@ -393,7 +477,7 @@ public class FreeTextManager
 			{
 				if (false == manager.existData(sNextRecordedSlice, slice))
 				{
-					Logger.trace(sFctName + ": No free text found for code \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+					Logger.trace(sFctName + ": No free text found for code \"" + sFreeTextHeaderCode + "\".", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 					return false ;
 				}
 			}
@@ -417,49 +501,77 @@ public class FreeTextManager
 				sliceToAdd.setNext(sNextSliceToRecord) ;
 			}
 					
-			manager.insertData(sliceToAdd) ;
+			if (false == insertHistorizedData(sliceToAdd, manager))
+				return false ;
 		}
 		
 		return true ;
 	}
 		
 	/**
-	  * Erase a free text in database
-	  * 
-	  * @return true if successful, false if not
-	  * 
-	  * @param sFreeTextHeaderCode Code of free text to erase
-	  */
+	 * Update historized information
+	 * 
+	 * @param slice   New free text slice
+	 * @param manager Free text slices manager
+	 */
+	protected boolean updateHistorizedData(FreeTextModel slice, FreeTextModelManager manager)
+	{
+		if ((null == slice) || "".equals(slice.getLabel()) || (null == manager))
+			return false ;
+		
+		if (false == manager.forceUpdateData(slice))
+			return false ;
+		
+		return historize(slice, ChangeType.change) ;
+	}
+	
+	/**
+	 * Erase a free text in database<br>
+	 * <br>
+	 * This function needs a registered user.
+	 * 
+	 * @return true if successful, false if not
+	 * 
+	 * @param sFreeTextHeaderCode Code of free text to erase
+	 */
 	public boolean eraseData(final String sFreeTextHeaderCode)
 	{
 		String sFctName = "FreeTextManager.eraseData" ;
 		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
 		if ((null == _dbConnector) || (null == sFreeTextHeaderCode) || "".equals(sFreeTextHeaderCode))
 		{
-			Logger.trace(sFctName + ": invalid parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid parameter.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
 		if (false == QuadrifoliumFcts.isFreeTextHeaderCode(sFreeTextHeaderCode))
 		{
-			Logger.trace(sFctName + ": invalid free text header code (\"" + sFreeTextHeaderCode + "\").", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid free text header code (\"" + sFreeTextHeaderCode + "\").", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
 		// Try getting the first slice
 		//
-		FreeTextModelManager manager = new FreeTextModelManager(_iUserId, _dbConnector) ;
+		FreeTextModelManager manager = new FreeTextModelManager(_sessionElements.getPersonId(), _dbConnector) ;
 		
 		FreeTextModel slice = new FreeTextModel() ; 
 		if (false == manager.existData(sFreeTextHeaderCode, slice))
 		{
-			Logger.trace(sFctName + ": No free text found for header code \"" + sFreeTextHeaderCode + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": No free text found for header code \"" + sFreeTextHeaderCode + "\".", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
 		// If the only one, just delete record and we are done
 		//
-		boolean bDeleted = manager.deleteRecord(slice.getId()) ;
+		boolean bDeleted = HistorizeDataDeletion(slice, manager) ;
 		if (false == slice.hasNext())
 			return bDeleted ; 
 		
@@ -467,15 +579,32 @@ public class FreeTextManager
 		{
 			if (false == manager.existData(slice.getNext(), slice))
 			{
-				Logger.trace(sFctName + ": No free text found for code \"" + slice.getNext() + "\".", _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFctName + ": No free text found for code \"" + slice.getNext() + "\".", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 				return false ;
 			}
 			
-			if (false == manager.deleteRecord(slice.getId()))
+			if (false == HistorizeDataDeletion(slice, manager))
 				return false ;			
 		}
 		
 		return true ;
+	}
+	
+	/**
+	 * Historize information deletion
+	 * 
+	 * @param slice   New free text slice
+	 * @param manager Free text slices manager
+	 */
+	protected boolean HistorizeDataDeletion(FreeTextModel slice, FreeTextModelManager manager)
+	{
+		if ((null == slice) || "".equals(slice.getLabel()) || (null == manager))
+			return false ;
+		
+		if (false == manager.deleteRecord(slice.getId()))
+			return false ;
+		
+		return historize(slice, ChangeType.delete) ;
 	}
 	
 	/**
@@ -538,7 +667,9 @@ public class FreeTextManager
 	}
 	
 	/**
-	 * Get the next available code for a given concept
+	 * Get the next available code for a given concept<br>
+	 * <br>
+	 * This function needs a registered user.
 	 * 
 	 * @param sConceptCode Code of the concept this free text is attached to
 	 * 
@@ -547,10 +678,18 @@ public class FreeTextManager
 	public String getNextFreeTextHeaderCode(final String sConceptCode)
 	{
 		String sFctName = "FreeTextManager.getNextFreeTextHeaderCode" ;
+
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return "" ;
+		}
 		
 		if ((null == _dbConnector) || (null == sConceptCode) || "".equals(sConceptCode))
 		{
-			Logger.trace(sFctName + ": bad parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": bad parameter", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return "" ;
 		}
 		
@@ -559,7 +698,7 @@ public class FreeTextManager
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
 		if (null == _dbConnector.getPreparedStatement())
 		{
-			Logger.trace(sFctName + ": cannot get Statement", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": cannot get Statement", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -570,7 +709,7 @@ public class FreeTextManager
 		
 		if (false == _dbConnector.executePreparedStatement())
 		{
-			Logger.trace(sFctName + ": failed query " + sQuery, _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": failed query " + sQuery, _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -578,7 +717,7 @@ public class FreeTextManager
 		ResultSet rs = _dbConnector.getResultSet() ;
 		if (null == rs)
 		{
-			Logger.trace(sFctName + ": no max code found in table freeText for concept = " + sConceptCode, _iUserId, Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": no max code found in table freeText for concept = " + sConceptCode, _sessionElements.getPersonId(), Logger.TraceLevel.WARNING) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -596,7 +735,7 @@ public class FreeTextManager
 	    }
 		} catch (SQLException e)
 		{
-			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 		}
 		
 		_dbConnector.closeResultSet() ;
@@ -613,7 +752,9 @@ public class FreeTextManager
 	}
 	
 	/**
-	 * Get the next available code for a given concept
+	 * Get the next available code for a given concept<br>
+	 * <br>
+	 * This function needs a registered user.
 	 * 
 	 * @param sConceptCode Code of the concept this free text is attached to
 	 * 
@@ -622,10 +763,18 @@ public class FreeTextManager
 	public String getNextFreeTextCode(final String sConceptCode)
 	{
 		String sFctName = "FreeTextManager.getNextFreeTextCode" ;
+
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return "" ;
+		}
 		
 		if ((null == _dbConnector) || (null == sConceptCode) || "".equals(sConceptCode))
 		{
-			Logger.trace(sFctName + ": bad parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": bad parameter", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return "" ;
 		}
 		
@@ -636,7 +785,7 @@ public class FreeTextManager
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
 		if (null == _dbConnector.getPreparedStatement())
 		{
-			Logger.trace(sFctName + ": cannot get Statement", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": cannot get Statement", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -646,7 +795,7 @@ public class FreeTextManager
 		
 		if (false == _dbConnector.executePreparedStatement())
 		{
-			Logger.trace(sFctName + ": failed query " + sQuery, _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": failed query " + sQuery, _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -654,7 +803,7 @@ public class FreeTextManager
 		ResultSet rs = _dbConnector.getResultSet() ;
 		if (null == rs)
 		{
-			Logger.trace(sFctName + ": no max code found in table freeText for concept = " + sConceptCode, _iUserId, Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": no max code found in table freeText for concept = " + sConceptCode, _sessionElements.getPersonId(), Logger.TraceLevel.WARNING) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -672,7 +821,7 @@ public class FreeTextManager
 	    }
 		} catch (SQLException e)
 		{
-			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 		}
 		
 		_dbConnector.closeResultSet() ;

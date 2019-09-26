@@ -174,7 +174,7 @@ public class QuadrifoliumLoginHeaderPresenter extends WidgetPresenter<Quadrifoli
 			// Initialize the supervisor with user and server version information
 			//
 			_supervisor.setUser(person) ;
-			_supervisor.setSessionToken(value.getSessionToken()) ;
+			_supervisor.setSessionElements(value.getSessionElements()) ;
 			_supervisor.setServerVersion(value.getVersion()) ;
 
 			// Tell display to mask login controls

@@ -22,6 +22,7 @@ import org.quadrifolium.shared.ontology.Triple;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
 import org.quadrifolium.shared.rpc4ontology.GetSemanticTriplesAction;
 import org.quadrifolium.shared.rpc4ontology.GetSemanticTriplesResult;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 import com.google.inject.Inject;
@@ -29,7 +30,8 @@ import com.google.inject.Provider;
 
 public class GetSemanticTriplesForConceptHandler extends QuadrifoliumActionHandler<GetSemanticTriplesAction, GetSemanticTriplesResult>
 {
-	protected int    _iUserId ;
+	protected SessionElements _sessionElements ;
+	protected int             _iUserId ;
 
 	/**
 	 * Buffer used to avoid looking twice for labels in the database 
@@ -43,7 +45,8 @@ public class GetSemanticTriplesForConceptHandler extends QuadrifoliumActionHandl
 	{
 		super(logger, servletContext, servletRequest) ;
 		
-		_iUserId = -1 ;
+		_sessionElements = null ;
+		_iUserId         = -1 ;
 	}
 	
 	/**
@@ -53,12 +56,21 @@ public class GetSemanticTriplesForConceptHandler extends QuadrifoliumActionHandl
 	{
 		super() ;
 		
-		_iUserId = -1 ;
+		_sessionElements = null ;
+		_iUserId         = -1 ;
 	}
 
 	@Override
 	public GetSemanticTriplesResult execute(final GetSemanticTriplesAction action, final ExecutionContext context) throws ActionException 
   {	
+		_sessionElements    = action.getSessionElements() ;
+ 		
+ 		// This function is read only, hence it doesn't need a registered user
+		//
+		_iUserId = -1 ;
+		if (null != _sessionElements)
+			_iUserId = _sessionElements.getPersonId() ;
+		
 		// To make certain that the connection will be closed, a "finally" block must be added to secure the call to closeAll
 		//
 		DBConnector dbconnector = null ;
@@ -67,8 +79,6 @@ public class GetSemanticTriplesForConceptHandler extends QuadrifoliumActionHandl
 		{			
    		String sCode        = action.getConceptCode() ;
    		String sDisplayLang = action.getDisplayLanguage() ;
-   		
-   		_iUserId            = action.getUserId() ;
    		
    		// Check if it really is a concept code
    		//
@@ -249,7 +259,7 @@ public class GetSemanticTriplesForConceptHandler extends QuadrifoliumActionHandl
 		// Provide the traits with their labels
 		//
 		for (Iterator<TripleWithLabel> it = aTriples.iterator() ; it.hasNext() ; )
-			QuadrifoliumServerFcts.fillTraitWithLabels(dbConnector, _iUserId, sLanguage, it.next(), _aLabelsForCodes) ;
+			QuadrifoliumServerFcts.fillTraitWithLabels(dbConnector, _sessionElements, sLanguage, it.next(), _aLabelsForCodes) ;
 	}
 
 	@Override

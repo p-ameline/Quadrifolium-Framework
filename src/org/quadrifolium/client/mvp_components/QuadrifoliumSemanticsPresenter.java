@@ -110,7 +110,7 @@ public class QuadrifoliumSemanticsPresenter extends WidgetPresenter<Quadrifolium
 		
 		// The query language is set to "" meaning that all languages are to be displayed
 		//
-		_dispatcher.execute(new GetSemanticTriplesAction(_supervisor.getUserId(), _supervisor.getUserLanguage(), sConcept), new GetSemanticTriplesForConceptCallback()) ;
+		_dispatcher.execute(new GetSemanticTriplesAction(_supervisor.getSessionElements(), _supervisor.getUserLanguage(), sConcept), new GetSemanticTriplesForConceptCallback()) ;
 	}
 	
 	/**

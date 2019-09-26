@@ -1,6 +1,7 @@
 package org.quadrifolium.shared.rpc4ontology;
 
 import org.quadrifolium.shared.ontology.TripleWithLabel;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 
 import net.customware.gwt.dispatch.shared.Action;
 
@@ -9,7 +10,7 @@ import net.customware.gwt.dispatch.shared.Action;
  */
 public class SaveDefinitionAction implements Action<SaveDefinitionResult> 
 {
-  private int    _iUserId ;
+  private SessionElements _sessionElements ;
   
   private String _sConceptCode ;
   private String _sNewLanguage ;
@@ -22,11 +23,11 @@ public class SaveDefinitionAction implements Action<SaveDefinitionResult>
 	 * <br>
 	 * editedDefinition must be null if the request is to create a new definition
 	 */
-	public SaveDefinitionAction(final int iUserId, final String sConceptCode, final String sNewLanguage, final String sNewText, final TripleWithLabel editedDefinition) 
+	public SaveDefinitionAction(final SessionElements sessionElements, final String sConceptCode, final String sNewLanguage, final String sNewText, final TripleWithLabel editedDefinition) 
 	{
 		super() ;
 		
-		_iUserId          = iUserId ;
+		_sessionElements  = sessionElements ;
 		_sConceptCode     = sConceptCode ;
 		_sNewLanguage     = sNewLanguage ;
 		_sNewText         = sNewText ;
@@ -40,15 +41,15 @@ public class SaveDefinitionAction implements Action<SaveDefinitionResult>
 	{
 		super() ;
 		
-		_iUserId          = -1 ;
+		_sessionElements  = null ;
 		_sConceptCode     = "" ;
 		_sNewLanguage     = "" ;
 		_sNewText         = "" ;
 		_editedDefinition = null ;
 	}
 
-	public int getUserId() {
-		return _iUserId ;
+	public SessionElements getSessionElements() {
+		return _sessionElements ;
 	}
 	
 	public String getConceptCode() {

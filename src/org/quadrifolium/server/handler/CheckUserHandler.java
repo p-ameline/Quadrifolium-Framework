@@ -50,18 +50,18 @@ public class CheckUserHandler extends QuadrifoliumActionHandler<SendLoginAction,
    		//
    		Person user = getPerson(sIdentifier, sPassword) ;
    		if (null == user)
-   			return new SendLoginResult("", getInfoString("Wrong identifiers"), null, sVersion) ;
+   			return new SendLoginResult(null, getInfoString("Wrong identifiers"), null, sVersion) ;
    		
    		// Open a session into "sessions" database
    		//
    		SessionsManager sessionManager = new SessionsManager() ;
    		boolean bSessionCreated = sessionManager.createNewSession(user.getPersonId()) ;
    		if (false == bSessionCreated)
-   			return new SendLoginResult("", getInfoString("Cannot create session"), null, sVersion) ;
+   			return new SendLoginResult(null, getInfoString("Cannot create session"), null, sVersion) ;
    				
-   		// Return Token
+   		// Return session information
    		//
-   		return new SendLoginResult(sessionManager.getToken(), "", user, sVersion) ;
+   		return new SendLoginResult(sessionManager.getSessionElements(), "", user, sVersion) ;
 		}
 		catch (Exception cause) 
 		{

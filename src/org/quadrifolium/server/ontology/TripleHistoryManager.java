@@ -7,18 +7,14 @@ import java.util.ArrayList;
 
 import org.quadrifolium.server.DBConnector;
 import org.quadrifolium.server.Logger;
-import org.quadrifolium.server.ontology_base.ChangeHistory;
 import org.quadrifolium.server.ontology_base.HistoryTriple;
-import org.quadrifolium.server.ontology_base.ChangeHistory.ChangeType;
-import org.quadrifolium.server.ontology_base.ChangeHistory.TableType;
-import org.quadrifolium.shared.ontology.Triple;
 import org.quadrifolium.shared.rpc_util.SessionElements;
 
 /** 
- * Object in charge of Read/Write operations for the <code>triple</code> table 
+ * Object in charge of Read/Write operations for the <code>historyTriple</code> table 
  *   
  */
-public class TripleManager  
+public class TripleHistoryManager  
 {	
 	protected final DBConnector     _dbConnector ;
 	protected final SessionElements _sessionElements ;
@@ -28,24 +24,24 @@ public class TripleManager
 	 * 
 	 * @param sessionElements Can be null if only using read only functions
 	 */
-	public TripleManager(final SessionElements sessionElements, final DBConnector dbConnector)
+	public TripleHistoryManager(final SessionElements sessionElements, final DBConnector dbConnector)
 	{
 		_dbConnector     = dbConnector ;
 		_sessionElements = sessionElements ;
 	}
 
 	/**
-	 * Insert a Triple object in database, and complete this object with insertion created information<br>
+	 * Insert a HistoryTriple object in database, and complete this object with insertion created information<br>
 	 * <br>
 	 * This function needs a registered user.
 	 * 
-	 * @param dataToInsert Triple to be inserted
+	 * @param dataToInsert HistoryTriple to be inserted
 	 *
 	 * @return <code>true</code> if successful, <code>false</code> if not
 	 */
-	public boolean insertData(Triple dataToInsert)
+	public boolean insertData(HistoryTriple dataToInsert)
 	{
-		String sFctName = "TripleManager.insertData" ;
+		String sFctName = "TripleHistoryManager.insertData" ;
 		
 		// This function needs a registered user
 		//
@@ -61,7 +57,7 @@ public class TripleManager
 			return false ;
 		}
 		
-		String sQuery = "INSERT INTO triple (subject, predicate, object) VALUES (?, ?, ?)" ;
+		String sQuery = "INSERT INTO historyTriple (tripleId, subject, predicate, object) VALUES (?, ?, ?, ?)" ;
 		
 		_dbConnector.prepareStatememt(sQuery, Statement.RETURN_GENERATED_KEYS) ;
 		if (null == _dbConnector.getPreparedStatement())
@@ -71,9 +67,10 @@ public class TripleManager
 			return false ;
 		}
 		
-		_dbConnector.setStatememtString(1, dataToInsert.getSubject()) ;
-		_dbConnector.setStatememtString(2, dataToInsert.getPredicate()) ;
-		_dbConnector.setStatememtString(3, dataToInsert.getObject()) ;
+		_dbConnector.setStatememtInt(1, dataToInsert.getTripleId()) ;
+		_dbConnector.setStatememtString(2, dataToInsert.getSubject()) ;
+		_dbConnector.setStatememtString(3, dataToInsert.getPredicate()) ;
+		_dbConnector.setStatememtString(4, dataToInsert.getObject()) ;
 		
 		// Execute query 
 		//
@@ -101,23 +98,23 @@ public class TripleManager
 		_dbConnector.closeResultSet() ;
 		_dbConnector.closePreparedStatement() ;
 		
-		Logger.trace(sFctName +  ": user " + _sessionElements.getPersonId() + " successfuly recorded triple " + dataToInsert.getId(), _sessionElements.getPersonId(), Logger.TraceLevel.STEP) ;
+		Logger.trace(sFctName +  ": user " + _sessionElements.getPersonId() + " successfuly recorded historyTriple " + dataToInsert.getId(), _sessionElements.getPersonId(), Logger.TraceLevel.STEP) ;
 		
-		return historize(dataToInsert, ChangeType.create) ;
+		return true ;
 	}
 	
 	/**
-	 * Update a Triple in database<br>
+	 * Update a HistoryTriple in database<br>
 	 * <br>
 	 * This function needs a registered user.
 	 * 
 	 * @return true if successful, false if not
 	 * 
-	 * @param dataToUpdate Triple to be updated
+	 * @param dataToUpdate HistoryTriple to be updated
 	 */
-	public boolean updateData(Triple dataToUpdate)
+	public boolean updateData(HistoryTriple dataToUpdate)
 	{
-		String sFctName = "TripleManager.updateData" ;
+		String sFctName = "TripleHistoryManager.updateData" ;
 		
 		// This function needs a registered user
 		//
@@ -133,7 +130,7 @@ public class TripleManager
 			return false ;
 		}
 		
-		Triple foundData = new Triple() ;
+		HistoryTriple foundData = new HistoryTriple() ;
 		if (false == existData(dataToUpdate.getId(), foundData))
 			return false ;
 		
@@ -145,42 +142,18 @@ public class TripleManager
 		
 		return forceUpdateData(dataToUpdate) ;
 	}
-		
+			
 	/**
-	 * Historize a change
-	 * 
-	 * @param triple     Triple to historize (new one for new and update, old one for delete)
-	 * @param changeType Modification type (add, update, delete)
-	 */
-	protected boolean historize(final Triple triple, ChangeHistory.ChangeType changeType)
-	{
-		// Create an historization object and save it
-		//
-		HistoryTriple tripleHistory = new HistoryTriple(triple) ;
-		
-		TripleHistoryManager historyManager = new TripleHistoryManager(_sessionElements, _dbConnector) ;
-		if (false == historyManager.insertData(tripleHistory))
-			return false ;
-		
-		// Create a Change history record
-		//
-		ChangeHistory changeHistory = new ChangeHistory(_sessionElements.getSessionId(), "", TableType.triple, changeType, triple.getId(), tripleHistory.getId()) ;
-		
-		ChangeHistoryManager changeManager = new ChangeHistoryManager(_sessionElements.getPersonId(), _dbConnector) ;
-		return changeManager.insertData(changeHistory) ;
-	}
-	
-	/**
-	  * Check if there is any Triple with this ID in database and, if true get its content
+	  * Check if there is any HistoryTriple with this ID in database and, if true get its content
 	  * 
 	  * @return True if found, else false
 	  * 
-	  * @param iId       Identifier of Triple to look for
-	  * @param foundData Triple to store existing information to 
+	  * @param iId       Identifier of HistoryTriple to look for
+	  * @param foundData HistoryTriple to store existing information to 
 	  */
-	public boolean existData(final int iId, Triple foundData)
+	public boolean existData(final int iId, HistoryTriple foundData)
 	{
-		String sFctName = "TripleManager.existData" ;
+		String sFctName = "TripleHistoryManager.existData" ;
 		
 		// This function is read only, hence it doesn't need a registered user
 		//
@@ -194,7 +167,7 @@ public class TripleManager
 			return false ;
 		}
 		
-		String sQuery = "SELECT * FROM triple WHERE id = ?" ;
+		String sQuery = "SELECT * FROM historyTriple WHERE id = ?" ;
 		
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
 		_dbConnector.setStatememtInt(1, iId) ;
@@ -237,7 +210,7 @@ public class TripleManager
 	}
 	
 	/**
-	  * Fill an array with Triple(s) with a given subject and a given predicate
+	  * Fill an array with HistoryTriple(s) with a given subject and a given predicate
 	  * 
 	  * @return <code>true</code> if everything went well, <code>false</code> if not
 	  * 
@@ -245,9 +218,9 @@ public class TripleManager
 	  * @param sPredicate Predicate to look for 
 	  * @param aResults   Array to fill (not cleared before adding data)
 	  */
-	public boolean getObjects(final String sSubject, final String sPredicate, ArrayList<Triple> aResults)
+	public boolean getObjects(final String sSubject, final String sPredicate, ArrayList<HistoryTriple> aResults)
 	{
-		String sFctName = "TripleManager.getObjects" ;
+		String sFctName = "TripleHistoryManager.getObjects" ;
 		
 		// This function is read only, hence it doesn't need a registered user
 		//
@@ -261,7 +234,7 @@ public class TripleManager
 			return false ;
 		}
 		
-		String sQuery = "SELECT * FROM triple WHERE subject = ? AND predicate = ?" ;
+		String sQuery = "SELECT * FROM historyTriple WHERE subject = ? AND predicate = ?" ;
 		
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
 		_dbConnector.setStatememtString(1, sSubject) ;
@@ -288,7 +261,7 @@ public class TripleManager
 		{
 	    while (rs.next())
 	    {
-	    	Triple foundData = new Triple() ;
+	    	HistoryTriple foundData = new HistoryTriple() ;
 	    	fillDataFromResultSet(rs, foundData, iUserId) ;
 	    	
 	    	aResults.add(foundData) ;
@@ -301,9 +274,9 @@ public class TripleManager
 		}
 		
 		if (iCount > 1)
-			Logger.trace(sFctName + ": " + iCount + " Triples found for subject " + sSubject + " and predicate " + sPredicate, iUserId, Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": " + iCount + " HistoryTriple found for subject " + sSubject + " and predicate " + sPredicate, iUserId, Logger.TraceLevel.WARNING) ;
 		else
-			Logger.trace(sFctName + ": " + iCount + " Triple found for subject " + sSubject + " and predicate " + sPredicate, iUserId, Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": " + iCount + " HistoryTriple found for subject " + sSubject + " and predicate " + sPredicate, iUserId, Logger.TraceLevel.WARNING) ;
 		
 		_dbConnector.closeResultSet() ;
 		_dbConnector.closePreparedStatement() ;
@@ -312,7 +285,7 @@ public class TripleManager
 	}
 	
 	/**
-	  * Fill an array with Triple(s) with a given object and a given predicate
+	  * Fill an array with HistoryTriple(s) with a given object and a given predicate
 	  * 
 	  * @return <code>true</code> if everything went well, <code>false</code> if not
 	  * 
@@ -320,9 +293,9 @@ public class TripleManager
 	  * @param sPredicate Predicate to look for 
 	  * @param aResults   Array to fill (not cleared before adding data)
 	  */
-	public boolean getSubjects(final String sObject, final String sPredicate, ArrayList<Triple> aResults)
+	public boolean getSubjects(final String sObject, final String sPredicate, ArrayList<HistoryTriple> aResults)
 	{
-		String sFctName = "TripleManager.getObjects" ;
+		String sFctName = "TripleHistoryManager.getObjects" ;
 		
 		// This function is read only, hence it doesn't need a registered user
 		//
@@ -336,7 +309,7 @@ public class TripleManager
 			return false ;
 		}
 		
-		String sQuery = "SELECT * FROM triple WHERE object = ? AND predicate = ?" ;
+		String sQuery = "SELECT * FROM historyTriple WHERE object = ? AND predicate = ?" ;
 		
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
 		_dbConnector.setStatememtString(1, sObject) ;
@@ -363,7 +336,7 @@ public class TripleManager
 		{
 	    while (rs.next())
 	    {
-	    	Triple foundData = new Triple() ;
+	    	HistoryTriple foundData = new HistoryTriple() ;
 	    	fillDataFromResultSet(rs, foundData, iUserId) ;
 	    	
 	    	aResults.add(foundData) ;
@@ -376,9 +349,9 @@ public class TripleManager
 		}
 		
 		if (iCount > 1)
-			Logger.trace(sFctName + ": " + iCount + " Triples found for subject " + sObject + " and predicate " + sPredicate, iUserId, Logger.TraceLevel.DETAIL) ;
+			Logger.trace(sFctName + ": " + iCount + " HistoryTriple found for subject " + sObject + " and predicate " + sPredicate, iUserId, Logger.TraceLevel.DETAIL) ;
 		else
-			Logger.trace(sFctName + ": " + iCount + " Triple found for subject " + sObject + " and predicate " + sPredicate, iUserId, Logger.TraceLevel.DETAIL) ;
+			Logger.trace(sFctName + ": " + iCount + " HistoryTriple found for subject " + sObject + " and predicate " + sPredicate, iUserId, Logger.TraceLevel.DETAIL) ;
 		
 		_dbConnector.closeResultSet() ;
 		_dbConnector.closePreparedStatement() ;
@@ -387,7 +360,7 @@ public class TripleManager
 	}
 	
 	/**
-	 * Update a Triple in database<br>
+	 * Update a HistoryTriple in database<br>
 	 * <br>
 	 * This function needs a registered user.
 	 * 
@@ -395,9 +368,9 @@ public class TripleManager
 	 * 
 	 * @param  dataToUpdate Triple to update
 	 */
-	private boolean forceUpdateData(final Triple dataToUpdate)
+	private boolean forceUpdateData(final HistoryTriple dataToUpdate)
 	{
-		String sFctName = "TripleManager.forceUpdateData" ;
+		String sFctName = "TripleHistoryManager.forceUpdateData" ;
 		
 		// This function needs a registered user
 		//
@@ -415,7 +388,7 @@ public class TripleManager
 		
 		// Prepare SQL query
 		//
-		String sQuery = "UPDATE triple SET subject = ?, predicate = ?, object = ?" +
+		String sQuery = "UPDATE historyTriple SET tripleId = ?, subject = ?, predicate = ?, object = ?" +
 				                          " WHERE id = ?" ; 
 		
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
@@ -426,11 +399,12 @@ public class TripleManager
 			return false ;
 		}
 		
-		_dbConnector.setStatememtString(1, dataToUpdate.getSubject()) ;
-		_dbConnector.setStatememtString(2, dataToUpdate.getPredicate()) ;
-		_dbConnector.setStatememtString(3, dataToUpdate.getObject()) ;
+		_dbConnector.setStatememtInt(1, dataToUpdate.getTripleId()) ;
+		_dbConnector.setStatememtString(2, dataToUpdate.getSubject()) ;
+		_dbConnector.setStatememtString(3, dataToUpdate.getPredicate()) ;
+		_dbConnector.setStatememtString(4, dataToUpdate.getObject()) ;
 		
-		_dbConnector.setStatememtInt(4, dataToUpdate.getId()) ;
+		_dbConnector.setStatememtInt(5, dataToUpdate.getId()) ;
 				
 		// Execute query 
 		//
@@ -442,21 +416,21 @@ public class TripleManager
 			return false ;
 		}
 
-		Logger.trace(sFctName + ": updated data for Triple " + dataToUpdate.getId(), _sessionElements.getPersonId(), Logger.TraceLevel.SUBSTEP) ;
+		Logger.trace(sFctName + ": updated data for HistoryTriple " + dataToUpdate.getId(), _sessionElements.getPersonId(), Logger.TraceLevel.SUBSTEP) ;
 		
 		_dbConnector.closePreparedStatement() ;
 		
-		return historize(dataToUpdate, ChangeType.change) ;
+		return true ;
 	}
 	
 	/**
-	  * Initialize a Triple from a query ResultSet 
+	  * Initialize a HistoryTriple from a query ResultSet 
 	  * 
 	  * @param rs        ResultSet of a query
-	  * @param foundData Triple to fill
+	  * @param foundData HistoryTriple to fill
 	  * 
 	  */
-	public static void fillDataFromResultSet(final ResultSet rs, Triple foundData, final int iUserId)
+	public static void fillDataFromResultSet(final ResultSet rs, HistoryTriple foundData, final int iUserId)
 	{
 		if ((null == rs) || (null == foundData))
 			return ;
@@ -464,12 +438,14 @@ public class TripleManager
 		try
 		{
 			foundData.setId(rs.getInt("id")) ;
+			
+			foundData.setTripleId(rs.getInt("tripleId")) ;
     	foundData.setSubject(rs.getString("subject")) ;
     	foundData.setPredicate(rs.getString("predicate")) ;
     	foundData.setObject(rs.getString("object")) ;
 		} 
 		catch (SQLException e) {
-			Logger.trace("TripleManager.fillDataFromResultSet: exception when processing results set: " + e.getMessage(), iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace("TripleHistoryManager.fillDataFromResultSet: exception when processing results set: " + e.getMessage(), iUserId, Logger.TraceLevel.ERROR) ;
 		}
 	}		
 }

@@ -14,12 +14,13 @@ public class ChangeHistory
 {
 	private int    _iId ;
 	private int    _iSessionId ;
+	private String _sDateTime ;
 	private String _sTable ;
 	private String _sType ;
 	private int    _iElementId ;
 	private int    _iHistoryId ;
 	
-	public enum TableType  { triple, lemma, flex, undefined } ;
+	public enum TableType  { triple, lemma, flex, freeText, undefined } ;
 	public enum ChangeType { create, change, delete, undefined } ;
 	
 	//
@@ -31,9 +32,10 @@ public class ChangeHistory
 	/**
 	 * Default constructor
 	 */
-	public ChangeHistory(final int iSessionId, final TableType table, final ChangeType type, final int iElementId, final int iHistoryId) 
+	public ChangeHistory(final int iSessionId, final String sDateTime, final TableType table, final ChangeType type, final int iElementId, final int iHistoryId) 
 	{
 		_iSessionId = iSessionId ;
+		_sDateTime  = sDateTime ;
 		_iElementId = iElementId ;
 		_iHistoryId = iHistoryId ;
 		
@@ -55,6 +57,7 @@ public class ChangeHistory
 		_iId        = other._iId ;
 		
 		_iSessionId = other._iSessionId ;
+		_sDateTime  = other._sDateTime ;
 		_iElementId = other._iElementId ;
 		_iHistoryId = other._iHistoryId ;
 		
@@ -69,6 +72,7 @@ public class ChangeHistory
 	{
 		_iId        = -1 ;
 		_iSessionId = -1 ;
+		_sDateTime  = "" ;
 		_iElementId = -1 ;
 		_iHistoryId = -1 ;
 		_sTable     = "" ;
@@ -100,6 +104,13 @@ public class ChangeHistory
 		_iSessionId = id ;
 	}
 
+	public String getDateTime() {
+		return _sDateTime ;
+	}
+	public void setDateTime(final String sDateTime) {
+		_sDateTime = sDateTime ;
+	}
+	
 	public TableType getTable()
 	{
 		if ("L".equals(_sTable))
@@ -108,6 +119,8 @@ public class ChangeHistory
 			return TableType.flex ;
 		if ("T".equals(_sTable))
 			return TableType.triple ;
+		if ("R".equals(_sTable))
+			return TableType.freeText ;
 		
 		return TableType.undefined ;
 	}
@@ -126,6 +139,9 @@ public class ChangeHistory
 				break ;
 			case triple :
 				_sTable = "T" ;
+				break ;
+			case freeText :
+				_sTable = "R" ;
 				break ;
 			default :
 				_sTable = "" ;

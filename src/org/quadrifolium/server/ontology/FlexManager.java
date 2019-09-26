@@ -7,8 +7,13 @@ import java.util.ArrayList;
 
 import org.quadrifolium.server.DBConnector;
 import org.quadrifolium.server.Logger;
+import org.quadrifolium.server.ontology_base.ChangeHistory;
+import org.quadrifolium.server.ontology_base.ChangeHistory.ChangeType;
+import org.quadrifolium.server.ontology_base.ChangeHistory.TableType;
+import org.quadrifolium.server.ontology_base.HistoryFlex;
 import org.quadrifolium.server.util.QuadrifoliumServerFcts;
 import org.quadrifolium.shared.ontology.Flex;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 /** 
@@ -17,32 +22,44 @@ import org.quadrifolium.shared.util.QuadrifoliumFcts;
  */
 public class FlexManager  
 {	
-	protected final DBConnector _dbConnector ;
-	protected final int         _iUserId ;
+	protected final DBConnector     _dbConnector ;
+	protected final SessionElements _sessionElements ;
 	
 	/**
-	 * Constructor 
+	 * Constructor
+	 * 
+	 * @param sessionElements Can be null if only using read only functions
 	 */
-	public FlexManager(final int iUserId, final DBConnector dbConnector)
+	public FlexManager(final SessionElements sessionElements, final DBConnector dbConnector)
 	{
-		_dbConnector = dbConnector ;
-		_iUserId     = iUserId ;
+		_dbConnector     = dbConnector ;
+		_sessionElements = sessionElements ;
 	}
 
 	/**
-	  * Insert a Flex object in database, and complete this object with insertion created information
-	  * 
-	  * @param dataToInsert Flex to be inserted
-	  *
-	  * @return <code>true</code> if successful, <code>false</code> if not
-	  */
+	 * Insert a Flex object in database, and complete this object with insertion created information<br>
+	 * <br>
+	 * This function needs a registered user.
+	 * 
+	 * @param dataToInsert Flex to be inserted
+	 *
+	 * @return <code>true</code> if successful, <code>false</code> if not
+	 */
 	public boolean insertData(Flex dataToInsert)
 	{
 		String sFctName = "FlexManager.insertData" ;
 		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
 		if ((null == _dbConnector) || (null == dataToInsert))
 		{
-			Logger.trace(sFctName + ": invalid parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": invalid parameter", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
@@ -51,7 +68,7 @@ public class FlexManager
 		_dbConnector.prepareStatememt(sQuery, Statement.RETURN_GENERATED_KEYS) ;
 		if (null == _dbConnector.getPreparedStatement())
 		{
-			Logger.trace(sFctName + ": cannot get Statement", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": cannot get Statement", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closeAll() ;
 			return false ;
 		}
@@ -65,7 +82,7 @@ public class FlexManager
 		int iNbAffectedRows = _dbConnector.executeUpdatePreparedStatement(true) ;
 		if (-1 == iNbAffectedRows)
 		{
-			Logger.trace(sFctName + ": failed query " + sQuery, _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": failed query " + sQuery, _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closeAll() ;
 			return false ;
 		}
@@ -76,33 +93,69 @@ public class FlexManager
 			if (rs.next())
 				dataToInsert.setId(rs.getInt(1)) ;
 			else
-				Logger.trace(sFctName + ": cannot get row after query " + sQuery, _iUserId, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFctName + ": cannot get row after query " + sQuery, _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
     } 
 		catch (SQLException e)
     {
-			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
     }
 		
 		_dbConnector.closeResultSet() ;
 		_dbConnector.closePreparedStatement() ;
 		
-		Logger.trace(sFctName +  ": user " + _iUserId + " successfuly recorded flex " + dataToInsert.getCode() + ":" + dataToInsert.getLabel(), _iUserId, Logger.TraceLevel.STEP) ;
+		Logger.trace(sFctName +  ": user " + _sessionElements.getPersonId() + " successfuly recorded flex " + dataToInsert.getCode() + ":" + dataToInsert.getLabel(), _sessionElements.getPersonId(), Logger.TraceLevel.STEP) ;
 		
-		return true ;
+		return historize(dataToInsert, ChangeType.create) ;
 	}
 	
 	/**
-	  * Update a Flex in database
-	  * 
-	  * @return true if successful, false if not
-	  * 
-	  * @param dataToUpdate Flex to be updated
-	  */
+	 * Historize a change
+	 * 
+	 * @param triple     Triple to historize (new one for new and update, old one for delete)
+	 * @param changeType Modification type (add, update, delete)
+	 */
+	protected boolean historize(final Flex flex, ChangeHistory.ChangeType changeType)
+	{
+		// Create an historization object and save it
+		//
+		HistoryFlex flexHistory = new HistoryFlex(flex) ;
+		
+		FlexHistoryManager historyManager = new FlexHistoryManager(_sessionElements, _dbConnector) ;
+		if (false == historyManager.insertData(flexHistory))
+			return false ;
+		
+		// Create a Change history record
+		//
+		ChangeHistory changeHistory = new ChangeHistory(_sessionElements.getSessionId(), "", TableType.flex, changeType, flex.getId(), flexHistory.getId()) ;
+		
+		ChangeHistoryManager changeManager = new ChangeHistoryManager(_sessionElements.getPersonId(), _dbConnector) ;
+		return changeManager.insertData(changeHistory) ;
+	}
+	
+	/**
+	 * Update a Flex in database<br>
+	 * <br>
+	 * This function needs a registered user.
+	 * 
+	 * @return true if successful, false if not
+	 * 
+	 * @param dataToUpdate Flex to be updated
+	 */
 	public boolean updateData(Flex dataToUpdate)
 	{
+		String sFctName = "FlexManager.updateData" ;
+		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
 		if ((null == _dbConnector) || (null == dataToUpdate))
 		{
-			Logger.trace("FlexManager.updateData: bad parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace("FlexManager.updateData: bad parameter", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
@@ -112,7 +165,7 @@ public class FlexManager
 		
 		if (foundData.equals(dataToUpdate))
 		{
-			Logger.trace("LemmaManager.updateData: Trait to update (" + dataToUpdate.getCode() + " / " + dataToUpdate.getLabel() + ") unchanged; nothing to do", _iUserId, Logger.TraceLevel.SUBSTEP) ;
+			Logger.trace("LemmaManager.updateData: Trait to update (" + dataToUpdate.getCode() + " / " + dataToUpdate.getLabel() + ") unchanged; nothing to do", _sessionElements.getPersonId(), Logger.TraceLevel.SUBSTEP) ;
 			return true ;
 		}
 		
@@ -120,20 +173,28 @@ public class FlexManager
 	}
 		
 	/**
-	  * Check if there is any Flex with this code in database and, if true get its content
-	  * 
-	  * @return True if found, else false
-	  * 
-	  * @param sCode     Code of Lexicon to check
-	  * @param foundData Flex to get existing information
-	  */
+	 * Check if there is any Flex with this code in database and, if true get its content<br>
+	 * <br>
+	 * This function is read only, hence it doesn't need a registered user.
+	 * 
+	 * @return True if found, else false
+	 * 
+	 * @param sCode     Code of Lexicon to check
+	 * @param foundData Flex to get existing information
+	 */
 	public boolean existData(final String sCode, final Flex foundData)
 	{
 		String sFctName = "FlexManager.existData" ;
 		
+		// This function is read only, hence it doesn't need a registered user
+		//
+		int iUserId = -1 ;
+		if (null != _sessionElements)
+			iUserId = _sessionElements.getPersonId() ;
+		
 		if ((null == _dbConnector) || (null == sCode) || (null == foundData))
 		{
-			Logger.trace(sFctName + ": bad parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": bad parameter", iUserId, Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
@@ -144,7 +205,7 @@ public class FlexManager
 	   		
 		if (false == _dbConnector.executePreparedStatement())
 		{
-			Logger.trace(sFctName + ": failed query " + sQuery, _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": failed query " + sQuery, iUserId, Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return false ;
 		}
@@ -152,7 +213,7 @@ public class FlexManager
 		ResultSet rs = _dbConnector.getResultSet() ;
 		if (null == rs)
 		{
-			Logger.trace(sFctName + ": no Lemma found for code = " + sCode, _iUserId, Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": no Lemma found for code = " + sCode, iUserId, Logger.TraceLevel.WARNING) ;
 			_dbConnector.closePreparedStatement() ;
 			return false ;
 		}
@@ -161,7 +222,7 @@ public class FlexManager
 		{
 	    if (rs.next())
 	    {
-	    	fillDataFromResultSet(rs, foundData, _iUserId) ;
+	    	fillDataFromResultSet(rs, foundData, iUserId) ;
 	    	
 	    	_dbConnector.closeResultSet() ;
 	    	_dbConnector.closePreparedStatement() ;
@@ -170,7 +231,7 @@ public class FlexManager
 	    }
 		} catch (SQLException e)
 		{
-			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), iUserId, Logger.TraceLevel.ERROR) ;
 		}
 		
 		_dbConnector.closeResultSet() ;
@@ -180,20 +241,28 @@ public class FlexManager
 	}
 	
 	/**
-	  * Get all inflections for this lemma
-	  * 
-	  * @return <code>true</code> if everything went well, <code>false</code> if not
-	  * 
-	  * @param sLemmaCode Code of lemma to look for corresponding inflections
-	  * @param foundData  aResults list of inflections to fill (not cleared before adding data) 
-	  */
+	 * Get all inflections for this lemma<br>
+	 * <br>
+	 * This function is read only, hence it doesn't need a registered user.
+	 * 
+	 * @return <code>true</code> if everything went well, <code>false</code> if not
+	 * 
+	 * @param sLemmaCode Code of lemma to look for corresponding inflections
+	 * @param foundData  aResults list of inflections to fill (not cleared before adding data) 
+	 */
 	public boolean existDataForLemma(final String sLemmaCode, ArrayList<Flex> aResults)
 	{
 		String sFctName = "FlexManager.existDataForLemma" ;
 		
+		// This function is read only, hence it doesn't need a registered user
+		//
+		int iUserId = -1 ;
+		if (null != _sessionElements)
+			iUserId = _sessionElements.getPersonId() ;
+		
 		if ((null == _dbConnector) || (null == sLemmaCode) || "".equals(sLemmaCode) || (null == aResults))
 		{
-			Logger.trace(sFctName + ": bad parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": bad parameter", iUserId, Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
@@ -204,7 +273,7 @@ public class FlexManager
 	   		
 		if (false == _dbConnector.executePreparedStatement())
 		{
-			Logger.trace(sFctName + ": failed query " + sQuery, _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": failed query " + sQuery, iUserId, Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return false ;
 		}
@@ -212,7 +281,7 @@ public class FlexManager
 		ResultSet rs = _dbConnector.getResultSet() ;
 		if (null == rs)
 		{
-			Logger.trace(sFctName + ": no Flex found for lemma = " + sLemmaCode, _iUserId, Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": no Flex found for lemma = " + sLemmaCode, iUserId, Logger.TraceLevel.WARNING) ;
 			_dbConnector.closePreparedStatement() ;
 			return false ;
 		}
@@ -224,7 +293,7 @@ public class FlexManager
 	    while (rs.next())
 	    {
 	    	Flex foundData = new Flex() ;
-	    	fillDataFromResultSet(rs, foundData, _iUserId) ;
+	    	fillDataFromResultSet(rs, foundData, iUserId) ;
 	    	
 	    	aResults.add(foundData) ;
 	    	
@@ -232,13 +301,13 @@ public class FlexManager
 	    }
 		} catch (SQLException e)
 		{
-			Logger.trace(sFctName + ": exception when iterating results for lemma = " + sLemmaCode, _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": exception when iterating results for lemma = " + sLemmaCode, iUserId, Logger.TraceLevel.ERROR) ;
 		}
 		
 		if (iCount > 1)
-			Logger.trace(sFctName + ": " + iCount + " inflections found for lemma " + sLemmaCode, _iUserId, Logger.TraceLevel.DETAIL) ;
+			Logger.trace(sFctName + ": " + iCount + " inflections found for lemma " + sLemmaCode, iUserId, Logger.TraceLevel.DETAIL) ;
 		else
-			Logger.trace(sFctName + ": " + iCount + " inflection found for lemma " + sLemmaCode, _iUserId, Logger.TraceLevel.DETAIL) ;
+			Logger.trace(sFctName + ": " + iCount + " inflection found for lemma " + sLemmaCode, iUserId, Logger.TraceLevel.DETAIL) ;
 		
 		_dbConnector.closeResultSet() ;
 		_dbConnector.closePreparedStatement() ;
@@ -247,19 +316,29 @@ public class FlexManager
 	}
 	
 	/**
-	  * Update a Flex in database
-	  * 
-	  * @return <code>true</code> if creation succeeded, <code>false</code> if not
-	  * 
-	  * @param  dataToUpdate Flex to update
-	  */
+	 * Update a Flex in database<br>
+	 * <br>
+	 * This function needs a registered user.
+	 * 
+	 * @return <code>true</code> if creation succeeded, <code>false</code> if not
+	 * 
+	 * @param  dataToUpdate Flex to update
+	 */
 	private boolean forceUpdateData(final Flex dataToUpdate)
 	{
 		String sFctName = "FlexManager.forceUpdateData" ;
 		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
 		if ((null == _dbConnector) || (null == dataToUpdate))
 		{
-			Logger.trace(sFctName + ": bad parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": bad parameter", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
@@ -271,7 +350,7 @@ public class FlexManager
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
 		if (null == _dbConnector.getPreparedStatement())
 		{
-			Logger.trace(sFctName + ": cannot get Statement", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": cannot get Statement", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return false ;
 		}
@@ -287,20 +366,22 @@ public class FlexManager
 		int iNbAffectedRows = _dbConnector.executeUpdatePreparedStatement(false) ;
 		if (-1 == iNbAffectedRows)
 		{
-			Logger.trace(sFctName + ": failed query " + sQuery, _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": failed query " + sQuery, _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return false ;
 		}
 
-		Logger.trace(sFctName + ": updated data for Flex " + dataToUpdate.getCode(), _iUserId, Logger.TraceLevel.SUBSTEP) ;
+		Logger.trace(sFctName + ": updated data for Flex " + dataToUpdate.getCode(), _sessionElements.getPersonId(), Logger.TraceLevel.SUBSTEP) ;
 		
 		_dbConnector.closePreparedStatement() ;
 		
-		return true ;
+		return historize(dataToUpdate, ChangeType.change) ;
 	}
 	
 	/**
-	 * Get the next available code for a given lemma
+	 * Get the next available code for a given lemma<br>
+	 * <br>
+	 * This function needs a registered user.
 	 * 
 	 * @param sQLemmaCode Code of the lemma this flex is a flexed form for, can be <code>""</code>
 	 * 
@@ -310,9 +391,17 @@ public class FlexManager
 	{
 		String sFctName = "FlexManager.getNextFlexCode" ;
 		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return "" ;
+		}
+		
 		if ((null == sQLemmaCode) || "".equals(sQLemmaCode))
 		{
-			Logger.trace(sFctName + ": empty parameter.", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": empty parameter.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			return "" ;
 		}
 		
@@ -321,7 +410,7 @@ public class FlexManager
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
 		if (null == _dbConnector.getPreparedStatement())
 		{
-			Logger.trace(sFctName + ": cannot get Statement", _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": cannot get Statement", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -330,7 +419,7 @@ public class FlexManager
 		
 		if (false == _dbConnector.executePreparedStatement())
 		{
-			Logger.trace(sFctName + ": failed query " + sQuery, _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": failed query " + sQuery, _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -338,7 +427,7 @@ public class FlexManager
 		ResultSet rs = _dbConnector.getResultSet() ;
 		if (null == rs)
 		{
-			Logger.trace(sFctName + ": no max code found in table flex for lemma = " + sQLemmaCode, _iUserId, Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": no max code found in table flex for lemma = " + sQLemmaCode, _sessionElements.getPersonId(), Logger.TraceLevel.WARNING) ;
 			_dbConnector.closePreparedStatement() ;
 			return "" ;
 		}
@@ -365,7 +454,7 @@ public class FlexManager
 	    }
 		} catch (SQLException e)
 		{
-			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _iUserId, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": exception when iterating results " + e.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
 		}
 		
 		_dbConnector.closeResultSet() ;

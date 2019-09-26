@@ -1,9 +1,11 @@
 package org.quadrifolium.server.ontology_base ;
 
+import org.quadrifolium.shared.ontology.Triple;
+
 /**
- * Lemma.java
+ * HistoryTriple.java
  *
- * The Lemma class represents a word and its flexed variations
+ * The HistoryTriple class represents a versioned instance of a triple
  * 
  * Author: PA
  * 
@@ -11,6 +13,7 @@ package org.quadrifolium.server.ontology_base ;
 public class HistoryTriple
 {
 	private int    _iId ;
+	
 	private int    _iTripleId ;
 	private String _sSubject ;
 	private String _sPredicate ;
@@ -35,6 +38,22 @@ public class HistoryTriple
 		_sSubject   = sSubject ;
 		_sPredicate = sPredicate ;
 		_sObject    = sObject ;
+	}
+	
+	/**
+	 * Constructor from a Triple
+	 */
+	public HistoryTriple(final Triple triple) 
+	{
+		reset() ;
+		
+		if (null == triple)
+			return ;
+		
+		_iTripleId  = triple.getId() ;
+		_sSubject   = triple.getSubject() ;
+		_sPredicate = triple.getPredicate() ;
+		_sObject    = triple.getObject() ;
 	}
 	
 	/**

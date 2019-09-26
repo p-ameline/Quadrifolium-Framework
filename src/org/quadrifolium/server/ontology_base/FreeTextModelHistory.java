@@ -1,9 +1,9 @@
 package org.quadrifolium.server.ontology_base ;
 
 /**
- * Lemma.java
+ * FreeTextModelHistory.java
  *
- * The Flex class represents a specific flexed variation of a lemma
+ * The FreeTextModelHistory class represents a versioned instance of a FreeTextModel
  * 
  * Author: PA
  * 
@@ -11,6 +11,7 @@ package org.quadrifolium.server.ontology_base ;
 public class FreeTextModelHistory
 {
 	private int    _iId ;
+	
 	private int    _iFreeTextId ;
 	private String _sLabel ;
 	private String _sCode ;
@@ -40,16 +41,30 @@ public class FreeTextModelHistory
 	}
 	
 	/**
+	 * Constructor from a FreeTextModel 
+	 */
+	public FreeTextModelHistory(final FreeTextModel freeTextModel) 
+	{
+		reset() ;
+		
+		_iFreeTextId = freeTextModel.getId() ;
+		_sLabel      = freeTextModel.getLabel() ;
+		_sCode       = freeTextModel.getCode() ;
+		_sLanguage   = freeTextModel.getLanguage() ;
+		_sNext       = freeTextModel.getNext() ;
+	}
+	
+	/**
 	 * Copy constructor
 	 */
 	public FreeTextModelHistory(final FreeTextModelHistory model) {
-		initFromFlex(model) ;
+		initFromModel(model) ;
 	}
 	
 	/**
 	 * Initialize from an object of the kind 
 	 */
-	public void initFromFlex(final FreeTextModelHistory model)
+	public void initFromModel(final FreeTextModelHistory model)
 	{
 		reset() ;
 		

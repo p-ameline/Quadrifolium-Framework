@@ -8,11 +8,11 @@ public class LexiqueTo4foliumAction implements Action<LexiqueTo4foliumResult>
 {	
 	private SessionElements _sessionElements ;
 
-	public LexiqueTo4foliumAction(final int iPersonId, final String sToken) 
+	public LexiqueTo4foliumAction(final SessionElements sessionElements) 
 	{
 		super() ;
 
-		_sessionElements = new SessionElements(iPersonId, sToken) ;
+		_sessionElements = sessionElements ;
 	}
 
   protected LexiqueTo4foliumAction() 

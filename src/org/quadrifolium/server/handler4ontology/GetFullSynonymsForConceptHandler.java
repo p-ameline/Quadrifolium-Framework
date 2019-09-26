@@ -29,6 +29,7 @@ import org.quadrifolium.shared.ontology.Triple;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
 import org.quadrifolium.shared.rpc4ontology.GetFullSynonymsForConceptAction;
 import org.quadrifolium.shared.rpc4ontology.GetFullSynonymsForConceptResult;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 import com.google.inject.Inject;
@@ -36,7 +37,8 @@ import com.google.inject.Provider;
 
 public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<GetFullSynonymsForConceptAction, GetFullSynonymsForConceptResult>
 {
-	protected int    _iUserId ;
+	protected SessionElements _sessionElements ;
+	protected int             _iUserId ;
 	
 	protected String _sQueryLanguage ;
 
@@ -56,8 +58,9 @@ public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<
 	{
 		super(logger, servletContext, servletRequest) ;
 		
-		_iUserId        = -1 ;
-		_sQueryLanguage = "" ;
+		_sessionElements = null ;
+		_iUserId         = -1 ;
+		_sQueryLanguage  = "" ;
 	}
 	
 	/**
@@ -67,8 +70,9 @@ public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<
 	{
 		super() ;
 		
-		_iUserId        = -1 ;
-		_sQueryLanguage = "" ;
+		_sessionElements = null ;
+		_iUserId         = -1 ;
+		_sQueryLanguage  = "" ;
 	}
 
 	@Override
@@ -324,7 +328,7 @@ public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<
 		{
 			TripleWithLabel trait = it.next() ;
 			
-			QuadrifoliumServerFcts.fillTraitWithLabels(dbConnector, _iUserId, sLanguage, trait, _aLabelsForCodes) ;
+			QuadrifoliumServerFcts.fillTraitWithLabels(dbConnector, _sessionElements, sLanguage, trait, _aLabelsForCodes) ;
 		}
 		
 		return true ;
@@ -361,7 +365,7 @@ public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<
 		
 		// Get all inflections for this lemma
 		//
-		FlexManager flexManager = new FlexManager(_iUserId, dbConnector) ;
+		FlexManager flexManager = new FlexManager(_sessionElements, dbConnector) ;
 			
 		ArrayList<Flex> aFlexForLemma = new ArrayList<Flex>() ;
 		if ((false == flexManager.existDataForLemma(sLemmaCode, aFlexForLemma)) || aFlexForLemma.isEmpty())
@@ -459,7 +463,7 @@ public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<
 				for (Iterator<TripleWithLabel> itTrait = aTraits.iterator() ; itTrait.hasNext() ; )
 				{
 					TripleWithLabel trait = itTrait.next() ;
-					QuadrifoliumServerFcts.fillTraitWithLabels(dbConnector, _iUserId, sLanguage, trait, _aLabelsForCodes) ;
+					QuadrifoliumServerFcts.fillTraitWithLabels(dbConnector, _sessionElements, sLanguage, trait, _aLabelsForCodes) ;
 				}
 			}
 		}
@@ -541,7 +545,7 @@ public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<
 		for (Iterator<TripleWithLabel> itTrait = _aTraitsForConcept.iterator() ; itTrait.hasNext() ; )
 		{
 			TripleWithLabel trait = itTrait.next() ;
-			QuadrifoliumServerFcts.fillTraitWithLabels(dbConnector, _iUserId, sLanguage, trait, _aLabelsForCodes) ;
+			QuadrifoliumServerFcts.fillTraitWithLabels(dbConnector, _sessionElements, sLanguage, trait, _aLabelsForCodes) ;
 		}
 		
 		return true ;

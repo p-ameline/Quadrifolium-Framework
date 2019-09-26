@@ -8,6 +8,8 @@ import org.quadrifolium.server.DBConnector;
 import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.ontology_base.ChangeHistory;
 
+import com.ldv.shared.model.LdvTime;
+
 /** 
  * Object in charge of Read/Write operations for the <code>changeHistory</code> table 
  *   
@@ -43,7 +45,8 @@ public class ChangeHistoryManager
 			return false ;
 		}
 		
-		String sQuery = "INSERT INTO changeHistory (sessionId, table, type, elementId, historyId) VALUES (?, ?, ?, ?, ?)" ;
+		String sQuery = "INSERT INTO changeHistory (sessionId, datetime, histoTable, modifType, elementId, historyId)" + 
+		                                           " VALUES (?, ?, ?, ?, ?, ?)" ;
 		
 		_dbConnector.prepareStatememt(sQuery, Statement.RETURN_GENERATED_KEYS) ;
 		if (null == _dbConnector.getPreparedStatement())
@@ -53,11 +56,24 @@ public class ChangeHistoryManager
 			return false ;
 		}
 		
+		// If no Date/Time, pick current one
+		//
+		String sDateTime = "" ;
+		if ("".equals(dataToInsert.getDateTime()))
+		{
+			LdvTime time = new LdvTime(0) ;
+			time.takeTime() ;
+			sDateTime = time.getLocalDateTime() ;
+		}
+		else
+			sDateTime = dataToInsert.getDateTime() ;
+		
 		_dbConnector.setStatememtInt(1, dataToInsert.getSessionId()) ;
-		_dbConnector.setStatememtString(2, dataToInsert.getTableString()) ;
-		_dbConnector.setStatememtString(3, dataToInsert.getTypeString()) ;
-		_dbConnector.setStatememtInt(4, dataToInsert.getElementId()) ;
-		_dbConnector.setStatememtInt(5, dataToInsert.getHistoryId()) ;
+		_dbConnector.setStatememtString(2, sDateTime) ;
+		_dbConnector.setStatememtString(3, dataToInsert.getTableString()) ;
+		_dbConnector.setStatememtString(4, dataToInsert.getTypeString()) ;
+		_dbConnector.setStatememtInt(5, dataToInsert.getElementId()) ;
+		_dbConnector.setStatememtInt(6, dataToInsert.getHistoryId()) ;
 		
 		// Execute query 
 		//
@@ -195,7 +211,7 @@ public class ChangeHistoryManager
 		
 		// Prepare SQL query
 		//
-		String sQuery = "UPDATE changeHistory SET sessionId = ?, table = ?, type = ?, elementId = ?, historyId = ?" +
+		String sQuery = "UPDATE changeHistory SET sessionId = ?, datetime = ?, `table` = ?, `type` = ?, elementId = ?, historyId = ?" +
 				                          " WHERE id = ?" ; 
 		
 		_dbConnector.prepareStatememt(sQuery, Statement.NO_GENERATED_KEYS) ;
@@ -207,12 +223,13 @@ public class ChangeHistoryManager
 		}
 		
 		_dbConnector.setStatememtInt(1, dataToUpdate.getSessionId()) ;
-		_dbConnector.setStatememtString(2, dataToUpdate.getTableString()) ;
-		_dbConnector.setStatememtString(3, dataToUpdate.getTypeString()) ;
-		_dbConnector.setStatememtInt(4, dataToUpdate.getElementId()) ;
-		_dbConnector.setStatememtInt(5, dataToUpdate.getHistoryId()) ;
+		_dbConnector.setStatememtString(2, dataToUpdate.getDateTime()) ;
+		_dbConnector.setStatememtString(3, dataToUpdate.getTableString()) ;
+		_dbConnector.setStatememtString(4, dataToUpdate.getTypeString()) ;
+		_dbConnector.setStatememtInt(5, dataToUpdate.getElementId()) ;
+		_dbConnector.setStatememtInt(6, dataToUpdate.getHistoryId()) ;
 		
-		_dbConnector.setStatememtInt(6, dataToUpdate.getId()) ;
+		_dbConnector.setStatememtInt(7, dataToUpdate.getId()) ;
 				
 		// Execute query 
 		//
@@ -247,8 +264,9 @@ public class ChangeHistoryManager
 		{
 			foundData.setId(rs.getInt("id")) ;
 			foundData.setSessionId(rs.getInt("sessionId")) ;
-    	foundData.setTableString(rs.getString("table")) ;
-    	foundData.setTypeString(rs.getString("type")) ;
+			foundData.setDateTime(rs.getString("datetime")) ;
+    	foundData.setTableString(rs.getString("histoTable")) ;
+    	foundData.setTypeString(rs.getString("modifType")) ;
     	foundData.setElementId(rs.getInt("elementId")) ;
     	foundData.setHistoryId(rs.getInt("historyId")) ;
 		} 

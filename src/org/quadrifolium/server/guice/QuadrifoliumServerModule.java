@@ -16,6 +16,7 @@ import org.quadrifolium.server.handler4ontology.GetFullSynonymsForConceptHandler
 import org.quadrifolium.server.handler4ontology.GetLanguageTagsHandler;
 import org.quadrifolium.server.handler4ontology.GetLemmasForConceptHandler;
 import org.quadrifolium.server.handler4ontology.GetSemanticTriplesForConceptHandler;
+import org.quadrifolium.server.handler4ontology.SaveDefinitionTripleHandler;
 import org.quadrifolium.server.handler_special.LexiqueTo4foliumHandler;
 
 import org.quadrifolium.shared.rpc.CheckPseudoAction;
@@ -30,6 +31,7 @@ import org.quadrifolium.shared.rpc4ontology.GetFullSynonymsForConceptAction;
 import org.quadrifolium.shared.rpc4ontology.GetLanguageTagsAction;
 import org.quadrifolium.shared.rpc4ontology.GetLemmasForConceptAction;
 import org.quadrifolium.shared.rpc4ontology.GetSemanticTriplesAction;
+import org.quadrifolium.shared.rpc4ontology.SaveDefinitionAction;
 import org.quadrifolium.shared.rpc_special.LexiqueTo4foliumAction;
 
 import com.google.inject.Singleton;
@@ -50,7 +52,7 @@ public class QuadrifoliumServerModule extends ActionHandlerModule
 		bindHandler(SendLoginAction.class,           CheckUserHandler.class) ;
 		bindHandler(GetWelcomeTextAction.class,      GetWelcomeTextHandler.class) ;
 		
-		// Ontology management
+		// Ontology management display
 		// 
 		bindHandler(GetFlexListAction.class,               GetFlexListFromTextHandler.class) ;
 		bindHandler(GetLemmasForConceptAction.class,       GetLemmasForConceptHandler.class) ;
@@ -58,6 +60,10 @@ public class QuadrifoliumServerModule extends ActionHandlerModule
 		bindHandler(GetSemanticTriplesAction.class,        GetSemanticTriplesForConceptHandler.class) ;
 		bindHandler(GetDefinitionsTriplesAction.class,     GetDefinitionsTriplesForConceptHandler.class) ;
 		bindHandler(GetLanguageTagsAction.class,           GetLanguageTagsHandler.class) ;
+		
+		// Ontology management write functions
+		//
+		bindHandler(SaveDefinitionAction.class,            SaveDefinitionTripleHandler.class) ;
 		
 		bindHandler(LexiqueTo4foliumAction.class,    LexiqueTo4foliumHandler.class) ;
 		

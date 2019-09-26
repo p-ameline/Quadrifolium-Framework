@@ -1,9 +1,11 @@
 package org.quadrifolium.server.ontology_base ;
 
+import org.quadrifolium.shared.ontology.Lemma;
+
 /**
- * Lemma.java
+ * HistoryLemma.java
  *
- * The Lemma class represents a word and its flexed variations
+ * The HistoryLemma class represents a versioned instance of a Lemma
  * 
  * Author: PA
  * 
@@ -11,6 +13,7 @@ package org.quadrifolium.server.ontology_base ;
 public class HistoryLemma
 {
 	private int    _iId ;
+	
 	private int    _iLemmaId ;
 	private String _sLabel ;
 	private String _sCode ;
@@ -35,6 +38,22 @@ public class HistoryLemma
 		_sLabel    = sLabel ;
 		_sCode     = sCode ;
 		_sLanguage = sLanguage ;
+	}
+	
+	/**
+	 * Constructor from a Lemma
+	 */
+	public HistoryLemma(final Lemma lemma) 
+	{
+		reset() ;
+
+		if (null == lemma)
+			return ;
+		
+		_iLemmaId  = lemma.getId() ;
+		_sLabel    = lemma.getLabel() ;
+		_sCode     = lemma.getCode() ;
+		_sLanguage = lemma.getLanguage() ;
 	}
 	
 	/**
