@@ -25,7 +25,7 @@ public class QuadrifoliumDefinitionsView extends FlowPanel implements Quadrifoli
 {
 	private final QuadrifoliumConstants constants = GWT.create(QuadrifoliumConstants.class) ;
 
-	public enum INTERFACETYPE { readOnlyMode, editableMode, editMode } ;
+	public enum INTERFACETYPE { undefined, readOnlyMode, editableMode, editMode } ;
 	
 	// Command panel controls
 	//
@@ -207,7 +207,7 @@ public class QuadrifoliumDefinitionsView extends FlowPanel implements Quadrifoli
 			{
 				PushButton editButton = new PushButton(new Image(QuadrifoliumResources.INSTANCE.editIcon())) ;
 				editButton.addStyleName("elementEditButton") ;
-				editButton.getElement().setId("add_" + triple.getObject()) ;
+				editButton.getElement().setId("edt_" + triple.getObject()) ;
 				_aButtons.add(editButton) ;
 				_definitionsTable.setWidget(iRow, iCol++, editButton) ;
 				
@@ -249,10 +249,48 @@ public class QuadrifoliumDefinitionsView extends FlowPanel implements Quadrifoli
 	public String getEditedLanguage() {
 		return _languageSelection.getSelectedValue() ;
 	}
+
+	@Override
+	public void setEditedLanguage(final String sLanguageTag)
+	{
+		if ((null == sLanguageTag) || "".equals(sLanguageTag))
+		{
+			_languageSelection.setSelectedIndex(-1) ;
+			return ;
+		}
+		
+		// Get index for this language tag
+		//
+		int iItemCount = _languageSelection.getItemCount() ;
+		if (iItemCount <= 0)
+			return ;
+		
+		int iIndexToSelect = -1 ;
+		
+		for (int i = 0 ; i < iItemCount ; i++)
+			if (sLanguageTag.equals(_languageSelection.getValue(i)))
+			{
+				iIndexToSelect = i ;
+				break ;
+			}
+		
+		// Select the proper language tag or nothing if not found
+		//
+		_languageSelection.setSelectedIndex(iIndexToSelect) ;
+	}
 	
 	@Override
 	public String getEditedText() {
 		return _AddedLabel.getText() ;
+	}
+	
+	@Override
+	public void setEditedText(final String sText)
+	{
+		if (null == sText)
+			_AddedLabel.setText("") ;
+		else
+			_AddedLabel.setText(sText) ;
 	}
 	
 	@Override
@@ -306,6 +344,10 @@ public class QuadrifoliumDefinitionsView extends FlowPanel implements Quadrifoli
 		return _ErrorDialogBoxOkButton ;
 	}
 
+	public ArrayList<PushButton> getButtonsArray() {
+		return _aButtons ;
+	}
+	
 	public void reset() {	
 	}
 

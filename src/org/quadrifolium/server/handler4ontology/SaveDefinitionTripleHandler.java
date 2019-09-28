@@ -113,7 +113,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
    			return new SaveDefinitionResult("Error, no concept code.", null, sConceptCode, sLanguageTag, sText, iUpdatedTripleId) ;
    		}
    		
-   		if ((null != updatedTriple) && (false == sConceptCode.equals(updatedTriple.getObject())))
+   		if ((null != updatedTriple) && (false == sConceptCode.equals(updatedTriple.getSubject())))
    		{
    			Logger.trace("SaveDefinitionTripleHandler.execute: Error, wrong concept code for definition to update.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
    			return new SaveDefinitionResult("Error, wrong concept code for definition to update.", null, sConceptCode, sLanguageTag, sText, iUpdatedTripleId) ;
@@ -202,8 +202,15 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 		//
 		FreeTextManager freeTextManager = new FreeTextManager(_sessionElements, dbConnector) ;
 		
-		if (false == freeTextManager.updateData(updatedTriple.getSubject(), sText, sLanguageTag))
+		if (false == freeTextManager.updateData(updatedTriple.getObject(), sText, sLanguageTag))
+		{
 			saveDefinitionstResult.setMessage("Internal server error.") ;
+			return ;
+		}
+		
+		// If there, it means that all went well, so we fill the result
+		//
+		saveDefinitionstResult.setSavedDefinition(updatedTriple) ;
 	}
 	
 	/**
@@ -247,7 +254,16 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 		
 		Triple tripleToInsert = new Triple(-1, sConceptCode, QuadrifoliumFcts.getConceptCodeForDefinition(), sFreeTextCode) ;
 		if (false == tripleManager.insertData(tripleToInsert))
+		{
 			saveDefinitionstResult.setMessage("Internal server error.") ;
+			return ;
+		}
+		
+		// If there, it means that all went well, so we fill the result
+		//
+		TripleWithLabel newTriple = new TripleWithLabel(tripleToInsert, sLanguageTag, "", "", sText) ; 
+		
+		saveDefinitionstResult.setSavedDefinition(newTriple) ;
 	}
 	
 	/**

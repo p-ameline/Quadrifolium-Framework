@@ -69,7 +69,7 @@ public class SaveDefinitionResult implements Result
 	public TripleWithLabel getSavedDefinition() {
 		return _savedDefinition ;
 	}
-	public void setMessage(TripleWithLabel savedDefinition) {
+	public void setSavedDefinition(TripleWithLabel savedDefinition) {
 		_savedDefinition = savedDefinition ;
 	}
 	

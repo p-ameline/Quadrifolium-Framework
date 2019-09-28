@@ -31,6 +31,7 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.inject.Inject;
 
 public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<QuadrifoliumDefinitionsPresenter.Display> 
@@ -39,9 +40,10 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 	{			
 		public void             feedDefinitionsTable(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;
 
-		public void             updateView(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;
-		public HasClickHandlers getEditButtonKeyDown() ;
-		public HasClickHandlers getAddButtonKeyDown() ;
+		public void                  updateView(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;
+		public HasClickHandlers      getEditButtonKeyDown() ;
+		public HasClickHandlers      getAddButtonKeyDown() ;
+		public ArrayList<PushButton> getButtonsArray() ;
 		
 		public void             openAddPanel() ;
 		public void             closeAddPanel() ;
@@ -50,7 +52,9 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 		public void             initializeLanguagesList(final ArrayList<LanguageTag> _LanguageTags) ;
 		
 		public String           getEditedLanguage() ;
+		public void             setEditedLanguage(final String sLanguageTag) ;
 		public String           getEditedText() ;
+		public void             setEditedText(final String sText) ;
 		
 		public void             openErrDialogBox(final String sErrMsgId) ;
 		public void             closeErrDialogBox() ;
@@ -236,7 +240,7 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 		workspace.add(display.asWidget()) ;
 		
 		if (_supervisor.isUserAnEditor())
-			display.updateView(_aDefinitionsTriples, INTERFACETYPE.editableMode) ;
+			updateView(INTERFACETYPE.editableMode) ;
 	}
 	
 	protected void UpdateDefinitions()
@@ -284,7 +288,7 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 			if (false == value.getTriplesArray().isEmpty())
 				_aDefinitionsTriples.addAll(value.getTriplesArray())  ;
 			
-			display.feedDefinitionsTable(_aDefinitionsTriples, getInterfaceType()) ;
+			refreshDefinitionsList() ;
 		}
 	}
 	
@@ -297,7 +301,7 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 		//
 		_bEditMode = false ;
 		
-		display.updateView(_aDefinitionsTriples, getInterfaceType()) ;
+		updateView() ;
 	}
 	
 	/**
@@ -309,7 +313,7 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 		
 		// Change view state
 		//
-		display.updateView(_aDefinitionsTriples, getInterfaceType()) ;
+		updateView() ;
 	}
 	
 	/**
@@ -334,7 +338,7 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 	{
 		display.closeAddPanel() ;
 		
-		_bEditMode        = false ;
+		_bEditMode        = true ;
 		_editedDefinition = null ;
 	
 		_bAdding = false ;
@@ -423,16 +427,147 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 			else
 			{
 				for (TripleWithLabel triple : _aDefinitionsTriples)
-				{
 					if (triple.getId() == iUpdatedTripleId)
-						triple.initFromModel(value.getSavedDefinition()) ;
-				}
+					{
+						triple.initFromLabelModel(value.getSavedDefinition()) ;
+						break ;
+					}
 			}
 			
 			closeEditingSession() ;
 			
 			display.feedDefinitionsTable(_aDefinitionsTriples, getInterfaceType()) ;
 		}
+	}
+	
+	/**
+	 * Connect the buttons that control definitions edition and deletion actions 
+	 */
+	protected void connectButtonsClickHandlers()
+	{
+		ArrayList<PushButton> aButtons = display.getButtonsArray() ;
+		
+		if ((null == aButtons) || aButtons.isEmpty())
+			return ;
+		
+		for (PushButton button : aButtons)
+		{
+			String sId = button.getElement().getId() ;
+			if ((null != sId) && (false == sId.equals("")))
+			{
+				String[] decomposition = sId.split("_") ;
+				
+				final String sAction       = decomposition[0] ;
+				final String sDefinitionId = decomposition[1] ;
+			
+				button.addClickHandler(new ClickHandler() {
+					public void onClick(ClickEvent event)
+					{
+						definitionAction(sAction, sDefinitionId) ;
+					}
+				}) ;
+			}
+		}
+	}
+	
+	/**
+	 * An action button was clicked for this definition 
+	 */
+	protected void definitionAction(final String sAction, final String sDefinitionID)
+	{
+		if ((null == sAction) || "".equals(sAction) || (null == sDefinitionID) || "".equals(sDefinitionID))
+			return ;
+		
+		TripleWithLabel tripleToEdit = getDefinitionFromId(sDefinitionID) ;
+		if (null == tripleToEdit)
+		{
+			// If clicked definition not found, better refresh the list
+			//
+			refreshDefinitionsList() ;
+			return ;
+		}
+		
+		// Edit
+		//
+		if ("edt".equals(sAction))
+		{
+			_bEditMode        = true ;
+			_editedDefinition = tripleToEdit ;
+			
+			display.initializeLanguagesList(_supervisor.getLanguageTags()) ;
+			
+			display.setEditedText(_editedDefinition.getObjectLabel()) ;
+			display.setEditedLanguage(_editedDefinition.getLanguage()) ;
+			
+			_bAdding = true ;
+			
+			display.openAddPanel() ;
+			
+			return ;
+		}
+		
+		// Edit
+		//
+		if ("del".equals(sAction))
+		{
+			
+		}
+	}
+	
+	/**
+	 * Find a definition in the array from its ID
+	 * 
+	 * @return The definition if found, <code>null</code> if not
+	 */
+	protected TripleWithLabel getDefinitionFromId(final String sDefinitionID)
+	{
+		if (_aDefinitionsTriples.isEmpty() || (null == sDefinitionID) || "".equals(sDefinitionID))
+			return null ;
+		
+		for (TripleWithLabel triple : _aDefinitionsTriples)
+			if (sDefinitionID.equals(triple.getObject()))
+				return triple ;
+		
+		return null ;
+	}
+
+	/**
+	 * Refresh the whole view
+	 * 
+	 * @param iInterfaceType Forced interface type, or computed one if <code>undefined</code>
+	 */
+	protected void updateView(final INTERFACETYPE iInterfaceType)
+	{
+		// Find the interface type if undefined
+		//
+		INTERFACETYPE iProperInterfaceType = iInterfaceType ;
+		if (INTERFACETYPE.undefined == iInterfaceType)
+			iProperInterfaceType = getInterfaceType() ;
+		
+		// Update view
+		//
+		display.updateView(_aDefinitionsTriples, iProperInterfaceType) ;
+		
+		// Connect buttons
+		//
+		connectButtonsClickHandlers() ;
+	}
+	
+	/**
+	 * Refresh the whole view
+	 */
+	protected void updateView() {
+		updateView(INTERFACETYPE.undefined) ;
+	}
+	
+	/**
+	 * Ask the display to refresh the definition list and, if they exist, connect action buttons
+	 */
+	protected void refreshDefinitionsList() 
+	{
+		display.feedDefinitionsTable(_aDefinitionsTriples, getInterfaceType()) ;
+		
+		connectButtonsClickHandlers() ;
 	}
 	
 	protected void signalSaveProblem(final String sServerMessage, final String sSentLanguage, final String sSentText, final int iUpdatedTripleId)
