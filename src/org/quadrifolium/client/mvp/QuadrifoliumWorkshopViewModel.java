@@ -1,9 +1,6 @@
 package org.quadrifolium.client.mvp;
 
 
-import org.quadrifolium.client.loc.QuadrifoliumConstants;
-
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -13,8 +10,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class QuadrifoliumWorkshopViewModel extends Composite implements WorkshopInterfaceModel 
 {
-	private final QuadrifoliumConstants constants = GWT.create(QuadrifoliumConstants.class) ;
-	
 	private final FlowPanel        _workspace ;
 	
 	// Concept search area

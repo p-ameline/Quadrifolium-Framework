@@ -179,6 +179,13 @@ table td, select {
 	right:            2px;
 }
 
+.addGrammar {
+	display:          inline-block;
+	width:            10em;
+	height:           3em;
+	right:            2px;
+}
+
 /** --------- Welcome --------- */
 
 .welcomeWorkspace{

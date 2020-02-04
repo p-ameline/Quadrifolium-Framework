@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
 import org.quadrifolium.shared.ontology.FlexWithTraits;
 import org.quadrifolium.shared.ontology.LemmaWithInflections;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
 
-import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.TreeViewModel;
@@ -190,7 +190,7 @@ public class LinguisticTreeModel implements TreeViewModel
   /**
    * Fills the list of nodes from a list of synonyms 
    */
-  public void fillData(final List<LemmaWithInflections> synonyms) 
+  public void fillData(final List<LemmaWithInflections> synonyms, final INTERFACETYPE iInterfaceType) 
   {
   	// List<LinguisticTreeNode> dataList = ((ListDataProvider<LinguisticTreeNode>)_dataProvider).getList() ;
   	List<LinguisticTreeNode> dataList = ((ListDataProvider<LinguisticTreeNode>)_rootDataProvider).getList() ;
@@ -211,7 +211,7 @@ public class LinguisticTreeModel implements TreeViewModel
   	
   	fillDataList(dataList, synonyms) ;
   	
-  	_root.refresh() ;
+  	_root.refresh(iInterfaceType) ;
   }
   
   /**
@@ -307,7 +307,12 @@ public class LinguisticTreeModel implements TreeViewModel
   	_root.setContent(sConceptName) ;
   }
   
-  public void refresh() {
-  	_root.refresh() ;
+  /**
+   * Refreshing the tree is a recursive process, starting from root
+   * 
+   * @param iInterfaceType
+   */
+  public void refresh(final INTERFACETYPE iInterfaceType) {
+  	_root.refresh(iInterfaceType) ;
   }
 }

@@ -24,9 +24,9 @@ import com.google.inject.Inject;
 
 public abstract class QuadrifoliumWorkshopPresenterModel<D extends WorkshopInterfaceModel> extends QuadrifoliumBasePresenter<D>
 {	
-	protected     QuadrifoliumLemmasPresenter       _lemmasPresenter ;
-	protected     QuadrifoliumSemanticsPresenter    _semanticsPresenter ;
-	protected     QuadrifoliumDefinitionsPresenter  _definitionsPresenter ;
+	protected QuadrifoliumLemmasPresenter      _lemmasPresenter ;
+	protected QuadrifoliumSemanticsPresenter   _semanticsPresenter ;
+	protected QuadrifoliumDefinitionsPresenter _definitionsPresenter ;
 	
 	@Inject
 	public QuadrifoliumWorkshopPresenterModel(final D                      display, 

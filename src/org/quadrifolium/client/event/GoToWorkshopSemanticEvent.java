@@ -16,8 +16,7 @@ public class GoToWorkshopSemanticEvent extends GwtEvent<GoToWorkshopSemanticEven
 	
 	public static Type<GoToWorkshopSemanticEventHandler> TYPE = new Type<GoToWorkshopSemanticEventHandler>() ;
 	
-	private Panel                                                             _workspace ;
-	private QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> _parent ;
+	private GoToWorkshopComponentContent _content = new GoToWorkshopComponentContent() ;
 	
 	public static Type<GoToWorkshopSemanticEventHandler> getType() 
 	{
@@ -28,16 +27,20 @@ public class GoToWorkshopSemanticEvent extends GwtEvent<GoToWorkshopSemanticEven
 	
 	public GoToWorkshopSemanticEvent(QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> parent, Panel workspace) 
 	{	
-		_workspace = workspace ;
-		_parent    = parent ;
+		_content.setWorkspace(workspace) ;
+		_content.setParent(parent) ;
+	}
+
+	public GoToWorkshopComponentContent getContent() {
+		return _content ;
 	}
 	
 	public Panel getWorkspace() {
-		return _workspace ;
+		return _content.getWorkspace() ;
 	}
 		
 	public QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> getParent() {
-		return _parent ;
+		return _content.getParent() ;
 	}
 	
 	@Override

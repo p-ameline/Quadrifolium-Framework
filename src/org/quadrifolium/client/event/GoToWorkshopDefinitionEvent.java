@@ -15,9 +15,8 @@ import com.google.gwt.user.client.ui.Panel;
 public class GoToWorkshopDefinitionEvent extends GwtEvent<GoToWorkshopDefinitionEventHandler> {
 	
 	public static Type<GoToWorkshopDefinitionEventHandler> TYPE = new Type<GoToWorkshopDefinitionEventHandler>() ;
-	
-	private Panel                                                             _workspace ;
-	private QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> _parent ;
+
+	private GoToWorkshopComponentContent _content = new GoToWorkshopComponentContent() ;
 	
 	public static Type<GoToWorkshopDefinitionEventHandler> getType() 
 	{
@@ -28,16 +27,20 @@ public class GoToWorkshopDefinitionEvent extends GwtEvent<GoToWorkshopDefinition
 	
 	public GoToWorkshopDefinitionEvent(QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> parent, Panel workspace) 
 	{	
-		_workspace = workspace ;
-		_parent    = parent ;
+		_content.setWorkspace(workspace) ;
+		_content.setParent(parent) ;
+	}
+	
+	public GoToWorkshopComponentContent getContent() {
+		return _content ;
 	}
 	
 	public Panel getWorkspace() {
-		return _workspace ;
+		return _content.getWorkspace() ;
 	}
 		
 	public QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> getParent() {
-		return _parent ;
+		return _content.getParent() ;
 	}
 	
 	@Override

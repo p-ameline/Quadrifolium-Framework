@@ -634,4 +634,56 @@ public class QuadrifoliumServerFcts
 		
 		return freeTextManager.getFreeTextLabel(sCode, null) ;
 	}
+	
+	/**
+	 * Insert a new triple in database
+	 * 
+	 * @return ID of created triple (<code>-1</code> is something went wrong)
+	 */
+	public static int recordTriple(DBConnector dbConnector, final String sSubject, final String sPredicate, final String sObject, final SessionElements sessionElements) throws NullPointerException
+	{
+		if ((null == dbConnector) || (null == sSubject) || (null == sPredicate) || (null == sObject))
+			throw new NullPointerException() ;
+		
+		if ("".equals(sSubject) || "".equals(sPredicate) || "".equals(sObject))
+			return -1 ;
+		
+		Triple newTriple = new Triple(-1, sSubject, sPredicate, sObject) ;
+		
+		return recordTriple(dbConnector, newTriple, sessionElements) ;
+	}
+	
+	/**
+	 * Insert a new triple in database
+	 * 
+	 * @return ID of created triple (<code>-1</code> is something went wrong)
+	 */
+	public static int recordTriple(DBConnector dbConnector, Triple tripleToInsert, final SessionElements sessionElements) throws NullPointerException
+	{
+		if ((null == dbConnector) || (null == tripleToInsert))
+			throw new NullPointerException() ;
+		
+		TripleManager tripleManager = new TripleManager(sessionElements, dbConnector) ;
+		if (false == tripleManager.insertData(tripleToInsert))
+			return -1 ;
+		
+		return tripleToInsert.getId() ;
+	}
+	
+	/**
+	 * Insert a free text in database
+	 * 
+	 * @param sText The text to be stored
+	 * 
+	 * @return The "header code" of the stored text
+	 */
+	public static String recordFreeText(DBConnector dbConnector, final String sConceptCode, final String sText, final String sLanguage, final SessionElements sessionElements)
+	{
+		if ((null == dbConnector) || (null == sText) || "".equals(sText))
+			return "" ;
+		
+		FreeTextManager freeTextManager = new FreeTextManager(sessionElements, dbConnector) ;
+		
+		return freeTextManager.insertData(sConceptCode, sText, sLanguage) ;
+	}
 }

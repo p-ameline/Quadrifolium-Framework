@@ -2,23 +2,21 @@ package org.quadrifolium.client.mvp_components;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 import net.customware.gwt.presenter.client.EventBus;
-import net.customware.gwt.presenter.client.widget.WidgetDisplay;
-import net.customware.gwt.presenter.client.widget.WidgetPresenter;
 
 import java.util.ArrayList;
 
 import org.quadrifolium.client.event.GoToWorkshopLemmaEvent;
 import org.quadrifolium.client.event.GoToWorkshopLemmaEventHandler;
-import org.quadrifolium.client.event.WorkshopConceptChangedEvent;
-import org.quadrifolium.client.event.WorkshopConceptChangedEventHandler;
 import org.quadrifolium.client.event.WorkshopConceptSynonymsLoadedEvent;
 import org.quadrifolium.client.global.QuadrifoliumSupervisor;
-import org.quadrifolium.client.mvp.QuadrifoliumWorkshopPresenterModel;
-import org.quadrifolium.client.mvp.QuadrifoliumWorkshopViewModel;
+import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
 import org.quadrifolium.shared.ontology.Flex;
+import org.quadrifolium.shared.ontology.LanguageTag;
 import org.quadrifolium.shared.ontology.LemmaWithInflections;
 import org.quadrifolium.shared.rpc4ontology.GetFullSynonymsForConceptAction;
 import org.quadrifolium.shared.rpc4ontology.GetFullSynonymsForConceptResult;
+import org.quadrifolium.shared.rpc4ontology.SaveLemmaAction;
+import org.quadrifolium.shared.rpc4ontology.SaveLemmaResult;
 import org.quadrifolium.shared.util.ParsedLanguageTag;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -26,7 +24,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.inject.Inject;
 
 /**
@@ -35,28 +33,48 @@ import com.google.inject.Inject;
  * @author Philippe
  *
  */
-public class QuadrifoliumLemmasPresenter extends WidgetPresenter<QuadrifoliumLemmasPresenter.Display> 
+public class QuadrifoliumLemmasPresenter extends QuadrifoliumComponentBasePresenter<QuadrifoliumLemmasPresenter.Display> 
 {	
-	public interface Display extends WidgetDisplay 
+	public interface Display extends QuadrifoliumComponentInterface 
 	{			
-		public void             feedLinguisticTree(final ArrayList<LemmaWithInflections> aSynonyms) ;
-		public void             feedLinguisticTreeForOthers(final ArrayList<LemmaWithInflections> aSynonyms) ;
+		public void                  feedLinguisticTree(final ArrayList<LemmaWithInflections> aSynonyms, final INTERFACETYPE iInterfaceType) ;
+		public void                  feedLinguisticTreeForOthers(final ArrayList<LemmaWithInflections> aSynonyms, final INTERFACETYPE iInterfaceType) ;
 		
-		public void             initCommandPanelForEditing() ;
-		public HasClickHandlers getNewLemmaButton() ;
+		public void                  updateView(final INTERFACETYPE iInterfaceType) ;
+		public void                  updateViewForOthers(final INTERFACETYPE iInterfaceType) ;
+
+		public void                  initializeLanguagesList(final ArrayList<LanguageTag> aLanguages) ;
+
+		public String                getEditedText() ;
+		public void                  setEditedText(final String sText) ;
+		public String                getEditedGrammar() ;
+		public void                  setEditedGrammar(final String sGrammar) ;
+		public String                getEditedLanguage() ;
+		public void                  setEditedLanguage(final String sLanguageTag) ;
+		public String                get2ndEditedText() ;
+		public void                  set2ndEditedText(final String sText) ;
+		public String                get2ndEditedGrammar() ;
+		public void                  set2ndEditedGrammar(final String sGrammar) ;
+		
+		public HasClickHandlers      get2ndEditButtonKeyDown() ;
+		public HasClickHandlers      get2ndAddButtonKeyDown() ;
+		public ArrayList<PushButton> get2ndButtonsArray() ;
+		
+		public void                  open2ndAddPanel() ;
+		public void                  close2ndAddPanel() ;
+		public HasClickHandlers      get2ndAddOkButtonKeyDown() ;
+		public HasClickHandlers      get2ndAddCancelButtonKeyDown() ;
+
 	}
 
-	private final DispatchAsync                   _dispatcher ;
-	private final QuadrifoliumSupervisor          _supervisor ;
+	protected ArrayList<LemmaWithInflections> _aSynonyms = new ArrayList<LemmaWithInflections>() ;
+	protected Flex                            _preferredInflexion ;
 	
-	protected     QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> _parent ;
+	protected LemmaWithInflections            _editedLemma ;
+	protected LemmaWithInflections            _2ndEditedLemma ;
 	
-	// Is it a read-only component?
-	//
-	protected     boolean                         _bReadOnly ;
-	
-	protected     ArrayList<LemmaWithInflections> _aSynonyms = new ArrayList<LemmaWithInflections>() ;
-	protected     Flex                            _preferredInflexion ;
+	protected boolean                         _b2ndEditMode ;
+	protected boolean                         _b2ndAdding ;
 	
 	@Inject
 	public QuadrifoliumLemmasPresenter(final Display display, 
@@ -64,15 +82,14 @@ public class QuadrifoliumLemmasPresenter extends WidgetPresenter<QuadrifoliumLem
 			                               final DispatchAsync dispatcher,
 			                               final QuadrifoliumSupervisor supervisor) 
 	{
-		super(display, eventBus) ;
-		
-		_dispatcher        = dispatcher ;
-		_supervisor        = supervisor ;
-		
-		_bReadOnly         = true ;
-		_parent            = null ;
+		super(display, eventBus, dispatcher, supervisor) ;
 		
 		_preferredInflexion = null ;
+		_editedLemma        = null ;
+		_2ndEditedLemma     = null ;
+		
+		_b2ndEditMode       = false ;
+		_b2ndAdding         = false ;		
 		
 		bind() ;
 	}
@@ -84,46 +101,58 @@ public class QuadrifoliumLemmasPresenter extends WidgetPresenter<QuadrifoliumLem
 	protected void onBind() 
 	{
 		Log.debug("Entering QuadrifoliumWorkshopPresenter::onBind()") ;
+		super.onBind() ;
 		
 		// Message received when it is time to open the workshop
 		//
 		eventBus.addHandler(GoToWorkshopLemmaEvent.TYPE, new GoToWorkshopLemmaEventHandler() {
-			public void onGoToWorkshopLemma(GoToWorkshopLemmaEvent event)
-			{
-				// If this presenter is already connected, discard this message
-				//
-				if (null != _parent)
-					return ;
-				
-				// Connect this presenter to the workshop
-				//
-				_parent = event.getParent() ;
-				
-				Log.debug("Loading Workshop's lemma presenter Page") ;
-				Panel WelcomeWorkspace = event.getWorkspace() ;
-				WelcomeWorkspace.clear() ;
-				WelcomeWorkspace.add(display.asWidget()) ;
+			public void onGoToWorkshopLemma(GoToWorkshopLemmaEvent event) {
+				connectToWorkshop(event.getContent()) ;
 			}
 		});
 		
-		// Message received when the concept at work changed
-		//
-		eventBus.addHandler(WorkshopConceptChangedEvent.TYPE, new WorkshopConceptChangedEventHandler() {
-			public void onWorkshopConceptChanged(WorkshopConceptChangedEvent event)
-			{
-				// If the "concept changed" targets another workshop, discard it
-				if (event.getTargetWorkshop() != _parent)
-					return ;
-				
-				Log.debug("Lemma presenter handling concept change") ;
-				UpdateLinguisticLeaf() ;
+		/**
+		 * Get key down from the button that switches from edit more to read-only mode 
+		 */
+		display.get2ndEditButtonKeyDown().addClickHandler(new ClickHandler() {
+			public void onClick(final ClickEvent event) {
+				switch2ndEditMode() ;
 			}
-		});		
+		});
+			
+		/**
+		 * Get key down from the "add definition" button 
+		 */
+		display.get2ndAddButtonKeyDown().addClickHandler(new ClickHandler() {
+			public void onClick(final ClickEvent event)
+			{
+				if (_b2ndAdding)
+					return ;
+					
+				add2ndNewElement() ;
+			}
+		});
+			
+		/**
+		 * Get key down from the OK button from the "add definition" panel 
+		 */
+		display.get2ndAddOkButtonKeyDown().addClickHandler(new ClickHandler() {
+			public void onClick(final ClickEvent event)
+			{
+				if (false == _b2ndAdding)
+					return ;
+					
+				save2ndEditedElement() ;
+			}
+		});
 	}
+	
+	
 	
 	/**
 	 * Ask the view to create editing controls and connect corresponding handlers
 	 */
+/*
 	protected void initCommandControls()
 	{
 		display.initCommandPanelForEditing() ;
@@ -139,21 +168,127 @@ public class QuadrifoliumLemmasPresenter extends WidgetPresenter<QuadrifoliumLem
 					}
 				});
 	}
+*/
 	
 	/**
-	 * User wants to create a new lemma
+	 * Refresh view
 	 */
-	protected void addNewLemma()
+	protected void UpdateDisplay(final INTERFACETYPE iInterfaceType) 
 	{
+		display.updateView(iInterfaceType) ;
+		display.updateViewForOthers(iInterfaceType) ;
 		
+		feedLinguisticTrees() ;
 	}
 	
-	protected void UpdateLinguisticLeaf()
+	/**
+	 * Connect the buttons that control definitions edition and deletion actions 
+	 */
+	protected void connectButtonsClickHandlers()
+	{
+		ArrayList<PushButton> aButtons = display.getButtonsArray() ;
+		
+		if ((null == aButtons) || aButtons.isEmpty())
+			return ;
+		
+		for (PushButton button : aButtons)
+		{
+			String sId = button.getElement().getId() ;
+			if ((null != sId) && (false == sId.equals("")))
+			{
+				String[] decomposition = sId.split("_") ;
+				
+				final String sAction       = decomposition[0] ;
+				final String sDefinitionId = decomposition[1] ;
+			
+				button.addClickHandler(new ClickHandler() {
+					public void onClick(ClickEvent event)
+					{
+						lemmaAction(sAction, sDefinitionId) ;
+					}
+				}) ;
+			}
+		}
+	}
+	
+	/**
+	 * An action button was clicked for this lemma 
+	 */
+	protected void lemmaAction(final String sAction, final String sLemmaCode)
+	{
+		if ((null == sAction) || "".equals(sAction) || (null == sLemmaCode) || "".equals(sLemmaCode))
+			return ;
+		
+		LemmaWithInflections lemmaToEdit = getLemmaFromCode(sLemmaCode) ;
+		if (null == lemmaToEdit)
+		{
+			// If clicked definition not found, better refresh the list
+			//
+			refreshLemmasList() ;
+			return ;
+		}
+		
+		// Edit
+		//
+		if ("edt".equals(sAction))
+		{
+			_bEditMode   = true ;
+			_editedLemma = lemmaToEdit ;
+			
+			display.initializeLanguagesList(_supervisor.getLanguageTags()) ;
+			
+			display.setEditedText(_editedLemma.getLabel()) ;
+			// display.setEditedLanguage(_editedDefinition.getLanguage()) ;
+			
+			_bAdding = true ;
+			
+			display.openAddPanel() ;
+			
+			return ;
+		}
+		
+		// Edit
+		//
+		if ("del".equals(sAction))
+		{
+			
+		}
+	}
+	
+	/**
+	 * Find a lemma in the array from its code
+	 * 
+	 * @return The lemma if found, <code>null</code> if not
+	 */
+	protected LemmaWithInflections getLemmaFromCode(final String sLemmaCode)
+	{
+		if (_aSynonyms.isEmpty() || (null == sLemmaCode) || "".equals(sLemmaCode))
+			return null ;
+		
+		for (LemmaWithInflections lemma : _aSynonyms)
+			if (sLemmaCode.equals(lemma.getCode()))
+				return lemma ;
+		
+		return null ;
+	}
+	
+	/**
+	 * Ask the display to refresh the definition list and, if they exist, connect action buttons
+	 */
+	protected void refreshLemmasList() 
+	{
+		feedLinguisticTrees() ;
+		
+		connectButtonsClickHandlers() ;
+	}
+	
+	protected void UpdateContent()
 	{
 		// Since the process is asynchronous, we better clear the list first so it doesn't remain out-of-date for some times   
 		//
-		display.feedLinguisticTree(null) ;
-		display.feedLinguisticTreeForOthers(null) ;
+		display.feedLinguisticTree(null, getInterfaceType()) ;
+		display.feedLinguisticTreeForOthers(null, getInterfaceType()) ;
+		
 		_aSynonyms.clear() ;
 		_preferredInflexion = null ;
 		
@@ -220,8 +355,36 @@ public class QuadrifoliumLemmasPresenter extends WidgetPresenter<QuadrifoliumLem
 				aOtherLanguages.add(lemma) ;
 		}
 		
-		display.feedLinguisticTree(aUserLanguage) ;
-		display.feedLinguisticTreeForOthers(aOtherLanguages) ;
+		display.feedLinguisticTree(aUserLanguage, getInterfaceType()) ;
+		display.feedLinguisticTreeForOthers(aOtherLanguages, getInterfaceType()) ;
+	}
+	
+	/**
+	 * Open the "add lemma" panel
+	 */
+	protected void addNewElement() 
+	{
+		_bEditMode   = true ;
+		_editedLemma = null ;
+		
+		_bAdding = true ;
+		
+		display.openAddPanel() ;
+	}
+	
+	/**
+	 * Open the second "add lemma" panel
+	 */
+	protected void add2ndNewElement() 
+	{
+		_b2ndEditMode   = true ;
+		_2ndEditedLemma = null ;
+		
+		display.initializeLanguagesList(_supervisor.getLanguageTags()) ;
+		
+		_b2ndAdding = true ;
+		
+		display.open2ndAddPanel() ;
 	}
 	
 	/**
@@ -311,23 +474,175 @@ public class QuadrifoliumLemmasPresenter extends WidgetPresenter<QuadrifoliumLem
 		
 		return (candidateTag.getInformationCount() > championTag.getInformationCount()) ;
 	} 
-	
-	public void setParent(QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> parent) {
-		_parent = parent ;
-	}
-	
-	public void setReadOnly(boolean bReadOnly) {
-		_bReadOnly = bReadOnly ;
 		
-		if (false == _bReadOnly)
-			initCommandControls() ;
-	}
-	public boolean isReadOnly() {                           
-		return _bReadOnly ;
-	}
-	
 	public Flex getPreferredInflexion() {
 		return _preferredInflexion ;
+	}
+
+	/**
+	 * Switch from edit mode to read-only mode or vice-versa
+	 */
+	protected void switch2ndEditMode()
+	{
+		_b2ndEditMode = !_b2ndEditMode ;
+		
+		// Change view state
+		//
+		updateView() ;
+	}
+	
+	/**
+	 * Close the editing session
+	 */
+	protected void closeEditingSession()
+	{
+		display.closeAddPanel() ;
+		
+		_bEditMode   = true ;
+		_editedLemma = null ;
+	
+		_bAdding = false ;
+	}
+	
+	/**
+	 * Save currently edited lemma
+	 */
+	protected void saveEditedElement()
+	{
+		// Check that no information is missing
+		//
+		String sText = display.getEditedText() ;
+		if ("".equals(sText))
+		{
+			display.openErrDialogBox("lemmaErrEmptyLabel") ;
+			return ;
+		}
+		
+		String sGrammar = display.getEditedGrammar() ;
+		if ("".equals(sGrammar))
+		{
+			display.openErrDialogBox("lemmaErrEmptyGrammar") ;
+			return ;
+		}
+		
+/*
+		String sLanguage = display.getEditedLanguage() ;
+		if ("".equals(sLanguage))
+		{
+			display.openErrDialogBox("definitionErrNoLanguage") ;
+			return ;
+		}
+*/
+		
+		// If editing an existing definition, check if something changed
+		//
+		if (null != _editedLemma)
+		{
+			// if ((sText.equals(_editedLemma.getLabel())) && (sLanguage.equals(_editedLemma.getLanguage())))
+			if ((sText.equals(_editedLemma.getLabel())) && (sGrammar.equals(org.quadrifolium.shared.ontology.OntologyLexicon.getGrammarString(_editedLemma))))
+			{
+				closeEditingSession() ;
+				return ;
+			}
+		}
+		
+		// No need to Check if this language is already attributed to another lemma since synonyms are accepted
+		//
+		
+		// Send the save query to the server
+		//
+		_dispatcher.execute(new SaveLemmaAction(_supervisor.getSessionElements(), _supervisor.getConcept(), _supervisor.getUserLanguage(), sText, sGrammar, _editedLemma), new SaveLemmaCallback()) ;
+	}
+	
+	/**
+	 * Save currently edited lemma
+	 */
+	protected void save2ndEditedElement()
+	{
+		// Check that no information is missing
+		//
+		String sText = display.get2ndEditedText() ;
+		if ("".equals(sText))
+		{
+			display.openErrDialogBox("lemmaErrEmptyLabel") ;
+			return ;
+		}
+		
+		String sGrammar = display.get2ndEditedGrammar() ;
+		if ("".equals(sGrammar))
+		{
+			display.openErrDialogBox("lemmaErrEmptyGrammar") ;
+			return ;
+		}
+		
+		String sLanguage = display.getEditedLanguage() ;
+		if ("".equals(sLanguage))
+		{
+			display.openErrDialogBox("lemmaErrNoLanguage") ;
+			return ;
+		}
+		
+		// If editing an existing definition, check if something changed
+		//
+		if (null != _editedLemma)
+		{
+			if ((sText.equals(_editedLemma.getLabel())) && (sLanguage.equals(_editedLemma.getLanguage())) && (sGrammar.equals(org.quadrifolium.shared.ontology.OntologyLexicon.getGrammarString(_editedLemma))))
+			{
+				closeEditingSession() ;
+				return ;
+			}
+		}
+		
+		// No need to Check if this language is already attributed to another lemma since synonyms are accepted
+		//
+		
+		// Send the save query to the server
+		//
+		_dispatcher.execute(new SaveLemmaAction(_supervisor.getSessionElements(), _supervisor.getConcept(), sLanguage, sText, sGrammar, _editedLemma), new SaveLemmaCallback()) ;
+	}
+	
+	/**
+	 * Callback function called when the server answers to a request to save a definition
+	 * 
+	 * @author Philippe
+	 *
+	 */
+	public class SaveLemmaCallback implements AsyncCallback<SaveLemmaResult>
+	{
+		public SaveLemmaCallback() {
+			super() ;
+		}
+
+		@Override
+		public void onFailure(Throwable cause) {
+			Log.error("Unhandled error", cause);
+			Log.info("error from GetDefinitionsTriplesForConceptCallback!!");
+		}
+
+		@Override
+		public void onSuccess(SaveLemmaResult value) 
+		{
+			// If the returned definition is null, it means that the server didn't succeed
+			//
+			if (null == value.getSavedLemma())
+			{
+				signalSaveProblem(value.getMessage(), value.getSentLanguage(), value.getSentText(), value.getUpdatedLemmaId()) ;
+				return ;
+			}
+			
+			// If things went well, just update the view
+			//
+			
+			
+			closeEditingSession() ;
+			
+			// display.feedDefinitionsTable(_aDefinitionsTriples, getInterfaceType()) ;
+		}
+	}
+	
+	protected void signalSaveProblem(final String sServerMessage, final String sSentLanguage, final String sSentText, final int iUpdatedLemmaId)
+	{
+		
 	}
 	
 	@Override

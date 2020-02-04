@@ -87,6 +87,11 @@ public interface QuadrifoliumConstants extends Constants
 	String definitionErrEmptyLabel() ;
 	String definitionErrNoLanguage() ;
 	String definitionErrLanguageExists() ;
+
+	String lemmaErrEmptyLabel() ;
+	String lemmaErrNoLanguage() ;
+	String lemmaErrNoGrammar() ;
+	String lemmaErrAlreadyExists() ;
 	
 	String tripleSubject() ;
 	String triplePredicate() ;

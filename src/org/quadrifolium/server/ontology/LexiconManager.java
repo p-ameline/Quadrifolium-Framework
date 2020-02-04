@@ -6,7 +6,7 @@ import java.sql.Statement;
 
 import org.quadrifolium.server.DBConnector;
 import org.quadrifolium.server.Logger;
-import org.quadrifolium.server.ontology_base.OntologyLexicon;
+import org.quadrifolium.shared.ontology.OntologyLexicon;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 /** 

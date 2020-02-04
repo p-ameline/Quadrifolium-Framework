@@ -1,0 +1,123 @@
+
+body { 
+        background: #fff;
+	color: #000;
+	font-family: 'Times New Roman', 'Lucida Sans Unicode', Verdana, sans-serif;
+        font-size: 14pt;
+	margin: 0;
+	padding: 0;
+        width:40em; 
+        margin-left:auto; 
+        margin-right:auto 
+}
+	
+p { 
+        margin-top:1em; 
+        margin-bottom:1em 
+}
+
+p::first-letter {
+	font-size: 1.5em;
+}
+        
+abstract { 
+        margin-left:3em; 
+        margin-right:3em; 
+        border-style:solid; 
+        border-color:black; 
+        border-width:thin; 
+        padding:1em 
+}
+        
+foottext { 
+        display:       block;
+
+        margin-top:    1em; 
+        margin-bottom: 1em; 
+        margin-left:   2em; 
+        margin-right:  2em 
+}
+
+footnote { 
+        margin-left:2em; 
+	text-indent:-2em
+}
+
+img.centered {
+        display: block;
+        margin-left: auto;
+        margin-right: auto
+}
+ 
+cartel { 
+	width:        90%;
+	display:      block; 
+        margin-left:  auto; 
+        margin-right: auto;
+        text-align:   center; 
+        font-size:    0.8em;
+        color:        #555555
+}
+       
+h1, h2     { 
+        text-align: center 
+}
+
+blockquote {
+	color: #02576B;
+	font-style: italic;
+	font-size: 100%;
+	line-height: 100%;
+	width: auto;
+	padding: 10px 10px 10px 30px;
+	margin: 15px 0;
+	background: #F3FBFF url(../images/quote.png) 0 0 no-repeat;
+	border: 1px solid #CEE0E4;
+}
+
+p.sidebox {
+	width: 300px; 
+	float: left; 
+	overflow: hidden;
+	padding: 5px 5px 5px 5px;
+	margin-right: 5px;
+	margin-bottom: 0px;
+	border: 1px solid #CEE0E4;
+}
+
+p.freesidebox { 
+	float: left; 
+	overflow: hidden;
+	padding: 5px 5px 5px 5px;
+	margin-right: 5px;
+	margin-bottom: 0px;
+	border: 1px solid #CEE0E4;
+}
+
+p.scrollsidebox {
+	width: 500px; 
+	float: left; 
+	overflow: scroll;
+	padding: 5px 5px 5px 5px;
+	margin-right: 5px;
+	margin-bottom: 0px;
+	border: 1px solid #CEE0E4;
+}
+
+a {
+	text-decoration: none;
+	border-bottom:1px solid #b4e7f8;
+	box-shadow:inset 0 -2px 0 #b4e7f8;
+	color:inherit;
+	-webkit-transition:background .15s cubic-bezier(.33,.66,.66,1);
+	transition:background .15s cubic-bezier(.33,.66,.66,1);
+}
+
+a:hover {
+	border-bottom:3px solid #12679b;
+	box-shadow:inset 0 -2px 0 #12679b;
+	color:inherit;
+	-webkit-transition:background .15s cubic-bezier(.33,.66,.66,1);
+	transition:background .15s cubic-bezier(.33,.66,.66,1);
+}
+

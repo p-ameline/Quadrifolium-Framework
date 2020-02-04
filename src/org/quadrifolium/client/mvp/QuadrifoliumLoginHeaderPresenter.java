@@ -183,7 +183,7 @@ public class QuadrifoliumLoginHeaderPresenter extends WidgetPresenter<Quadrifoli
       
       // Publish the successful login status to the Event Bus
       //
-			eventBus.fireEvent(new GoToLoginResponseEvent()) ;
+      eventBus.fireEvent(new GoToLoginResponseEvent()) ;
 			
 			// If client version and server version are not equal, warn the user that he should reload
 			//

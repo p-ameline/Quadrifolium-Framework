@@ -3,6 +3,10 @@ package org.quadrifolium.shared.ontology ;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.quadrifolium.shared.util.QuadrifoliumFcts;
+import org.quadrifolium.shared.util.QuadrifoliumFcts.Gender;
+import org.quadrifolium.shared.util.QuadrifoliumFcts.PartOfSpeech;
+
 import com.google.gwt.user.client.rpc.IsSerializable ;
 
 /**
@@ -144,8 +148,8 @@ public class LemmaWithInflections extends Lemma implements IsSerializable
 		if ((null == aInflections) || aInflections.isEmpty())
 			return ;
 		
-		for (Iterator<FlexWithTraits> it = aInflections.iterator() ; it.hasNext() ; )
-			_aInflections.add(new FlexWithTraits(it.next())) ;
+		for (FlexWithTraits inflection : aInflections)
+			_aInflections.add(new FlexWithTraits(inflection)) ;
 	}
 	public void addInflection(final FlexWithTraits inflection)
 	{
@@ -165,8 +169,8 @@ public class LemmaWithInflections extends Lemma implements IsSerializable
 		if ((null == aTraits) || aTraits.isEmpty())
 			return ;
 		
-		for (Iterator<TripleWithLabel> it = aTraits.iterator() ; it.hasNext() ; )
-			_aTraits.add(new TripleWithLabel(it.next())) ;
+		for (TripleWithLabel trait : aTraits)
+			_aTraits.add(new TripleWithLabel(trait)) ;
 	}
 	public void addTrait(final TripleWithLabel trait)
 	{
@@ -174,5 +178,71 @@ public class LemmaWithInflections extends Lemma implements IsSerializable
 			return ;
 		
 		_aTraits.add(new TripleWithLabel(trait)) ;
+	}
+	
+	/**
+	 * Get the part of speech of this lemma (from traits)
+	 * 
+	 * @return The part of sppech if found, <code>nullPoS</code> if not
+	 */
+	public PartOfSpeech getPartOfSpeech()
+	{
+		// Get the concept code for "part of speech"
+		//
+		String sConceptCode = QuadrifoliumFcts.getConceptCodeForPartOfSpeech() ;
+		if ((null == sConceptCode) || "".equals(sConceptCode))
+			return QuadrifoliumFcts.PartOfSpeech.nullPoS ;
+		
+		// Get the triple (if any) which predicate is the concept code for "part of speech"
+		//
+		for (TripleWithLabel trait : _aTraits)
+			if (sConceptCode.equals(trait.getPredicate()))
+				return QuadrifoliumFcts.getPartOfSpeechFromConceptCode(trait.getObject()) ;
+		
+		return QuadrifoliumFcts.PartOfSpeech.nullPoS ;
+	}
+	
+	/**
+	 * Get the grammatical gender of this lemma (from traits)
+	 * 
+	 * @return The grammatical gender if found, <code>nullGender</code> if not
+	 */
+	public Gender getGramaticalGender()
+	{
+		// Get the concept code for "grammatical gender"
+		//
+		String sConceptCode = QuadrifoliumFcts.getConceptCodeForGrammaticalGender() ;
+		if ((null == sConceptCode) || "".equals(sConceptCode))
+			return QuadrifoliumFcts.Gender.nullGender ;
+		
+		// Get the triple (if any) which predicate is the concept code for "grammatical gender"
+		//
+		for (TripleWithLabel trait : _aTraits)
+			if (sConceptCode.equals(trait.getPredicate()))
+				return QuadrifoliumFcts.getGrammaticalGenderFromConceptCode(trait.getObject()) ;
+		
+		return QuadrifoliumFcts.Gender.nullGender ;
+	}
+	
+	/**
+	 * Get the grammatical number of this lemma (from traits)
+	 * 
+	 * @return The grammatical number if found, <code>nullNumber</code> if not
+	 */
+	public QuadrifoliumFcts.Number getGramaticalNumber()
+	{
+		// Get the concept code for "grammatical number"
+		//
+		String sConceptCode = QuadrifoliumFcts.getConceptCodeForGrammaticalNumber() ;
+		if ((null == sConceptCode) || "".equals(sConceptCode))
+			return QuadrifoliumFcts.Number.nullNumber ;
+		
+		// Get the triple (if any) which predicate is the concept code for "grammatical number"
+		//
+		for (TripleWithLabel trait : _aTraits)
+			if (sConceptCode.equals(trait.getPredicate()))
+				return QuadrifoliumFcts.getGrammaticalNumberFromConceptCode(trait.getObject()) ;
+		
+		return QuadrifoliumFcts.Number.nullNumber ;
 	}
 }

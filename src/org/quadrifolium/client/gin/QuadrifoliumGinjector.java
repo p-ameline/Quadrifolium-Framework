@@ -6,12 +6,10 @@ import org.quadrifolium.client.global.QuadrifoliumSupervisor;
 import org.quadrifolium.client.mvp.QuadrifoliumAppPresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumCommandPanelPresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumLoginHeaderPresenter;
-import org.quadrifolium.client.mvp.QuadrifoliumLoginResponsePresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumPostLoginHeaderPresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumRegisterPresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumWelcomePagePresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumWelcomeTextPresenter;
-import org.quadrifolium.client.mvp.QuadrifoliumWorkshopPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumDefinitionsPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumLemmasPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumSemanticsPresenter;
@@ -34,14 +32,14 @@ public interface QuadrifoliumGinjector extends Ginjector
 	QuadrifoliumAppPresenter             getAppPresenter() ;
 
 	QuadrifoliumLoginHeaderPresenter     getLoginPresenter() ;	
-	QuadrifoliumLoginResponsePresenter   getLoginResponsePresenter() ;
+	// QuadrifoliumLoginResponsePresenter   getLoginResponsePresenter() ;
 	QuadrifoliumPostLoginHeaderPresenter getPostLoginHeaderPresenter() ;
 	
 	QuadrifoliumCommandPanelPresenter    getCommandPresenter() ;
 	
 	QuadrifoliumWelcomeTextPresenter     getWelcomeTextPresenter() ;
 	QuadrifoliumWelcomePagePresenter     getWelcomePagePresenter() ;
-	QuadrifoliumWorkshopPresenter        getWorkshopPresenter() ;
+	// QuadrifoliumWorkshopPresenter        getWorkshopPresenter() ;
 	
 	QuadrifoliumLemmasPresenter          getLemmasPresenter() ;
 	QuadrifoliumSemanticsPresenter       getSemanticsPresenter() ;

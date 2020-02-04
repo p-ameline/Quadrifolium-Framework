@@ -401,7 +401,7 @@ public class LemmaManager
 	 * 
 	 * @param sQConceptCode Code of the concept this lemma is a word for, can be <code>""</code>
 	 * 
-	 * @return Next available lemma code
+	 * @return Next available lemma code or <code>""</code> if something went wrong
 	 */
 	public String getNextLemmaCode(final String sQConceptCode)
 	{

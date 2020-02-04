@@ -2,7 +2,6 @@ package org.quadrifolium.client.event;
 
 import org.quadrifolium.client.mvp.QuadrifoliumWorkshopPresenterModel;
 import org.quadrifolium.client.mvp.QuadrifoliumWorkshopViewModel;
-import org.quadrifolium.client.mvp.WorkshopInterfaceModel;
 
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.ui.Panel;
@@ -17,8 +16,7 @@ public class GoToWorkshopLemmaEvent extends GwtEvent<GoToWorkshopLemmaEventHandl
 	
 	public static Type<GoToWorkshopLemmaEventHandler> TYPE = new Type<GoToWorkshopLemmaEventHandler>() ;
 	
-	private Panel                                                             _workspace ;
-	private QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> _parent ;
+	private GoToWorkshopComponentContent _content = new GoToWorkshopComponentContent() ;
 	
 	public static Type<GoToWorkshopLemmaEventHandler> getType() 
 	{
@@ -29,16 +27,20 @@ public class GoToWorkshopLemmaEvent extends GwtEvent<GoToWorkshopLemmaEventHandl
 	
 	public GoToWorkshopLemmaEvent(QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> parent, Panel workspace) 
 	{	
-		_workspace = workspace ;
-		_parent    = parent ;
+		_content.setWorkspace(workspace) ;
+		_content.setParent(parent) ;
+	}
+
+	public GoToWorkshopComponentContent getContent() {
+		return _content ;
 	}
 	
 	public Panel getWorkspace() {
-		return _workspace ;
+		return _content.getWorkspace() ;
 	}
 		
 	public QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> getParent() {
-		return _parent ;
+		return _content.getParent() ;
 	}
 	
 	@Override

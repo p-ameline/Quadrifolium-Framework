@@ -14,9 +14,7 @@ import org.quadrifolium.client.event.CommandLoadLanguagesEvent;
 import org.quadrifolium.client.event.GoToLoginResponseEvent;
 import org.quadrifolium.client.event.GoToLoginResponseEventHandler;
 import org.quadrifolium.client.event.GoToWorkshopCommandEvent;
-import org.quadrifolium.client.event.GoToWorkshopEvent;
 import org.quadrifolium.client.event.LoginPageEvent;
-import org.quadrifolium.client.event.LoginSuccessEvent;
 import org.quadrifolium.client.event.PostLoginHeaderEvent;
 import org.quadrifolium.client.event.RegisterSentEvent;
 import org.quadrifolium.client.event.SignalConceptChangedEvent;
@@ -199,7 +197,7 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 		}
 		display.getWorkspace().clear() ;
 		
-		// If LoginSuccessEvent is not handled yet, we have to defer fireEvent
+		// If WelcomeTextEvent is not handled yet, we have to defer fireEvent
 		//
 		if (false == eventBus.isEventHandled(WelcomeTextEvent.TYPE))
 		{
@@ -236,7 +234,7 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 		}
 		display.getWorkspace().clear() ;
 		
-		// If LoginSuccessEvent is not handled yet, we have to defer fireEvent
+		// If WelcomePageEvent is not handled yet, we have to defer fireEvent
 		//
 		if (false == eventBus.isEventHandled(WelcomePageEvent.TYPE))
 		{
@@ -259,6 +257,7 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 	/**
 	 * Load Quadrifolium true workshop interface
 	 */
+/*
 	public void goToWorkshopPage()
 	{
 		Log.info("Going to workshop page") ;
@@ -270,7 +269,7 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 			injector.getWorkshopPresenter() ;
 		}
 
-		// If LoginSuccessEvent is not handled yet, we have to defer fireEvent
+		// If GoToWorkshopEvent is not handled yet, we have to defer fireEvent
 		//
 		if (false == eventBus.isEventHandled(GoToWorkshopEvent.TYPE))
 		{
@@ -280,7 +279,7 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 				{
 	        public void execute() {
 	        	_pendingEvents = null ;
-	        	eventBus.fireEvent(new LoginSuccessEvent(display.getWorkspace())) ;
+	        	eventBus.fireEvent(new GoToWorkshopEvent(display.getWorkspace())) ;
 	        }
 	      };
 	      Scheduler.get().scheduleDeferred(_pendingEvents) ;
@@ -300,7 +299,8 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 		else
 			eventBus.fireEvent(new GoToWorkshopEvent(display.getWorkspace())) ;	
 	}
-		
+*/
+	
 	public void goToNewUserParamsPage(String sId)
 	{
 		if ((null == sId) || sId.equals(""))
@@ -364,7 +364,7 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 			_isRegisterPageCreated = true ;
 		}
 
-		// If LoginSuccessEvent is not handled yet, we have to defer fireEvent
+		// If RegisterSentEvent is not handled yet, we have to defer fireEvent
 		//
 		if (false == eventBus.isEventHandled(RegisterSentEvent.TYPE))
 		{

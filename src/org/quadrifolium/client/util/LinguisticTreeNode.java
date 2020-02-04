@@ -2,6 +2,7 @@ package org.quadrifolium.client.util;
 
 import java.util.ArrayList;
 
+import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
 import org.quadrifolium.shared.ontology.FlexWithTraits;
 import org.quadrifolium.shared.ontology.LemmaWithInflections;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
@@ -112,13 +113,13 @@ public class LinguisticTreeNode
 		_cell = cell; 
 	} 
 		
-	public void refresh() 
+	public void refresh(final INTERFACETYPE iInterfaceType) 
 	{ 
 		if (null != _parent) 
-			_parent.refresh() ; 
+			_parent.refresh(iInterfaceType) ; 
 
 		if (null != _cell)  
-			_cell.refresh() ; //refresh tree 
+			_cell.refresh(iInterfaceType) ; //refresh tree 
 	} 
 		
 	public String getName()
@@ -131,6 +132,20 @@ public class LinguisticTreeNode
 			return _inflection.getName() ;
 		if (null != _lemma)
 			return _lemma.getName() ;
+		
+		return "" ;
+	}
+	
+	public String getCode()
+	{
+		if (null != _name)
+			return "" ;
+		if (null != _trait)
+			return _trait.getObject() ;
+		if (null != _inflection)
+			return _inflection.getCode() ;
+		if (null != _lemma)
+			return _lemma.getCode() ;
 		
 		return "" ;
 	}

@@ -1,9 +1,14 @@
-package org.quadrifolium.server.ontology_base;
+package org.quadrifolium.shared.ontology;
+
+import org.quadrifolium.shared.ontology.OntologyLexicon;
 
 import junit.framework.TestCase ;
 
 public class OntologyLexiconTest extends TestCase
 {
+	/**
+	 * Check the extraction of a "display label" (i.e. a flexed form) from a "lexicon entry" and a grammatical number 
+	 */
   public void testDisplayLabel() 
   {
   	// Valid

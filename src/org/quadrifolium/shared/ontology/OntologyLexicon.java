@@ -1,7 +1,10 @@
-package org.quadrifolium.server.ontology_base ;
+package org.quadrifolium.shared.ontology ;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import org.quadrifolium.shared.util.QuadrifoliumFcts;
+import org.quadrifolium.shared.util.QuadrifoliumFcts.PartOfSpeech;
 
 /**
  * Lexicon.java
@@ -982,6 +985,67 @@ public class OntologyLexicon
 		}
 		
 		return "" ;	
+	}
+	
+	/**
+	 * Get the "lexicon like" grammar string (à la "FS" for a masculine singular noun) of a lemma
+	 * 
+	 * @return The grammar string (<code>""</code> if something went wrong)
+	 */
+	public static String getGrammarString(final LemmaWithInflections lemma) throws NullPointerException
+	{
+		if (null == lemma)
+			throw new NullPointerException() ;
+		
+		PartOfSpeech pos = lemma.getPartOfSpeech() ;
+		
+		if (PartOfSpeech.commonNoun == pos)
+			return getGrammarStringForNoun(lemma) ;
+		if (PartOfSpeech.adjective == pos)
+			return "ADJ" ;
+		if (PartOfSpeech.adverb == pos)
+			return "ADV" ;
+		
+		return "" ;
+	}
+	
+	/**
+	 * Get the "lexicon like" grammar string (à la "FS" for a masculine singular noun) of a lemma
+	 * 
+	 * @return The grammar string (<code>""</code> if something went wrong)
+	 */
+	public static String getGrammarStringForNoun(final LemmaWithInflections lemma) throws NullPointerException
+	{
+		if (null == lemma)
+			throw new NullPointerException() ;
+		
+		String sGrammarString = "" ;
+		
+		// Start from grammatical gender
+		//
+		QuadrifoliumFcts.Gender grammaticalGender = lemma.getGramaticalGender() ;
+		
+		if      (QuadrifoliumFcts.Gender.feminine == grammaticalGender)
+			sGrammarString += "F" ;
+		else if (QuadrifoliumFcts.Gender.masculine == grammaticalGender)
+			sGrammarString += "M" ;
+		else if (QuadrifoliumFcts.Gender.neuter == grammaticalGender)
+			sGrammarString += "N" ;
+		else
+			return "" ;
+		
+		// then, add grammatical number
+		//
+		QuadrifoliumFcts.Number grammaticalNumber = lemma.getGramaticalNumber() ;
+		
+		if      (QuadrifoliumFcts.Number.singular == grammaticalNumber)
+			sGrammarString += "S" ;
+		else if (QuadrifoliumFcts.Number.plural == grammaticalNumber)
+			sGrammarString += "P" ;
+		else
+			return "" ;
+		
+		return sGrammarString ;
 	}
 	
 	/**

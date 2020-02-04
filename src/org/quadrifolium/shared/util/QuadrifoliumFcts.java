@@ -279,6 +279,36 @@ public class QuadrifoliumFcts
 	}
 	
 	/**
+	 * Get the Part of speech category from a concept code 
+	 */
+	public static PartOfSpeech getPartOfSpeechFromConceptCode(final String sCode) throws NullPointerException
+	{
+		if (null == sCode)
+			throw new NullPointerException() ;
+		
+		if ("0000001".equals(sCode))
+			return PartOfSpeech.commonNoun ;
+		if ("0000008".equals(sCode))
+			return PartOfSpeech.adjective ;
+		if ("000000K".equals(sCode))
+			return PartOfSpeech.verb ;
+		if ("000000P".equals(sCode))
+			return PartOfSpeech.pronoun ;
+		if ("000000M".equals(sCode))
+			return PartOfSpeech.adverb ;
+		if ("000000L".equals(sCode))
+			return PartOfSpeech.determiner ;
+		if ("000000N".equals(sCode))
+			return PartOfSpeech.conjonction ;
+		if ("000000O".equals(sCode))
+			return PartOfSpeech.preposition ;
+		if ("000000T".equals(sCode))
+			return PartOfSpeech.interjection ;
+		
+		return PartOfSpeech.nullPoS ;
+	}
+	
+	/**
 	 * Get the concept code for the Part of speech concept 
 	 */
 	public static String getConceptCodeForPartOfSpeech() {
@@ -316,6 +346,36 @@ public class QuadrifoliumFcts
 	}
 	
 	/**
+	 * Get the grammatical number from a concept code 
+	 */
+	public static Number getGrammaticalNumberFromConceptCode(final String sCode) throws NullPointerException
+	{
+		if (null == sCode)
+			throw new NullPointerException() ;
+		
+		if ("0000006".equals(sCode))
+			return Number.singular ;
+		if ("0000007".equals(sCode))
+			return Number.plural ;
+		if ("000000A".equals(sCode))
+			return Number.singulative ;
+		if ("000000B".equals(sCode))
+			return Number.dual ;
+		if ("000000C".equals(sCode))
+			return Number.trial ;
+		if ("000000D".equals(sCode))
+			return Number.quadral ;
+		if ("000000E".equals(sCode))
+			return Number.paucal ;
+		if ("000000F".equals(sCode))
+			return Number.collective ;
+		if ("000000G".equals(sCode))
+			return Number.partitive ;
+
+		return Number.nullNumber ;
+	}
+	
+	/**
 	 * Get the concept code for the grammatical number concept 
 	 */
 	public static String getConceptCodeForGrammaticalNumber() {
@@ -338,6 +398,24 @@ public class QuadrifoliumFcts
 			default :
 				return "" ;
 		}
+	}
+	
+	/**
+	 * Get the grammatical gender from a concept code 
+	 */
+	public static Gender getGrammaticalGenderFromConceptCode(final String sCode)
+	{
+		if (null == sCode)
+			throw new NullPointerException() ;
+		
+		if ("0000004".equals(sCode))
+			return Gender.feminine ;
+		if ("0000003".equals(sCode))
+			return Gender.masculine ;
+		if ("0000005".equals(sCode))
+			return Gender.neuter ;
+		
+		return Gender.nullGender ;
 	}
 	
 	/**

@@ -2,21 +2,13 @@ package org.quadrifolium.client.mvp_components;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 import net.customware.gwt.presenter.client.EventBus;
-import net.customware.gwt.presenter.client.widget.WidgetDisplay;
-import net.customware.gwt.presenter.client.widget.WidgetPresenter;
 
 import java.util.ArrayList;
 
 import org.quadrifolium.client.event.GoToWorkshopDefinitionEvent;
 import org.quadrifolium.client.event.GoToWorkshopDefinitionEventHandler;
-import org.quadrifolium.client.event.UserChangedEvent;
-import org.quadrifolium.client.event.UserChangedEventHandler;
-import org.quadrifolium.client.event.WorkshopConceptChangedEvent;
-import org.quadrifolium.client.event.WorkshopConceptChangedEventHandler;
 import org.quadrifolium.client.global.QuadrifoliumSupervisor;
-import org.quadrifolium.client.mvp.QuadrifoliumWorkshopPresenterModel;
-import org.quadrifolium.client.mvp.QuadrifoliumWorkshopViewModel;
-import org.quadrifolium.client.mvp_components.QuadrifoliumDefinitionsView.INTERFACETYPE;
+import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
 import org.quadrifolium.shared.ontology.LanguageTag;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
 import org.quadrifolium.shared.rpc4ontology.GetDefinitionsTriplesAction;
@@ -25,52 +17,31 @@ import org.quadrifolium.shared.rpc4ontology.SaveDefinitionAction;
 import org.quadrifolium.shared.rpc4ontology.SaveDefinitionResult;
 
 import com.allen_sauer.gwt.log.client.Log;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.inject.Inject;
 
-public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<QuadrifoliumDefinitionsPresenter.Display> 
+public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBasePresenter<QuadrifoliumDefinitionsPresenter.Display> 
 {	
-	public interface Display extends WidgetDisplay 
+	public interface Display extends QuadrifoliumComponentInterface 
 	{			
 		public void             feedDefinitionsTable(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;
 
-		public void                  updateView(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;
-		public HasClickHandlers      getEditButtonKeyDown() ;
-		public HasClickHandlers      getAddButtonKeyDown() ;
-		public ArrayList<PushButton> getButtonsArray() ;
+		public void             updateView(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;
 		
-		public void             openAddPanel() ;
-		public void             closeAddPanel() ;
-		public HasClickHandlers getAddOkButtonKeyDown() ;
-		public HasClickHandlers getAddCancelButtonKeyDown() ;
 		public void             initializeLanguagesList(final ArrayList<LanguageTag> _LanguageTags) ;
 		
 		public String           getEditedLanguage() ;
 		public void             setEditedLanguage(final String sLanguageTag) ;
 		public String           getEditedText() ;
 		public void             setEditedText(final String sText) ;
-		
-		public void             openErrDialogBox(final String sErrMsgId) ;
-		public void             closeErrDialogBox() ;
-		public HasClickHandlers getErrDialogBoxOkButton() ;
 	}
 
-	private final DispatchAsync              _dispatcher ;
-	private final QuadrifoliumSupervisor     _supervisor ;
-	
-	protected     QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> _parent ;
-	
 	protected     ArrayList<TripleWithLabel> _aDefinitionsTriples ;
 	protected     TripleWithLabel            _editedDefinition ;
-	
-	protected     boolean _bEditMode ;
-	protected     boolean _bAdding ;
 	
 	@Inject
 	public QuadrifoliumDefinitionsPresenter(final Display display, 
@@ -78,15 +49,7 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 			                                    final DispatchAsync dispatcher,
 			                                    final QuadrifoliumSupervisor supervisor) 
 	{
-		super(display, eventBus) ;
-		
-		_dispatcher = dispatcher ;
-		_supervisor = supervisor ;
-		
-		_parent     = null ;
-		
-		_bEditMode  = false ;
-		_bAdding    = false ;
+		super(display, eventBus, dispatcher, supervisor) ;
 		
 		_aDefinitionsTriples = null ;
 		_editedDefinition    = null ;
@@ -101,149 +64,21 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 	protected void onBind() 
 	{
 		Log.debug("Entering QuadrifoliumDefinitionsPresenter::onBind()") ;
+		super.onBind() ;
 		
 		// Message received when it is time to open the workshop
 		//
 		eventBus.addHandler(GoToWorkshopDefinitionEvent.TYPE, new GoToWorkshopDefinitionEventHandler() {
-			public void onGoToWorkshopDefinition(GoToWorkshopDefinitionEvent event)
-			{
-				// If this presenter is already connected, discard this message
-				//
-				if (null != _parent)
-					return ;
-					
-				// Connect this presenter to the workshop
-				//
-				_parent = event.getParent() ;
-					
-				Log.debug("Loading Workshop's definitions presenter Page") ;
-				initialize(event.getWorkspace()) ;
+			public void onGoToWorkshopDefinition(GoToWorkshopDefinitionEvent event) {
+				connectToWorkshop(event.getContent()) ;
 			}
 		});
-		
-		// Message received when the concept at work changed
-		//
-		eventBus.addHandler(WorkshopConceptChangedEvent.TYPE, new WorkshopConceptChangedEventHandler() {
-			public void onWorkshopConceptChanged(WorkshopConceptChangedEvent event)
-			{
-				// If the "concept changed" targets another workshop, discard it
-				if (event.getTargetWorkshop() != _parent)
-					return ;
-					
-				Log.debug("Definitions presenter handling concept change") ;
-				UpdateDefinitions() ;
-			}
-		});
-		
-		// Message received when the user changed
-		//
-		eventBus.addHandler(UserChangedEvent.TYPE, new UserChangedEventHandler() {
-			public void onUserChanged(UserChangedEvent event)
-			{
-				adaptToUserChange() ;
-			}
-		});
-		
-		/**
-		 * Get key down from the button that switches from edit more to read-only mode 
-		 */
-		display.getEditButtonKeyDown().addClickHandler(new ClickHandler() {
-			public void onClick(final ClickEvent event)
-			{
-				switchEditMode() ;
-			}
-		});
-		
-		/**
-		 * Get key down from the "add definition" button 
-		 */
-		display.getAddButtonKeyDown().addClickHandler(new ClickHandler() {
-			public void onClick(final ClickEvent event)
-			{
-				if (_bAdding)
-					return ;
-				
-				addNewDefinition() ;
-			}
-		});
-		
-		/**
-		 * Get key down from the OK button from the "add definition" panel 
-		 */
-		display.getAddOkButtonKeyDown().addClickHandler(new ClickHandler() {
-			public void onClick(final ClickEvent event)
-			{
-				if (false == _bAdding)
-					return ;
-				
-				saveEditedDefinition() ;
-			}
-		});
-		
-		/**
-		 * Get key down from the OK button from the error box
-		 */
-		display.getErrDialogBoxOkButton().addClickHandler(new ClickHandler() {
-			public void onClick(final ClickEvent event)
-			{
-				display.closeErrDialogBox() ;
-			}
-		});
-		
-		scheduleRefresh() ;
 	}
 
 	/**
-	 * Create a timer to ensure that the definitions list remains up to date
+	 * Update definitions from server
 	 */
-	protected void scheduleRefresh()
-	{
-		// Create a new timer that updates the definitions list
-		//
-		Timer t = new Timer() {
-	    public void run() {
-	    	UpdateDefinitions() ;
-	    }
-	  };
-	  
-	  // Schedule the timer to run once in 10 seconds.
-	  //
-	  t.schedule(10000) ;
-	}
-  
-	
-	/**
-	 * Get current interface mode
-	 */
-	protected INTERFACETYPE getInterfaceType() 
-	{
-		INTERFACETYPE iInterfaceType = INTERFACETYPE.readOnlyMode ;
-		if (_supervisor.isUserAnEditor())
-		{
-			if (_bEditMode)
-				iInterfaceType = INTERFACETYPE.editMode ;
-			else
-				iInterfaceType = INTERFACETYPE.editableMode ;
-		}
-		return iInterfaceType ;
-	}
-	
-	/**
-	 * Install view inside workspace
-	 */
-	protected void initialize(Panel workspace)
-	{
-		if (null == workspace)
-			return ;
-		
-		workspace.clear() ;
-		workspace.add(display.asWidget()) ;
-		
-		if (_supervisor.isUserAnEditor())
-			updateView(INTERFACETYPE.editableMode) ;
-	}
-	
-	protected void UpdateDefinitions()
+	protected void UpdateContent()
 	{
 		// Since the process is asynchronous, we better clear the display first so definitions don't remain out-of-date for some times   
 		//
@@ -257,6 +92,13 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 		// The query language is set to "" meaning that all languages are to be displayed
 		//
 		_dispatcher.execute(new GetDefinitionsTriplesAction(_supervisor.getUserId(), "", sConcept), new GetDefinitionsTriplesForConceptCallback()) ;
+	}
+	
+	/**
+	 * Refresh view
+	 */
+	protected void UpdateDisplay(final INTERFACETYPE iInterfaceType) {
+		display.updateView(_aDefinitionsTriples, iInterfaceType) ;
 	}
 	
 	/**
@@ -291,35 +133,11 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 			refreshDefinitionsList() ;
 		}
 	}
-	
-	/**
-	 * Set what is needed when user changed (or there is no longer a logged user)
-	 */
-	protected void adaptToUserChange()
-	{
-		// Constant is that we are never editing
-		//
-		_bEditMode = false ;
 		
-		updateView() ;
-	}
-	
-	/**
-	 * Switch from edit mode to read-only mode or vice-versa
-	 */
-	protected void switchEditMode()
-	{
-		_bEditMode = !_bEditMode ;
-		
-		// Change view state
-		//
-		updateView() ;
-	}
-	
 	/**
 	 * Open the "add definition" panel
 	 */
-	protected void addNewDefinition() 
+	protected void addNewElement() 
 	{
 		_bEditMode        = true ;
 		_editedDefinition = null ;
@@ -347,7 +165,7 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 	/**
 	 * Save currently edited definition
 	 */
-	protected void saveEditedDefinition()
+	protected void saveEditedElement()
 	{
 		String sText = display.getEditedText() ;
 		if ("".equals(sText))
@@ -530,35 +348,6 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 		
 		return null ;
 	}
-
-	/**
-	 * Refresh the whole view
-	 * 
-	 * @param iInterfaceType Forced interface type, or computed one if <code>undefined</code>
-	 */
-	protected void updateView(final INTERFACETYPE iInterfaceType)
-	{
-		// Find the interface type if undefined
-		//
-		INTERFACETYPE iProperInterfaceType = iInterfaceType ;
-		if (INTERFACETYPE.undefined == iInterfaceType)
-			iProperInterfaceType = getInterfaceType() ;
-		
-		// Update view
-		//
-		display.updateView(_aDefinitionsTriples, iProperInterfaceType) ;
-		
-		// Connect buttons
-		//
-		connectButtonsClickHandlers() ;
-	}
-	
-	/**
-	 * Refresh the whole view
-	 */
-	protected void updateView() {
-		updateView(INTERFACETYPE.undefined) ;
-	}
 	
 	/**
 	 * Ask the display to refresh the definition list and, if they exist, connect action buttons
@@ -573,10 +362,6 @@ public class QuadrifoliumDefinitionsPresenter extends WidgetPresenter<Quadrifoli
 	protected void signalSaveProblem(final String sServerMessage, final String sSentLanguage, final String sSentText, final int iUpdatedTripleId)
 	{
 		
-	}
-	
-	public void setParent(QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> parent) {
-		_parent = parent ;
 	}
 	
 	@Override
