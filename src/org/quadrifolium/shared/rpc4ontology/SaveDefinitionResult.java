@@ -31,6 +31,7 @@ public class SaveDefinitionResult implements Result
 		_sMessage         = "" ;
 		
 		_iUpdatedTripleId = -1 ;
+		
 		_sConceptCode     = "" ;
 		_sSentLanguage    = "" ;
 		_sSentText        = "" ;

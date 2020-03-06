@@ -279,6 +279,38 @@ public class QuadrifoliumFcts
 	}
 	
 	/**
+	 * Get the concept code for a Part of speech category
+	 */
+	public static String getPartOfSpeechAsText(final PartOfSpeech iPoS)
+	{
+		switch(iPoS)
+		{
+			case commonNoun :
+				return "commonNoun" ;
+			case verb : 
+				return "verb" ;
+			case adjective :
+				return "adjective" ;
+			case determiner :
+				return "determiner" ;
+			case adverb :
+				return "adverb" ;
+			case conjonction :
+				return "conjonction" ;
+			case preposition :
+				return "preposition" ;
+			case pronoun :
+				return "pronoun" ;
+			case interjection :
+				return "interjection" ;
+			case nullPoS :
+				return "nullPoS" ;
+			default :
+				return "" ;
+		}
+	}
+	
+	/**
 	 * Get the Part of speech category from a concept code 
 	 */
 	public static PartOfSpeech getPartOfSpeechFromConceptCode(final String sCode) throws NullPointerException

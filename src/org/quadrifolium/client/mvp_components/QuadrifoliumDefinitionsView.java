@@ -8,11 +8,13 @@ import org.quadrifolium.client.ui.QuadrifoliumResources;
 import org.quadrifolium.shared.ontology.LanguageTag;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -25,6 +27,7 @@ public class QuadrifoliumDefinitionsView extends QuadrifoliumComponentBaseFlowDi
 	
 	// Definitions display area
 	//
+	protected SimplePanel _definitionsPanel ;
 	private   FlexTable   _definitionsTable ;
 	
 	public QuadrifoliumDefinitionsView() 
@@ -38,6 +41,7 @@ public class QuadrifoliumDefinitionsView extends QuadrifoliumComponentBaseFlowDi
 		initCommandPanel() ;
 		initAddingPanel() ;
 		initDefinitionsPanel() ;
+		
 		initErrorDialog() ;
 	}
 	
@@ -48,7 +52,11 @@ public class QuadrifoliumDefinitionsView extends QuadrifoliumComponentBaseFlowDi
 	{
 		_definitionsTable = new FlexTable() ;
 		
-    add(_definitionsTable) ;
+		_definitionsPanel = new SimplePanel() ;
+		_definitionsPanel.addStyleName("lemmasCellTreePanel") ;
+		_definitionsPanel.add(_definitionsTable) ;
+		
+    add(_definitionsPanel) ;
 	}
 	
 	/**
@@ -73,7 +81,7 @@ public class QuadrifoliumDefinitionsView extends QuadrifoliumComponentBaseFlowDi
 	protected void initAddingPanel()
 	{
 		_baseDisplayModel.createAddPanel() ;
-		_baseDisplayModel.getAddPanel().addStyleName("addDefinitionPanel") ;
+		_baseDisplayModel.getAddPanel().addStyleName("addElementPanel") ;
 		
 		_baseDisplayModel.getAddPanel().setHeight("0px") ;
 		
@@ -101,6 +109,8 @@ public class QuadrifoliumDefinitionsView extends QuadrifoliumComponentBaseFlowDi
 	{
 		_baseDisplayModel.getCommandPanel().clear() ;
 		showCaption() ;
+		
+		setDefinitionsPanelPosition() ;
 		
 		feedDefinitionsTable(aTriples, iInterfaceType) ;
 		
@@ -170,6 +180,8 @@ public class QuadrifoliumDefinitionsView extends QuadrifoliumComponentBaseFlowDi
 	{
 		_baseDisplayModel.getAddPanel().setHeight("5em") ;
 		
+		setDefinitionsPanelPosition() ;
+		
 		_languageSelection.setVisible(true) ;
 		_AddedLabel.setVisible(true) ;
 		
@@ -186,6 +198,15 @@ public class QuadrifoliumDefinitionsView extends QuadrifoliumComponentBaseFlowDi
 		_baseDisplayModel.getAddCancelButton().setVisible(false) ;
 		
 		_baseDisplayModel.getAddPanel().setHeight("0em") ;
+		
+		setDefinitionsPanelPosition() ;
+	}
+	
+	/**
+	 * Set the top position of the tree view panel so that it remains under the edit panel
+	 */
+	protected void setDefinitionsPanelPosition() {
+		_definitionsPanel.getElement().getStyle().setTop(_baseDisplayModel.getDisplayPanelPosition(), Unit.PX) ;
 	}
 	
 	@Override

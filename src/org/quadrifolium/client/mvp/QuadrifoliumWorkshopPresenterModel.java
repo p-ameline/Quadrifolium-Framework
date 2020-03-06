@@ -14,6 +14,8 @@ import org.quadrifolium.client.mvp_components.QuadrifoliumLemmasPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumLemmasView;
 import org.quadrifolium.client.mvp_components.QuadrifoliumSemanticsPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumSemanticsView;
+import org.quadrifolium.client.mvp_components.QuadrifoliumStemmaPresenter;
+import org.quadrifolium.client.mvp_components.QuadrifoliumStemmaView;
 import org.quadrifolium.shared.ontology.Flex;
 import org.quadrifolium.shared.rpc_special.LexiqueTo4foliumAction;
 import org.quadrifolium.shared.rpc_special.LexiqueTo4foliumResult;
@@ -27,6 +29,7 @@ public abstract class QuadrifoliumWorkshopPresenterModel<D extends WorkshopInter
 	protected QuadrifoliumLemmasPresenter      _lemmasPresenter ;
 	protected QuadrifoliumSemanticsPresenter   _semanticsPresenter ;
 	protected QuadrifoliumDefinitionsPresenter _definitionsPresenter ;
+	protected QuadrifoliumStemmaPresenter      _stemmaPresenter ;
 	
 	@Inject
 	public QuadrifoliumWorkshopPresenterModel(final D                      display, 
@@ -40,6 +43,7 @@ public abstract class QuadrifoliumWorkshopPresenterModel<D extends WorkshopInter
 		_lemmasPresenter      = null ;
 		_semanticsPresenter   = null ;
 		_definitionsPresenter = null ;
+		_stemmaPresenter      = null ;
 	}
 	
 	/**
@@ -79,13 +83,19 @@ public abstract class QuadrifoliumWorkshopPresenterModel<D extends WorkshopInter
 		_semanticsPresenter.setParent((QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel>) this) ;
 		display.addSemanticsView(semanticsView) ;
 		
-		
 		// Create definitions workshop
 		//
 		QuadrifoliumDefinitionsView definitionsView = new QuadrifoliumDefinitionsView() ;
 		_definitionsPresenter = new QuadrifoliumDefinitionsPresenter(definitionsView, eventBus, _dispatcher, _supervisor) ;
 		_definitionsPresenter.setParent((QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel>) this) ;
 		display.addDefinitionsView(definitionsView) ;
+		
+		// Create stemma workshop
+		//
+		QuadrifoliumStemmaView stemmaView = new QuadrifoliumStemmaView() ;
+		_stemmaPresenter = new QuadrifoliumStemmaPresenter(stemmaView, eventBus, _dispatcher, _supervisor) ;
+		_stemmaPresenter.setParent((QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel>) this) ;
+		display.addStemmaView(stemmaView) ;
 	}
 	
 	/**

@@ -46,15 +46,15 @@ table td, select {
 	// margin-top: 0.5em;
 }
 
-.workspace{
+.workspace {
+	display:   block;
 	font-size: 1em;
   color:     black;
-  left:      0px;
   width:     100%;
   height:    40em;
 }
 
-.footer{
+.footer {
   color:      black ;
   font-size:  1em;
   font-style: italic;
@@ -129,8 +129,20 @@ table td, select {
 	background:       #00B050;
 }
 
+.lemmasCellTreePanel {
+	overflow:  auto;
+	position:  absolute;
+	top:       2em;
+	bottom:    0;
+	zoom:      1;
+	width:     100%;
+}
+
 .lemmasCellTree {
-	overflow: scroll;
+	display:   block;
+  width:     100%;
+  height:    auto;
+  overflow:  visible;
 }
 
 /** --------- Workshop, semantics --------- */
@@ -151,8 +163,6 @@ table td, select {
   padding:          3px;
 }
 
-
-
 /** --------- Workshop, definitions --------- */
 
 .definitionsCommand {
@@ -164,12 +174,16 @@ table td, select {
   border:           3px;
   padding:          3px;
 }
+ 
+.addElementPanel {
+	display:     inline-block;
+	height:      auto;
+	border:      solid 1px black
+}
 
 .addDefinitionLang {
-	display:          inline-block;
-	width:            100px;
-	height:           1.5em;
-	right:            2px;
+	display:     block;
+	height:      1.5em;
 }
 
 .addDefinitionText {
@@ -180,10 +194,28 @@ table td, select {
 }
 
 .addGrammar {
-	display:          inline-block;
-	width:            10em;
-	height:           3em;
-	right:            2px;
+  display:     block;
+	height:      1.5em;
+}
+
+.addLabel {
+  display:     inline-block;
+  float:       left;
+  width:       6em;
+  font-size:   0.8em;
+  font-weight: normal;
+  color:       #3D1429;
+  text-align:  left;
+  right:       2px;
+}
+
+.addTextBox {
+  display:     block;
+  width:       25em;
+  font-size:   1em;
+  font-weight: normal;
+  color:       #3D1429;
+  text-align:  left;
 }
 
 /** --------- Welcome --------- */

@@ -17,6 +17,7 @@ import org.quadrifolium.server.handler.QuadrifoliumActionHandler;
 import org.quadrifolium.server.model.SessionsManager;
 import org.quadrifolium.server.ontology.FreeTextManager;
 import org.quadrifolium.server.ontology.TripleManager;
+import org.quadrifolium.server.util.QuadrifoliumServerFcts;
 import org.quadrifolium.shared.ontology.FreeText;
 import org.quadrifolium.shared.ontology.Triple;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
@@ -54,10 +55,12 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 
 	@Override
 	public SaveDefinitionResult execute(final SaveDefinitionAction action, final ExecutionContext context) throws ActionException 
-  {	
+  {
+		String sFctName = "SaveDefinitionTripleHandler.execute" ;
+		
 		if (null == action)
 		{
-			Logger.trace("SaveDefinitionTripleHandler.execute: Error, no input information.", -1, Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": Error, no input information.", -1, Logger.TraceLevel.ERROR) ;
 			return new SaveDefinitionResult("Error, no input information.", null, "", "", "", -1) ;
 		}
 		
@@ -74,7 +77,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 			_sessionElements = action.getSessionElements() ;
 			if (null == _sessionElements)
 			{
-				Logger.trace("SaveDefinitionTripleHandler.execute: Error, no session elements.", -1, Logger.TraceLevel.ERROR) ;
+				Logger.trace(sFctName + ": Error, no session elements.", -1, Logger.TraceLevel.ERROR) ;
 				return new SaveDefinitionResult("No session elements.", null, sConceptCode, sLanguageTag, sText, -1) ;
 			}
 			
@@ -84,7 +87,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
    		boolean bValidSession = sessionManager.isValidToken(_sessionElements.getPersonId(), _sessionElements.getToken()) ;
    		if (false == bValidSession)
    		{
-   			Logger.trace("SaveDefinitionTripleHandler.execute: Error, invalid session elements.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+   			Logger.trace(sFctName + ": Error, invalid session elements.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
    			return new SaveDefinitionResult("Invalid session elements.", null, sConceptCode, sLanguageTag, sText, -1) ;
    		}
 
@@ -96,7 +99,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
    		if (null != updatedTriple)
    			iUpdatedTripleId = updatedTriple.getId() ;
    		
-   		String sTraceText = "SaveDefinitionTripleHandler.execute: For concept " + sConceptCode ;
+   		String sTraceText = sFctName + ": For concept " + sConceptCode ;
    		if (-1 == iUpdatedTripleId)
    			sTraceText += " add definition " ;
    		else
@@ -109,13 +112,13 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
    		//
    		if ((null == sConceptCode) || "".equals(sConceptCode))
    		{
-   			Logger.trace("SaveDefinitionTripleHandler.execute: Error, no concept code.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+   			Logger.trace(sFctName + ": Error, no concept code.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
    			return new SaveDefinitionResult("Error, no concept code.", null, sConceptCode, sLanguageTag, sText, iUpdatedTripleId) ;
    		}
    		
    		if ((null != updatedTriple) && (false == sConceptCode.equals(updatedTriple.getSubject())))
    		{
-   			Logger.trace("SaveDefinitionTripleHandler.execute: Error, wrong concept code for definition to update.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+   			Logger.trace(sFctName + ": Error, wrong concept code for definition to update.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
    			return new SaveDefinitionResult("Error, wrong concept code for definition to update.", null, sConceptCode, sLanguageTag, sText, iUpdatedTripleId) ;
    		}
    		
@@ -123,7 +126,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
    		//
    		if ((null == sLanguageTag) || ("".equals(sLanguageTag)) || (null == sText) || ("".equals(sText)))
    		{
-   			Logger.trace("SaveDefinitionTripleHandler.execute: Error, empty language and/or text.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+   			Logger.trace(sFctName + ": Error, empty language and/or text.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
    			return new SaveDefinitionResult("Error, empty language and/or text.", null, sConceptCode, sLanguageTag, sText, iUpdatedTripleId) ;
    		}
    		
@@ -132,7 +135,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
    		String sVerifiedCode = QuadrifoliumFcts.getConceptCode(sConceptCode) ;
    		if (false == sVerifiedCode.equals(sConceptCode))
    		{
-   			Logger.trace("SaveDefinitionTripleHandler.execute: Error, wrong concept code.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+   			Logger.trace(sFctName + ": Error, wrong concept code.", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
    			return new SaveDefinitionResult("Error, wrong concept code.", null, sConceptCode, sLanguageTag, sText, iUpdatedTripleId) ;
    		}
    		
@@ -153,7 +156,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 		}
 		catch (Exception cause) 
 		{
-			Logger.trace("SaveDefinitionTripleHandler.execute: exception ; cause: " + cause.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+			Logger.trace(sFctName + ": exception ; cause: " + cause.getMessage(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
    
 			throw new ActionException(cause);
 		}
@@ -167,12 +170,14 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 	/**
 	 * Update an existing definition
 	 */
-	protected void updateDefinition(TripleWithLabel updatedTriple, final String sLanguageTag, final String sText, DBConnector dbConnector, SaveDefinitionResult saveDefinitionstResult)
+	protected void updateDefinition(TripleWithLabel updatedTriple, final String sLanguageTag, final String sText, DBConnector dbConnector, SaveDefinitionResult saveDefinitionstResult) throws NullPointerException
 	{
 		// We should never enter there
 		//
 		if (null == saveDefinitionstResult)
-			return ;
+			throw new NullPointerException() ;
+		
+		String sFctName = "SaveDefinitionTripleHandler.updateDefinition" ;
 		
 		if ((null == dbConnector) || (null == updatedTriple) || (null == sLanguageTag) || "".equals(sLanguageTag) || (null == sText) || "".equals(sText))
 		{
@@ -184,7 +189,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 		//
 		if (sLanguageTag.equals(updatedTriple.getLanguage()) && sText.equals(updatedTriple.getSubjectLabel()))
 		{
-			Logger.trace("SaveDefinitionTripleHandler.updateDefinition: Looks like there is nothing to do.", _sessionElements.getPersonId(), Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": Looks like there is nothing to do.", _sessionElements.getPersonId(), Logger.TraceLevel.WARNING) ;
 			saveDefinitionstResult.setMessage("Looks like there is nothing to do.") ;
 			return ;
 		}
@@ -193,7 +198,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 		//
 		if (false == isOkToInject(updatedTriple.getObject(), sLanguageTag, sText, dbConnector))
 		{
-			Logger.trace("SaveDefinitionTripleHandler.updateDefinition: Such a definition already exists.", _sessionElements.getPersonId(), Logger.TraceLevel.WARNING) ;
+			Logger.trace(sFctName + ": Such a definition already exists.", _sessionElements.getPersonId(), Logger.TraceLevel.WARNING) ;
 			saveDefinitionstResult.setMessage("Such a definition already exists.") ;
 			return ;
 		}
@@ -214,7 +219,7 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 	}
 	
 	/**
-	 * Record an existing definition
+	 * Record an new definition
 	 */
 	protected void saveDefinition(final String sConceptCode, final String sLanguageTag, final String sText, DBConnector dbConnector, SaveDefinitionResult saveDefinitionstResult)
 	{
@@ -240,20 +245,16 @@ public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveD
 		
 		// It is now possible to add in database
 		//
-		FreeTextManager freeTextManager = new FreeTextManager(_sessionElements, dbConnector) ;
-		
-		// First, add the text and get its ID
-		//
-		String sFreeTextCode = freeTextManager.insertData(sConceptCode, sText, sLanguageTag) ;
+		String sFreeTextCode = QuadrifoliumServerFcts.recordFreeText(dbConnector, sConceptCode, sText, sLanguageTag, _sessionElements) ;
 		if ((null == sFreeTextCode) || "".equals(sFreeTextCode))
 			saveDefinitionstResult.setMessage("Internal server error.") ;
 		
 		// Then add the triple
 		//
-		TripleManager tripleManager = new TripleManager(_sessionElements, dbConnector) ;
-		
 		Triple tripleToInsert = new Triple(-1, sConceptCode, QuadrifoliumFcts.getConceptCodeForDefinition(), sFreeTextCode) ;
-		if (false == tripleManager.insertData(tripleToInsert))
+		
+		int iTripleId = QuadrifoliumServerFcts.recordTriple(dbConnector, tripleToInsert, _sessionElements) ;
+		if (-1 == iTripleId)
 		{
 			saveDefinitionstResult.setMessage("Internal server error.") ;
 			return ;

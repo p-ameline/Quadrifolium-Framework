@@ -10,33 +10,27 @@ import net.customware.gwt.dispatch.shared.Action;
  */
 public class SaveLemmaAction implements Action<SaveLemmaResult> 
 {
-  private SessionElements _sessionElements ;
+  private SessionElements  _sessionElements ;
   
-  /** Concept the lemma to be created/edited belongs to */
-  private String _sConceptCode ;
-  
-  private String _sNewLanguage ;
-  private String _sNewText ;
-  private String _sNewGrammar ;
-  
-  /** Lemma being edited (when not a new one, thus can be <code>null</code>) */
-	private Lemma  _editedLemma ;
+  /** Lemma being edited when this is the case, <code>null</code> when creating a new lemma */
+	private Lemma            _editedLemma ;
+	
+	/** Information sent to create/edit the lemma */
+  private SaveLemmaContent _content ;
 
 	/**
 	 * Plain vanilla constructor<br>
 	 * <br>
 	 * editedDefinition must be null if the request is to create a new definition
 	 */
-	public SaveLemmaAction(final SessionElements sessionElements, final String sConceptCode, final String sNewLanguage, final String sNewText, final String sNewGrammar, final Lemma editedLemma) 
+	public SaveLemmaAction(final SessionElements sessionElements, final String sConceptCode, final String sNewLanguage, final String sNewText, final String sNewGrammar, final Lemma editedLemma, final boolean bFromOtherPanel) 
 	{
 		super() ;
 		
 		_sessionElements = sessionElements ;
-		_sConceptCode    = sConceptCode ;
-		_sNewLanguage    = sNewLanguage ;
-		_sNewText        = sNewText ;
-		_sNewGrammar     = sNewGrammar ;
 		_editedLemma     = editedLemma ;
+		
+		_content         = new SaveLemmaContent(sConceptCode, sNewLanguage, sNewText, sNewGrammar, bFromOtherPanel) ;
 	}
 
 	/**
@@ -46,32 +40,34 @@ public class SaveLemmaAction implements Action<SaveLemmaResult>
 	{
 		super() ;
 		
-		_sessionElements  = null ;
-		_sConceptCode     = "" ;
-		_sNewLanguage     = "" ;
-		_sNewText         = "" ;
-		_sNewGrammar      = "" ;
-		_editedLemma      = null ;
+		_sessionElements = null ;
+		_editedLemma     = null ;
+		
+		_content         = new SaveLemmaContent() ;
 	}
 
 	public SessionElements getSessionElements() {
 		return _sessionElements ;
 	}
 	
+	public SaveLemmaContent getContent() {
+		return _content ;
+	}
+	
 	public String getConceptCode() {
-		return _sConceptCode ;
+		return _content.getConceptCode() ;
 	}
 	
 	public String getNewLanguage() {
-		return _sNewLanguage ;
+		return _content.getNewLanguage() ;
 	}
 
 	public String getNewText() {
-		return _sNewText ;
+		return _content.getNewText() ;
 	}
 	
 	public String getNewGrammar() {
-		return _sNewGrammar ;
+		return _content.getNewGrammar() ;
 	}
 	
 	public Lemma getEditedLemma() {

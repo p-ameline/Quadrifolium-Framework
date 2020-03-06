@@ -379,7 +379,7 @@ public class FlexManager
 	}
 	
 	/**
-	 * Get the next available code for a given lemma<br>
+	 * Get the next available code for a given flex<br>
 	 * <br>
 	 * This function needs a registered user.
 	 * 
@@ -461,6 +461,54 @@ public class FlexManager
 		_dbConnector.closePreparedStatement() ;
 		
 		return sNextFlexCode ;
+	}
+	
+	/** 
+	 * Remove a Flex from database
+	 * <br>
+	 * This function needs a registered user.
+	 * 
+	 * @param  dataToDelete Flex to delete 
+	 * 
+	 * @return <code>true</code> if everything OK, <code>false</code> if any problem
+	 */
+	public boolean deleteRecord(final Flex dataToDelete)
+	{
+		String sFctName = "FlexManager.deleteRecord" ;
+		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
+		if ((null == _dbConnector) || (null == dataToDelete) || (dataToDelete.getId() < 0))
+		{
+			Logger.trace(sFctName + ": bad parameter", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
+		String sQuery = "DELETE FROM flex WHERE id = ?" ;
+	   
+		_dbConnector.prepareStatememt(sQuery, Statement.RETURN_GENERATED_KEYS) ;
+		_dbConnector.setStatememtInt(1, dataToDelete.getId()) ;
+		
+		// Execute query 
+		//
+		int iNbAffectedRows = _dbConnector.executeUpdatePreparedStatement(true) ;
+		
+		if (-1 == iNbAffectedRows)
+		{
+			Logger.trace(sFctName + ": failed deleting record " + dataToDelete.getId(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+			_dbConnector.closePreparedStatement() ;
+			return false ;
+		}
+		
+		_dbConnector.closePreparedStatement() ;
+				
+		return historize(dataToDelete, ChangeType.delete) ;
 	}
 	
 	/**

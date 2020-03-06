@@ -1,5 +1,6 @@
 package org.quadrifolium.shared.ontology ;
 
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -1023,7 +1024,7 @@ public class OntologyLexicon
 		
 		// Start from grammatical gender
 		//
-		QuadrifoliumFcts.Gender grammaticalGender = lemma.getGramaticalGender() ;
+		QuadrifoliumFcts.Gender grammaticalGender = lemma.getGrammaticalGender() ;
 		
 		if      (QuadrifoliumFcts.Gender.feminine == grammaticalGender)
 			sGrammarString += "F" ;
@@ -1034,18 +1035,144 @@ public class OntologyLexicon
 		else
 			return "" ;
 		
-		// then, add grammatical number
+		// Then, add grammatical number
+		// 
+		// For a noun, "plural" usually means that there is no singular flex form 
 		//
-		QuadrifoliumFcts.Number grammaticalNumber = lemma.getGramaticalNumber() ;
+		String sNumber = "S" ;
 		
-		if      (QuadrifoliumFcts.Number.singular == grammaticalNumber)
-			sGrammarString += "S" ;
-		else if (QuadrifoliumFcts.Number.plural == grammaticalNumber)
-			sGrammarString += "P" ;
+		QuadrifoliumFcts.Number grammaticalNumber = lemma.getGrammaticalNumber() ;
+		if (QuadrifoliumFcts.Number.plural == grammaticalNumber)
+			sNumber = "P" ;
 		else
-			return "" ;
+		{
+			ArrayList<FlexWithTraits> aForms = lemma.getInflections() ;
+			if (false == aForms.isEmpty())
+			{
+				boolean bExistSingulatForm = false ;
+				
+				for (FlexWithTraits form : aForms)
+					if (QuadrifoliumFcts.Number.singular == form.getGrammaticalNumber())
+						bExistSingulatForm = true ;
+			
+				if (false == bExistSingulatForm)
+					sNumber = "P" ;
+			}
+		}
+		
+		sGrammarString += sNumber ;
 		
 		return sGrammarString ;
+	}
+	
+	/**
+	 * Get the PartOfSpeech value from a grammar string
+	 */
+	public static PartOfSpeech getPoSFromGrammarString(final String sGrammar) throws NullPointerException
+	{
+		if (null == sGrammar)
+			throw new NullPointerException() ;
+		
+		if ("ADJ".equals(sGrammar))
+			return PartOfSpeech.adjective ;
+		
+		if ("MS".equals(sGrammar) || "MP".equals(sGrammar) || 
+				"FS".equals(sGrammar) || "FP".equals(sGrammar) || 
+				"NS".equals(sGrammar) || "NP".equals(sGrammar))
+			return PartOfSpeech.commonNoun ;
+		
+		if ("ADV".equals(sGrammar))
+			return PartOfSpeech.adverb ;
+		
+		return PartOfSpeech.nullPoS ;
+	}
+	
+	/**
+	 * Get the declination element for a grammatical number 
+	 */
+	public static Declination getDeclinationFromGrammaticalNumber(QuadrifoliumFcts.Number grammaticalNumber)
+	{
+		if (QuadrifoliumFcts.Number.singular == grammaticalNumber)
+			return Declination.singular ;
+		if (QuadrifoliumFcts.Number.plural   == grammaticalNumber)
+			return Declination.plural ;
+		
+		return Declination.nullDeclination ;
+	}
+	
+	/**
+	 * Get the gender element for a grammatical number and a a grammatical gender
+	 */
+	public static Gender getGenderFromNumberAndGender(QuadrifoliumFcts.Number grammaticalNumber, QuadrifoliumFcts.Gender grammaticalGender)
+	{
+		if      (QuadrifoliumFcts.Number.singular == grammaticalNumber)
+		{
+			if (QuadrifoliumFcts.Gender.feminine == grammaticalGender)
+				return Gender.FSGender ;
+			if (QuadrifoliumFcts.Gender.masculine == grammaticalGender)
+				return Gender.MSGender ;
+			if (QuadrifoliumFcts.Gender.neuter == grammaticalGender)
+				return Gender.NSGender ;
+		}
+		else if (QuadrifoliumFcts.Number.plural   == grammaticalNumber)
+		{
+			if (QuadrifoliumFcts.Gender.feminine == grammaticalGender)
+				return Gender.FPGender ;
+			if (QuadrifoliumFcts.Gender.masculine == grammaticalGender)
+				return Gender.MPGender ;
+			if (QuadrifoliumFcts.Gender.neuter == grammaticalGender)
+				return Gender.NPGender ;
+		}
+		
+		return Gender.nullGender ;
+	}
+	
+	/**
+	 * Get the Gender value from a grammar string
+	 */
+	public static QuadrifoliumFcts.Gender getGenderFromGrammarString(final String sGrammar) throws NullPointerException
+	{
+		if (null == sGrammar)
+			throw new NullPointerException() ;
+		
+		if (sGrammar.length() != 2)
+			return QuadrifoliumFcts.Gender.nullGender ;
+		
+		char cFirstChar = sGrammar.charAt(0) ;
+		
+		if ('M' == cFirstChar)
+			return QuadrifoliumFcts.Gender.masculine ;
+		if ('F' == cFirstChar)
+			return QuadrifoliumFcts.Gender.feminine ;
+		if ('N' == cFirstChar)
+			return QuadrifoliumFcts.Gender.neuter ;
+		
+		return QuadrifoliumFcts.Gender.nullGender ;
+	}
+	
+	/**
+	 * Get the Number value from a grammar string
+	 */
+	public static QuadrifoliumFcts.Number getNumberFromGrammarString(final String sGrammar) throws NullPointerException
+	{
+		if (null == sGrammar)
+			throw new NullPointerException() ;
+		
+		if (sGrammar.length() != 2)
+			return QuadrifoliumFcts.Number.nullNumber ;
+		
+		char cFirstChar = sGrammar.charAt(0) ;
+		if (('M' != cFirstChar) && ('F' != cFirstChar) && ('N' != cFirstChar))
+			return QuadrifoliumFcts.Number.nullNumber ;
+		
+		char cSecondChar = sGrammar.charAt(1) ;
+		
+		if ('S' == cSecondChar)
+			return QuadrifoliumFcts.Number.singular ;
+		if ('P' == cSecondChar)
+			return QuadrifoliumFcts.Number.plural ;
+		
+		return QuadrifoliumFcts.Number.nullNumber ;
 	}
 	
 	/**

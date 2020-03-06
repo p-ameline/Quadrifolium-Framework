@@ -16,10 +16,10 @@ public class SaveLemmaResult implements Result
 	private String  _sMessage ;
 	
 	private int     _iUpdatedLemmaId ;
-	private String  _sConceptCode ;
-	private String  _sSentLanguage ;
-	private String  _sSentText ;
 	
+	/** Information that was sent to create/edit the lemma */
+  private SaveLemmaContent _actionContent ;
+		
 	/**
 	 * No-args constructor, mandatory for serializable objects
 	 */
@@ -31,15 +31,14 @@ public class SaveLemmaResult implements Result
 		_sMessage        = "" ;
 		
 		_iUpdatedLemmaId = -1 ;
-		_sConceptCode    = "" ;
-		_sSentLanguage   = "" ;
-		_sSentText       = "" ;
+		
+		_actionContent   = new SaveLemmaContent() ;
 	}
 
 	/**
 	 * Plain vanilla constructor
-	 * */
-	public SaveLemmaResult(final String sMessage, Lemma savedLemma, final String sConceptCode, final String sSentLanguage, final String sSentText, final int iUpdatedLemmaId)
+	 */
+	public SaveLemmaResult(final String sMessage, Lemma savedLemma, final SaveLemmaContent content, final int iUpdatedLemmaId)
 	{
 		super() ;
 		
@@ -47,9 +46,23 @@ public class SaveLemmaResult implements Result
 		_savedLemma      = savedLemma ;
 		
 		_iUpdatedLemmaId = iUpdatedLemmaId ;
-		_sConceptCode    = sConceptCode ;
-		_sSentLanguage   = sSentLanguage ;
-		_sSentText       = sSentText ;
+		
+		_actionContent   = new SaveLemmaContent(content) ;
+	}
+	
+	/**
+	 * Full variables constructor
+	 */
+	public SaveLemmaResult(final String sMessage, Lemma savedLemma, final String sConceptCode, final String sSentLanguage, final String sSentGrammar, final String sSentText, final boolean bFromOtherPanel, final int iUpdatedLemmaId)
+	{
+		super() ;
+		
+		_sMessage        = sMessage ;
+		_savedLemma      = savedLemma ;
+		
+		_iUpdatedLemmaId = iUpdatedLemmaId ;
+		
+		_actionContent   = new SaveLemmaContent(sConceptCode, sSentLanguage, sSentText, sSentGrammar, bFromOtherPanel) ;
 	}
 	
 	public String getMessage() {
@@ -59,13 +72,6 @@ public class SaveLemmaResult implements Result
 		_sMessage = sMessage ;
 	}
 	
-	public String getConceptCode() {
-		return _sConceptCode ;
-	}
-	public void setConceptCode(final String sConceptCode) {
-		_sConceptCode = sConceptCode ;
-	}
-	
 	public Lemma getSavedLemma() {
 		return _savedLemma ;
 	}
@@ -73,18 +79,39 @@ public class SaveLemmaResult implements Result
 		_savedLemma = savedLemma ;
 	}
 	
-	public String getSentLanguage() {
-		return _sSentLanguage ;
+	public String getConceptCode() {
+		return _actionContent.getConceptCode() ;
 	}
-	public void setSentLanguage(final String sSentLanguage) {
-		_sSentLanguage = sSentLanguage ;
+	public void setConceptCode(final String sConceptCode) {
+		_actionContent.setConceptCode(sConceptCode) ;
+	}
+	
+	public SaveLemmaContent getActionContent() {
+		return _actionContent ;
+	}
+	public void setActionContent(final SaveLemmaContent actionContent) {
+		_actionContent.initFrom(actionContent) ;
+	}
+	
+	public String getSentLanguage() {
+		return _actionContent.getNewLanguage() ;
+	}
+	public void setSentLanguage(final String sLanguage) {
+		_actionContent.setNewLanguage(sLanguage) ;
+	}
+	
+	public String getSentGrammar() {
+		return _actionContent.getNewGrammar() ;
+	}
+	public void setSentGrammar(final String sGrammar) {
+		_actionContent.setNewGrammar(sGrammar) ;
 	}
 	
 	public String getSentText() {
-		return _sSentText ;
+		return _actionContent.getNewText() ;
 	}
-	public void setSentText(final String sSentText) {
-		_sSentText = sSentText ;
+	public void setSentText(final String sText) {
+		_actionContent.setNewText(sText) ;
 	}
 	
 	public int getUpdatedLemmaId() {
@@ -92,5 +119,9 @@ public class SaveLemmaResult implements Result
 	}
 	public void setUpdatedLemmaId(int iUpdatedLemmaId) {
 		_iUpdatedLemmaId = iUpdatedLemmaId ;
+	}
+	
+	public boolean isFromOtherPanel() {
+		return _actionContent.isFromOtherPanel() ;
 	}
 }

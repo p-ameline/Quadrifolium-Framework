@@ -449,6 +449,54 @@ public class TripleManager
 		return historize(dataToUpdate, ChangeType.change) ;
 	}
 	
+	/** 
+	 * Remove a Triple from database
+	 * <br>
+	 * This function needs a registered user.
+	 * 
+	 * @param  dataToDelete Triple to delete 
+	 * 
+	 * @return <code>true</code> if everything OK, <code>false</code> if any problem
+	 */
+	public boolean deleteRecord(final Triple dataToDelete)
+	{
+		String sFctName = "TripleManager.deleteRecord" ;
+		
+		// This function needs a registered user
+		//
+		if (null == _sessionElements)
+		{
+			Logger.trace(sFctName + ": no session elements.", -1, Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
+		if ((null == _dbConnector) || (null == dataToDelete) || (dataToDelete.getId() < 0))
+		{
+			Logger.trace(sFctName + ": bad parameter", _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+			return false ;
+		}
+		
+		String sQuery = "DELETE FROM triple WHERE id = ?" ;
+	   
+		_dbConnector.prepareStatememt(sQuery, Statement.RETURN_GENERATED_KEYS) ;
+		_dbConnector.setStatememtInt(1, dataToDelete.getId()) ;
+		
+		// Execute query 
+		//
+		int iNbAffectedRows = _dbConnector.executeUpdatePreparedStatement(true) ;
+		
+		if (-1 == iNbAffectedRows)
+		{
+			Logger.trace(sFctName + ": failed deleting record " + dataToDelete.getId(), _sessionElements.getPersonId(), Logger.TraceLevel.ERROR) ;
+			_dbConnector.closePreparedStatement() ;
+			return false ;
+		}
+		
+		_dbConnector.closePreparedStatement() ;
+				
+		return historize(dataToDelete, ChangeType.delete) ;
+	}
+	
 	/**
 	  * Initialize a Triple from a query ResultSet 
 	  * 

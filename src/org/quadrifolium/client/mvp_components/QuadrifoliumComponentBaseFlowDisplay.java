@@ -3,8 +3,8 @@ package org.quadrifolium.client.mvp_components;
 import java.util.ArrayList;
 
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
 
 public class QuadrifoliumComponentBaseFlowDisplay extends FlowPanel implements QuadrifoliumComponentInterface, IQuadrifoliumComponentBaseDisplayModel 
@@ -77,7 +77,7 @@ public class QuadrifoliumComponentBaseFlowDisplay extends FlowPanel implements Q
 	}
 	
 	@Override
-	public ArrayList<PushButton> getButtonsArray() {
+	public ArrayList<ButtonBase> getButtonsArray() {
 		return _baseDisplayModel.getButtons() ;
 	}
 	

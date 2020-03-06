@@ -3,7 +3,7 @@ package org.quadrifolium.client.mvp_components;
 import java.util.ArrayList;
 
 import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.ButtonBase;
 
 import net.customware.gwt.presenter.client.widget.WidgetDisplay;
 
@@ -11,7 +11,7 @@ public interface QuadrifoliumComponentInterface extends WidgetDisplay
 {
 	public HasClickHandlers      getEditButtonKeyDown() ;
 	public HasClickHandlers      getAddButtonKeyDown() ;
-	public ArrayList<PushButton> getButtonsArray() ;
+	public ArrayList<ButtonBase> getButtonsArray() ;
 	
 	public void                  openAddPanel() ;
 	public void                  closeAddPanel() ;

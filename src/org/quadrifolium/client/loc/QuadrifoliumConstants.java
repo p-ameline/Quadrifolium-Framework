@@ -39,6 +39,8 @@ public interface QuadrifoliumConstants extends Constants
 	String generalEmail() ;
 	String generalEmailConfirmed() ;
 	String generalLanguage() ;
+	String generalLemma() ;
+	String generalGrammar() ;
 	
 	String editUserData() ;
 	String buildCsv() ;
@@ -48,6 +50,7 @@ public interface QuadrifoliumConstants extends Constants
 	String captionLemmas() ;
 	String captionOtherLemmas() ;
 	String captionDefinitions() ;
+	String captionStemma() ;
 	String captionSemantics() ;
 	String captionTerminologies() ;
 	String captionDomain() ;
@@ -71,6 +74,14 @@ public interface QuadrifoliumConstants extends Constants
 	
 	String incorrectVersionNumber() ;
 
+	String grammarAdjective() ;
+	String grammarNounMascSing() ;
+	String grammarNounMascPlur() ;
+	String grammarNounFemSing() ;
+	String grammarNounFemPlur() ;
+	String grammarNounNeutSing() ;
+	String grammarNounNeutPlur() ;
+	
 	String SelectThisTerm() ;
 	
 	String registerErrDifMails() ;

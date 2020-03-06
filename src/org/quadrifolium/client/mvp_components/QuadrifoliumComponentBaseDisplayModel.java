@@ -3,12 +3,12 @@ package org.quadrifolium.client.mvp_components;
 import java.util.ArrayList;
 
 import org.quadrifolium.client.loc.QuadrifoliumConstants;
-import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
 import org.quadrifolium.client.ui.QuadrifoliumResources;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -36,17 +36,46 @@ public class QuadrifoliumComponentBaseDisplayModel implements QuadrifoliumCompon
 	protected DialogBox  _ErrorDialogBox ;
 	protected Button     _ErrorDialogBoxOkButton ;
 	
-	protected ArrayList<PushButton> _aButtons = new ArrayList<PushButton>() ;
+	protected ArrayList<ButtonBase> _aButtons = new ArrayList<ButtonBase>() ;
+	
+	public QuadrifoliumComponentBaseDisplayModel()
+	{
+		_CommandPanel      = null ;
+		
+		_ReadOnlyToEditBtn = null ;
+		_AddButton         = null ;
+		
+		_AddPanel          = null ;
+		_AddOkBtn          = null ;
+		_AddCancelBtn      = null ;
+		
+		_ErrorDialogBox         = null ;
+		_ErrorDialogBoxOkButton = null ;
+	}
 	
 	/**
 	 * Create command panel's buttons
 	 */
 	protected void createCommandPanelButtons()
 	{
+		createCommandPanelEditButton() ;
+		createCommandPanelAddButton() ;
+	}
+	
+	/**
+	 * Create command panel's buttons
+	 */
+	public void createCommandPanelEditButton()
+	{
 		_ReadOnlyToEditBtn = new Button(constants.generalEdit()) ;
 		_ReadOnlyToEditBtn.addStyleName("button white editButton") ;
-		
-		// _AddButton = new PushButton(new Image("iconAdd.png")) ;
+	}
+	
+	/**
+	 * Create command panel's buttons
+	 */
+	protected void createCommandPanelAddButton()
+	{
 		_AddButton = new PushButton(new Image(QuadrifoliumResources.INSTANCE.addIcon())) ;
 		_AddButton.addStyleName("elementEditButton") ;
 	}
@@ -142,6 +171,13 @@ public class QuadrifoliumComponentBaseDisplayModel implements QuadrifoliumCompon
 	public void closeAddPanel() {
 	}
 	
+	/**
+	 * Set the top position of the tree view panel so that it remains under the edit panel
+	 */
+	protected int getDisplayPanelPosition() {
+		return _CommandPanel.getOffsetHeight() + _AddPanel.getOffsetHeight() ;
+	}
+	
 	@Override
 	public HasClickHandlers getAddOkButtonKeyDown() {
 		return _AddOkBtn ;
@@ -163,7 +199,7 @@ public class QuadrifoliumComponentBaseDisplayModel implements QuadrifoliumCompon
 	}
 	
 	@Override
-	public ArrayList<PushButton> getButtonsArray() {
+	public ArrayList<ButtonBase> getButtonsArray() {
 		return _aButtons ;
 	}
 	
@@ -214,6 +250,7 @@ public class QuadrifoliumComponentBaseDisplayModel implements QuadrifoliumCompon
 	}
 	public void createAddPanel() {
 		_AddPanel = new FlowPanel() ;
+		_AddPanel.addStyleName("addElementPanel") ;
 	}
 	
 	public Button getAddOkButton() {
@@ -232,7 +269,7 @@ public class QuadrifoliumComponentBaseDisplayModel implements QuadrifoliumCompon
 		return _ErrorDialogBoxOkButton ;
 	}
 	
-	public ArrayList<PushButton> getButtons() {
+	public ArrayList<ButtonBase> getButtons() {
 		return _aButtons ;
 	}
 	public void clearButtons() {

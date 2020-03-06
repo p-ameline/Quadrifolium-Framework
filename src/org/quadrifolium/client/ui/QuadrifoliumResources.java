@@ -4,7 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.resources.client.CssResource.NotStrict;
+import com.google.gwt.resources.client.DataResource;
 
 /**
  * An object that implements this interface may have validation components.
@@ -26,11 +28,20 @@ public interface QuadrifoliumResources extends ClientBundle
 	@Source("iconEdit.png")
 	public ImageResource editIcon() ;
 	
+	@Source("iconEdit.png")
+	public DataResource editIconAsData() ;
+	
 	@Source("iconDel.png")
 	public ImageResource deleteIcon() ;
+	
+	@Source("iconDel.png")
+	public DataResource deleteIconAsData() ;
 
 	@Source("iconPlus.png")
 	public ImageResource addIcon() ;
+	
+	@Source("cytoscape.js")
+	public TextResource cytoscapeJs() ;
 	
 /*
   @Source("config.xml")

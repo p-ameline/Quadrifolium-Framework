@@ -1,6 +1,9 @@
 package org.quadrifolium.client.mvp;
 
 
+import org.quadrifolium.client.ui.QuadrifoliumResources;
+
+import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -23,6 +26,7 @@ public class QuadrifoliumWorkshopViewModel extends Composite implements Workshop
 	private       SimplePanel      _lemmasPanel ;
 	private       SimplePanel      _semanticsPanel ;
 	private       SimplePanel      _definitionsPanel ;
+	private       SimplePanel      _stemmaPanel ;
 		
 	public QuadrifoliumWorkshopViewModel() 
 	{
@@ -42,7 +46,7 @@ public class QuadrifoliumWorkshopViewModel extends Composite implements Workshop
 		//
 		_displayPanel = new SplitLayoutPanel() ;
 		_displayPanel.addStyleName("displayPanel") ;
-			
+		
 		// Prepare the lemmas panel
 		//
 		_lemmasPanel = new SimplePanel() ;
@@ -53,12 +57,23 @@ public class QuadrifoliumWorkshopViewModel extends Composite implements Workshop
 		_definitionsPanel = new SimplePanel() ;
 		_displayPanel.addNorth(_definitionsPanel, 250) ;
 		
+		// Prepare the stemma panel
+		//
+		_stemmaPanel = new SimplePanel() ;
+		_displayPanel.addSouth(_stemmaPanel, 250) ;
+		
 		// Prepare the semantics panel
 		//
 		_semanticsPanel = new SimplePanel() ;
 		_displayPanel.add(_semanticsPanel) ;
 		
 		_workspace.add(_displayPanel) ;
+		
+		// Attach the LayoutPanel to the RootLayoutPanel. The latter will listen for
+    // resize events on the window to ensure that its children are informed of
+    // possible size changes.
+    // RootLayoutPanel rp = RootLayoutPanel.get() ;
+    // rp.add(_displayPanel) ;
 			
 		initWidget(_workspace) ;
 	}
@@ -79,8 +94,13 @@ public class QuadrifoliumWorkshopViewModel extends Composite implements Workshop
 	}
 	
 	@Override
-	public void addDefinitionsView(Panel semanticsView) {
-		_definitionsPanel.add(semanticsView) ;
+	public void addDefinitionsView(Panel definitionsView) {
+		_definitionsPanel.add(definitionsView) ;
+	}
+	
+	@Override
+	public void addStemmaView(Panel stemmaView) {
+		_stemmaPanel.add(stemmaView) ;
 	}
 	
 	@Override
@@ -101,6 +121,11 @@ public class QuadrifoliumWorkshopViewModel extends Composite implements Workshop
 	@Override
 	public SimplePanel getDefinitionsWorkspace() {
 		return _definitionsPanel ;
+	}
+	
+	@Override
+	public SimplePanel getStemmaWorkspace() {
+		return _stemmaPanel ;
 	}
 	
 	public void reset() {	

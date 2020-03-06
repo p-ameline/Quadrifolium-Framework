@@ -9,9 +9,7 @@ import org.quadrifolium.client.event.GoToWorkshopDefinitionEvent;
 import org.quadrifolium.client.event.GoToWorkshopDefinitionEventHandler;
 import org.quadrifolium.client.global.QuadrifoliumSupervisor;
 import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
-import org.quadrifolium.shared.ontology.LanguageTag;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
-import org.quadrifolium.shared.rpc4ontology.GetDefinitionsTriplesAction;
 import org.quadrifolium.shared.rpc4ontology.GetDefinitionsTriplesResult;
 import org.quadrifolium.shared.rpc4ontology.SaveDefinitionAction;
 import org.quadrifolium.shared.rpc4ontology.SaveDefinitionResult;
@@ -25,27 +23,20 @@ import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.inject.Inject;
 
-public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBasePresenter<QuadrifoliumDefinitionsPresenter.Display> 
+public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresenter<QuadrifoliumStemmaPresenter.Display> 
 {	
 	public interface Display extends QuadrifoliumComponentInterface 
-	{			
-		public void             feedDefinitionsTable(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;
+	{
+		public void             feedStemma(final INTERFACETYPE iInterfaceType) ;
 
-		public void             updateView(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;
-		
-		public void             initializeLanguagesList(final ArrayList<LanguageTag> _LanguageTags) ;
-		
-		public String           getEditedLanguage() ;
-		public void             setEditedLanguage(final String sLanguageTag) ;
-		public String           getEditedText() ;
-		public void             setEditedText(final String sText) ;
+		public void             updateView(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;		
 	}
 
 	protected     ArrayList<TripleWithLabel> _aDefinitionsTriples ;
 	protected     TripleWithLabel            _editedDefinition ;
 	
 	@Inject
-	public QuadrifoliumDefinitionsPresenter(final Display display, 
+	public QuadrifoliumStemmaPresenter(final Display display, 
 			                                    final EventBus eventBus,
 			                                    final DispatchAsync dispatcher,
 			                                    final QuadrifoliumSupervisor supervisor) 
@@ -77,10 +68,11 @@ public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBaseP
 	}
 
 	/**
-	 * Update definitions from server
+	 * Update stemma from server
 	 */
 	protected void UpdateContent()
 	{
+/*
 		// Since the process is asynchronous, we better clear the display first so definitions don't remain out-of-date for some times   
 		//
 		display.feedDefinitionsTable(null, INTERFACETYPE.readOnlyMode) ;
@@ -93,6 +85,7 @@ public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBaseP
 		// The query language is set to "" meaning that all languages are to be displayed
 		//
 		_dispatcher.execute(new GetDefinitionsTriplesAction(_supervisor.getUserId(), "", sConcept), new GetDefinitionsTriplesForConceptCallback()) ;
+*/
 	}
 	
 	/**
@@ -137,17 +130,10 @@ public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBaseP
 		
 	/**
 	 * Open the "add definition" panel
+	 * 
+	 * Nothing to do there since the stemma is a singleton
 	 */
-	protected void addNewElement() 
-	{
-		_bEditMode        = true ;
-		_editedDefinition = null ;
-		
-		display.initializeLanguagesList(_supervisor.getLanguageTags()) ;
-		
-		_bAdding = true ;
-		
-		display.openAddPanel() ;
+	protected void addNewElement() {
 	}
 	
 	/**
@@ -165,19 +151,9 @@ public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBaseP
 	 */
 	protected void saveEditedElement()
 	{
-		String sText = display.getEditedText() ;
-		if ("".equals(sText))
-		{
-			display.openErrDialogBox("definitionErrEmptyLabel") ;
-			return ;
-		}
+		String sText = "" ;
 		
-		String sLanguage = display.getEditedLanguage() ;
-		if ("".equals(sLanguage))
-		{
-			display.openErrDialogBox("definitionErrNoLanguage") ;
-			return ;
-		}
+		String sLanguage = "" ;
 		
 		// If editing an existing definition, check if something changed
 		//
@@ -252,7 +228,7 @@ public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBaseP
 			
 			closeEditingSession() ;
 			
-			display.feedDefinitionsTable(_aDefinitionsTriples, getInterfaceType()) ;
+			display.feedStemma(getInterfaceType()) ;
 		}
 	}
 	
@@ -306,11 +282,6 @@ public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBaseP
 			_bEditMode        = true ;
 			_editedDefinition = tripleToEdit ;
 			
-			display.initializeLanguagesList(_supervisor.getLanguageTags()) ;
-			
-			display.setEditedText(_editedDefinition.getObjectLabel()) ;
-			display.setEditedLanguage(_editedDefinition.getLanguage()) ;
-			
 			_bAdding = true ;
 			
 			display.openAddPanel() ;
@@ -348,7 +319,7 @@ public class QuadrifoliumDefinitionsPresenter extends QuadrifoliumComponentBaseP
 	 */
 	protected void refreshDefinitionsList() 
 	{
-		display.feedDefinitionsTable(_aDefinitionsTriples, getInterfaceType()) ;
+		display.feedStemma(getInterfaceType()) ;
 		
 		connectButtonsClickHandlers() ;
 	}

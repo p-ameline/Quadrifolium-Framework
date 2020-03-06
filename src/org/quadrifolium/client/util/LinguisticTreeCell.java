@@ -1,22 +1,21 @@
 package org.quadrifolium.client.util;
 
 import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
+import org.quadrifolium.client.mvp_components.QuadrifoliumLemmasView;
 import org.quadrifolium.client.ui.QuadrifoliumResources;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.view.client.ListDataProvider;
 
 /**
@@ -30,18 +29,20 @@ public class LinguisticTreeCell extends AbstractCell<LinguisticTreeNode>
 {
 	protected ListDataProvider<LinguisticTreeNode> _dataProvider ; //for refresh
 	protected INTERFACETYPE                        _iInterfaceType ;
+	protected QuadrifoliumLemmasView               _parent ;
 	
   public LinguisticTreeCell(ListDataProvider<LinguisticTreeNode> dataProvider)
   {
-    super("keydown", "dblclick") ;
+    super("click") ;
     
     _dataProvider   = dataProvider ;
     _iInterfaceType = INTERFACETYPE.undefined ;
   }
   
-  public void refresh(final INTERFACETYPE iInterfaceType)
+  public void refresh(final INTERFACETYPE iInterfaceType, final QuadrifoliumLemmasView parent)
   {
-  	_iInterfaceType = iInterfaceType ;
+  	_iInterfaceType   = iInterfaceType ;
+  	_parent           = parent ;
   	
   	_dataProvider.refresh() ; 
   }
@@ -104,11 +105,18 @@ public class LinguisticTreeCell extends AbstractCell<LinguisticTreeNode>
 		{
     	sb.appendHtmlConstant("<button type=\"button\" tabindex=\"-1\" style=\"elementEditButton\" id=\"edt_" + value.getCode() + "\">") ;
       // sb.appendHtmlConstant(QuadrifoliumResources.INSTANCE.editIcon().getSafeUri().asString()) ;
-    	sb.appendHtmlConstant(QuadrifoliumResources.INSTANCE.editIcon().getName()) ;
+    	sb.appendHtmlConstant("<img src=\"") ;
+    	// sb.appendHtmlConstant(QuadrifoliumResources.INSTANCE.editIcon().getName()) ;
+    	sb.appendHtmlConstant(QuadrifoliumResources.INSTANCE.editIconAsData().getSafeUri().asString()) ;
+    	sb.appendHtmlConstant("\"") ;
       sb.appendHtmlConstant("</button>") ;
     	
       sb.appendHtmlConstant("<button type=\"button\" tabindex=\"-1\" style=\"elementEditButton\" id=\"del_" + value.getCode() + "\">") ;
-      sb.appendHtmlConstant(QuadrifoliumResources.INSTANCE.deleteIcon().getSafeUri().asString()) ;
+      // sb.appendHtmlConstant(QuadrifoliumResources.INSTANCE.deleteIcon().getSafeUri().asString()) ;
+      sb.appendHtmlConstant("<img src=\"") ;
+      // sb.appendHtmlConstant(QuadrifoliumResources.INSTANCE.deleteIcon().getName()) ;
+      sb.appendHtmlConstant(QuadrifoliumResources.INSTANCE.deleteIconAsData().getSafeUri().asString()) ;
+      sb.appendHtmlConstant("\"") ;
       sb.appendHtmlConstant("</button>") ;
 		}
     
@@ -122,10 +130,61 @@ public class LinguisticTreeCell extends AbstractCell<LinguisticTreeNode>
     // sb.append(rendered);
   }
 
-
   @Override
   protected void onEnterKeyDown(Context context, Element parent, LinguisticTreeNode value, NativeEvent event, ValueUpdater<LinguisticTreeNode> valueUpdater)
   {
-    Window.alert("You clicked " + event.getType() + " " + value.getName()) ;
+  	if (INTERFACETYPE.editMode != _iInterfaceType)
+  		return ;
+  	
+  	// Get target element
+  	//
+  	Element targetElement = event.getEventTarget().cast() ;
+  	if (null == targetElement)
+  		return ;
+  	
+  	String sID = targetElement.getId() ;
+  	
+  	// If an image, means that the button is the parent element
+  	//
+  	if ("img".equalsIgnoreCase(targetElement.getTagName()))
+  	{
+  		Element buttonElement = targetElement.getParentElement() ;
+  		if (null == buttonElement)
+  			return ;
+  		
+  		sID = buttonElement.getId() ;
+  		
+  		_parent.signalHit(sID, _parent.new hitPoint(event.getClientX(), event.getClientY())) ;
+  		
+  		// would turn round
+  		// clickElement(buttonElement) ;  		
+  	}
+  	
+  	// Event asEvent = Event.as(event) ;
+ 
+  	// For mouse events, such as click, dblclick, mousedown, or mouseup, the detail property indicates how many times 
+  	// the mouse has been clicked in the same location for this event. For a dblclick event the value of detail is always 2.
+  	//
+  	int iDetail = 0 ;
+  	
+  	if      ("click".equals(event.getType()))
+  		iDetail = 1 ;
+  	else if ("dblclick".equals(event.getType()))
+  		iDetail = 2 ;
+  	
+  	NativeEvent clickEvent = Document.get().createClickEvent(iDetail, 
+  			                                                     event.getScreenX(),
+  			                                                     event.getScreenY(),
+  			                                                     event.getClientX(), 
+  			                                                     event.getClientY(),
+  			                                                     event.getCtrlKey(), 
+  			                                                     event.getAltKey(),
+  			                                                     event.getShiftKey(), 
+  			                                                     event.getMetaKey()) ;
+  	DomEvent.fireNativeEvent(clickEvent, (HasClickHandlers) _parent) ;
   }
+  
+  protected native void clickElement(Element elem) /*-{
+  	elem.click();
+	}-*/;
 }

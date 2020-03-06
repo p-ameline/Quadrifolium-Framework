@@ -1,5 +1,7 @@
 package org.quadrifolium.shared.util ;
 
+import org.quadrifolium.shared.util.MiscellanousFcts.STRIP_DIRECTION;
+
 import com.google.gwt.user.client.rpc.IsSerializable ;
 
 /**
@@ -112,12 +114,35 @@ public class ParsedLanguageTag implements IsSerializable
 		}
 		
 		int iSubTagIndex = 0 ;  // current cursor in aSubtags 
-		int iSubTagPosit = 0 ;  // current cursor in the theoretical list (language = 0, extlang = 1,-script = 2, etc) 
 		
-		_sLanguage = aSubtags[iSubTagIndex++] ;
-	
-		// TODO To be continued
-		//
+		if (aSubtags.length > 0)
+		{
+			_sLanguage   = aSubtags[iSubTagIndex++] ;
+			if (aSubtags.length > 1)
+			{
+				_sExtLang    = aSubtags[iSubTagIndex++] ;
+				if (aSubtags.length > 2)
+				{
+					_sScript     = aSubtags[iSubTagIndex++] ;
+					if (aSubtags.length > 3)
+					{
+						_sRegion     = aSubtags[iSubTagIndex++] ;
+						if (aSubtags.length > 4)
+						{
+							_sVariant    = aSubtags[iSubTagIndex++] ;
+							if (aSubtags.length > 5)
+							{
+								_sExtension  = aSubtags[iSubTagIndex++] ;
+								if (aSubtags.length > 6)
+								{
+									_sPrivateUse = aSubtags[iSubTagIndex++] ;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -146,6 +171,75 @@ public class ParsedLanguageTag implements IsSerializable
 		}
 		
 		return true ;
+	}
+
+	
+	public String getMoreGenericTag()
+	{
+		int iCurrentLevel = getTagLevel() ;
+		
+		if (0 == iCurrentLevel)
+			return "" ;
+		
+		return getCodeForLevel(iCurrentLevel - 1) ;
+	}
+	
+	/**
+	 * Get the highest information element index 
+	 */
+	public int getTagLevel()
+	{
+		if (false == "".equals(_sPrivateUse))
+			return 7 ;
+		if (false == "".equals(_sExtension))
+			return 6 ;
+		if (false == "".equals(_sVariant))
+			return 5 ;
+		if (false == "".equals(_sRegion))
+			return 4 ;
+		if (false == "".equals(_sScript))
+			return 3 ;
+		if (false == "".equals(_sExtLang))
+			return 2 ;
+		if (false == "".equals(_sLanguage))
+			return 1 ;
+		
+		return 0 ;
+	}
+	
+	public String getCodeForLevel(final int iLevel)
+	{
+		if (iLevel <= 0)
+			return "" ;
+		
+		String sCode = _sLanguage ;
+		
+		if (iLevel > 1)
+		{
+			sCode += "-" + _sExtLang ;
+			if (iLevel > 2)
+			{
+				sCode += "-" + _sScript ;
+				if (iLevel > 3)
+				{
+					sCode += "-" + _sRegion ;
+					if (iLevel > 4)
+					{
+						sCode += "-" + _sVariant ;
+						if (iLevel > 5)
+						{
+							sCode += "-" + _sExtension ;
+							if (iLevel > 6)
+							{
+								sCode += "-" + _sPrivateUse ;
+							}
+						}
+					}
+				}
+			}
+		}
+			
+		return MiscellanousFcts.strip(sCode, STRIP_DIRECTION.stripRight, '-') ;
 	}
 	
 	public String getCode() {

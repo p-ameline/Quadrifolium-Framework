@@ -3,7 +3,7 @@ package org.quadrifolium.client.mvp_components;
 import java.util.ArrayList;
 
 import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -77,7 +77,7 @@ public class QuadrifoliumComponentBaseLayoutDisplay extends SplitLayoutPanel imp
 	}
 	
 	@Override
-	public ArrayList<PushButton> getButtonsArray() {
+	public ArrayList<ButtonBase> getButtonsArray() {
 		return _baseDisplayModel.getButtons() ;
 	}
 	

@@ -12,8 +12,11 @@ import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayMo
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.inject.Inject;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
@@ -81,30 +84,55 @@ public abstract class QuadrifoliumComponentBasePresenter<D extends QuadrifoliumC
 		});
 			
 		/**
-		 * Get key down from the "add definition" button 
+		 * Get key down from the "add element" button. Take care that it doesn't exist for singletons 
 		 */
-		display.getAddButtonKeyDown().addClickHandler(new ClickHandler() {
-			public void onClick(final ClickEvent event)
-			{
-				if (_bAdding)
-					return ;
+		HasClickHandlers addElementClickHandler = display.getAddButtonKeyDown() ;
+		if (null != addElementClickHandler)
+		{
+			addElementClickHandler.addClickHandler(new ClickHandler() {
+				public void onClick(final ClickEvent event)
+				{
+					if (_bAdding)
+						return ;
 					
-				addNewElement() ;
-			}
-		});
+					addNewElement() ;
+				}
+			});
+		}
 			
 		/**
-		 * Get key down from the OK button from the "add definition" panel 
+		 * Get key down from the OK button from the "add element" panel. Take care that it doesn't exist for singletons
 		 */
-		display.getAddOkButtonKeyDown().addClickHandler(new ClickHandler() {
-			public void onClick(final ClickEvent event)
-			{
-				if (false == _bAdding)
-					return ;
+		HasClickHandlers addElementOkClickHandler = display.getAddOkButtonKeyDown() ;
+		if (null != addElementOkClickHandler)
+		{
+			addElementOkClickHandler.addClickHandler(new ClickHandler() {
+				public void onClick(final ClickEvent event)
+				{
+					if (false == _bAdding)
+						return ;
 					
-				saveEditedElement() ;
-			}
-		});
+					saveEditedElement() ;
+				}
+			});
+		}
+		
+		/**
+		 * Get key down from the Cancel button from the "add element" panel. Take care that it doesn't exist for singletons
+		 */
+		HasClickHandlers addElementCancelClickHandler = display.getAddCancelButtonKeyDown() ;
+		if (null != addElementCancelClickHandler)
+		{
+			addElementCancelClickHandler.addClickHandler(new ClickHandler() {
+				public void onClick(final ClickEvent event)
+				{
+					if (false == _bAdding)
+						return ;
+					
+					closeEditingSession() ;
+				}
+			});
+		}
 			
 		/**
 		 * Get key down from the OK button from the error box
@@ -235,9 +263,23 @@ public abstract class QuadrifoliumComponentBasePresenter<D extends QuadrifoliumC
 	{
 		_bEditMode = !_bEditMode ;
 		
+		// When switching mode, the editing session should always be/get closed
+		//
+		closeEditingSession() ;
+		
 		// Change view state
 		//
 		updateView() ;
+	}
+
+	/**
+	 * Close the editing session
+	 */
+	protected void closeEditingSession()
+	{
+		display.closeAddPanel() ;
+		
+		_bAdding   = false ;
 	}
 	
 	/**
@@ -277,6 +319,64 @@ public abstract class QuadrifoliumComponentBasePresenter<D extends QuadrifoliumC
 	
 	public void setParent(QuadrifoliumWorkshopPresenterModel<QuadrifoliumWorkshopViewModel> parent) {
 		_parent = parent ;
+	}
+	
+	/**
+	 * Information contained inside button's ID
+	 * 
+	 * @author Philippe
+	 */
+	protected class buttonControlInformation
+	{
+		protected String _sAction ;
+		protected String _sId ;
+		
+		public buttonControlInformation()
+		{
+			_sAction = "" ;
+			_sId     = "" ;
+		}
+		
+		public buttonControlInformation(final String sAction, final String sId)
+		{
+			_sAction = sAction ;
+			_sId     = sId ;
+		}
+		
+		public String getAction() {
+			return _sAction ;
+		}
+		public void setAction(final String sAction) {
+			_sAction = sAction ;
+		}
+		
+		public String getId() {
+			return _sId ;
+		}
+		public void setId(final String sId) {
+			_sId = sId ;
+		}
+	}
+	
+	/**
+	 * Parse a button Id into a buttonControlInformation structure
+	 * 
+	 * @return <code>null</code> if something went wrong; the buttonControlInformation if not
+	 */
+	protected buttonControlInformation getControlInformation(final ButtonBase button) throws NullPointerException
+	{
+		if (null == button)
+			throw new NullPointerException() ;
+		
+		String sId = button.getElement().getId() ;
+		if ((null == sId) || ("".equals(sId)))
+			return null ;
+		
+		String[] decomposition = sId.split("_") ;
+		if (decomposition.length != 2)
+			return null ;
+			
+		return new buttonControlInformation(decomposition[0], decomposition[1]) ;
 	}
 	
 	@Override

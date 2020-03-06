@@ -16,6 +16,7 @@ import org.quadrifolium.shared.ontology.Lemma;
 import org.quadrifolium.shared.ontology.Triple;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
 import org.quadrifolium.shared.rpc_util.SessionElements;
+import org.quadrifolium.shared.util.ParsedLanguageTag;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 /**
@@ -424,9 +425,12 @@ public class QuadrifoliumServerFcts
 	 * 
 	 * @return The Lemma if found, <code>null</code> if not
 	 */
-	public static Lemma getPreferredLemmaForConcept(DBConnector dbConnector, final String sLanguage, final String sCode, final SessionElements sessionElements)
+	public static Lemma getPreferredLemmaForConcept(DBConnector dbConnector, final String sLanguage, final String sCode, final SessionElements sessionElements) throws NullPointerException
 	{
-		String sFctName = "QuadrifoliumServerFcts.getLabelForConceptCodeInBase" ;
+		if (null == dbConnector)
+			throw new NullPointerException() ;
+		
+		String sFctName = "QuadrifoliumServerFcts.getPreferredLemmaForConcept 1" ;
 		
 		// This function is read only, hence it doesn't need a registered user
 		//
@@ -450,19 +454,64 @@ public class QuadrifoliumServerFcts
 			sActiveLanguage = "en" ;
 		}
 		
+		// Create required managers and call function #2
+		//
+		LemmaManager  lemmaManager  = new LemmaManager(sessionElements, dbConnector) ;
+		TripleManager tripleManager = new TripleManager(sessionElements, dbConnector) ;
+
+		return getPreferredLemmaForConcept(sActiveLanguage, sCode, lemmaManager, tripleManager, sessionElements) ;		
+	}
+	
+	/**
+	 * Get the preferred lemma for a concept code<br>
+	 * <br>
+	 * This function is read only, hence it doesn't need a registered user.
+	 * 
+	 * @param sLanguage       Language of the label to look for (if empty, English is assumed)
+	 * @param sCode           Concept code to get label for
+	 * @param lemmaManager    Manager for the lemma table
+	 * @param tripleManager   Manager for the triple table
+	 * @param sessionElements Session information
+	 * 
+	 * @return The Lemma if found, <code>null</code> if not
+	 */
+	public static Lemma getPreferredLemmaForConcept(final String sLanguage, final String sCode, LemmaManager lemmaManager, TripleManager tripleManager, final SessionElements sessionElements) throws NullPointerException
+	{
+		if ((null == lemmaManager) || (null == tripleManager))
+			throw new NullPointerException() ;
+		
+		String sFctName = "QuadrifoliumServerFcts.getPreferredLemmaForConcept 2" ;
+		
+		// This function is read only, hence it doesn't need a registered user
+		//
+		int iUserId = -1 ;
+		if (null != sessionElements)
+			iUserId = sessionElements.getPersonId() ;
+		
+		// Check parameters
+		// 
+		if ((null == sCode) || "".equals(sCode))
+		{
+			Logger.trace(sFctName + ": bad parameter, leaving.", iUserId, Logger.TraceLevel.ERROR) ;
+			return null ;
+		}
+		
+		String sActiveLanguage = sLanguage ;
+		
+		if ((null == sLanguage) || "".equals(sLanguage))
+		{
+			Logger.trace(sFctName + ": bad parameter for language, switching to English.", iUserId, Logger.TraceLevel.ERROR) ;
+			sActiveLanguage = "en" ;
+		}
+		
 		// Look for a triple that points to the preferred lemma for a term (such a triple can exists for each different language)
 		//
-		TripleManager tripleManager = new TripleManager(sessionElements, dbConnector) ;
 		
 		// Getting all preferred terms triples for this concept
 		//
 		ArrayList<Triple> aResults = new ArrayList<Triple>() ;
 		tripleManager.getObjects(sCode, QuadrifoliumFcts.getConceptCodeForPreferredTerm(), aResults) ;
-		
-		// A LemmaManager will be needed from there anyway  
-		//
-		LemmaManager lemmaManager = new LemmaManager(sessionElements, dbConnector) ;
-		
+				
 		// Check if there is a result for this specific language
 		//
 		if (false == aResults.isEmpty())
@@ -484,11 +533,8 @@ public class QuadrifoliumServerFcts
 		//
 		ArrayList<Lemma> aLemmasForConcept = new ArrayList<Lemma>() ;
 		
-		if (lemmaManager.existDataForConcept(sCode, sActiveLanguage, aLemmasForConcept))
+		if ((lemmaManager.existDataForConcept(sCode, sActiveLanguage, aLemmasForConcept)) && (false == aLemmasForConcept.isEmpty()))
 		{
-			if (aLemmasForConcept.isEmpty())
-				return null ;
-			
 			// Sort on code
 			//
 			Collections.sort(aLemmasForConcept) ;
@@ -499,7 +545,21 @@ public class QuadrifoliumServerFcts
 			return it.next() ;
 		}
 		
-		return null ;
+		// If there, it means that no lemma where found for this code and this level of precision in language
+		// we will try to find something for a more generic language
+		//
+		
+		// "en" is already considered as "the most generic of all languages"
+		//
+		if ("en".equals(sActiveLanguage))
+			return null ;
+		
+		// Get a "one level more generic language" and call the function recursively on it
+		//
+		ParsedLanguageTag languageTag = new ParsedLanguageTag(sActiveLanguage) ;
+		String sMoreGenericLanguage = languageTag.getMoreGenericTag() ;
+		
+		return getPreferredLemmaForConcept(sMoreGenericLanguage, sCode, lemmaManager, tripleManager, sessionElements) ;
 	}
 	
 	/**
@@ -664,6 +724,40 @@ public class QuadrifoliumServerFcts
 			throw new NullPointerException() ;
 		
 		TripleManager tripleManager = new TripleManager(sessionElements, dbConnector) ;
+		if (false == tripleManager.insertData(tripleToInsert))
+			return -1 ;
+		
+		return tripleToInsert.getId() ;
+	}
+	
+	/**
+	 * Insert a new triple in database
+	 * 
+	 * @return ID of created triple (<code>-1</code> is something went wrong)
+	 */
+	public static int recordTriple(TripleManager tripleManager, final String sSubject, final String sPredicate, final String sObject, final SessionElements sessionElements) throws NullPointerException
+	{
+		if ((null == tripleManager) || (null == sSubject) || (null == sPredicate) || (null == sObject))
+			throw new NullPointerException() ;
+		
+		if ("".equals(sSubject) || "".equals(sPredicate) || "".equals(sObject))
+			return -1 ;
+		
+		Triple newTriple = new Triple(-1, sSubject, sPredicate, sObject) ;
+		
+		return recordTriple(tripleManager, newTriple, sessionElements) ;
+	}
+	
+	/**
+	 * Insert a new triple in database
+	 * 
+	 * @return ID of created triple (<code>-1</code> is something went wrong)
+	 */
+	public static int recordTriple(TripleManager tripleManager, Triple tripleToInsert, final SessionElements sessionElements) throws NullPointerException
+	{
+		if ((null == tripleManager) || (null == tripleToInsert))
+			throw new NullPointerException() ;
+		
 		if (false == tripleManager.insertData(tripleToInsert))
 			return -1 ;
 		

@@ -2,10 +2,13 @@ package org.quadrifolium.client.util;
 
 import java.util.ArrayList;
 
+import org.quadrifolium.client.mvp_components.QuadrifoliumLemmasView;
 import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
 import org.quadrifolium.shared.ontology.FlexWithTraits;
 import org.quadrifolium.shared.ontology.LemmaWithInflections;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
+
+import com.google.gwt.event.dom.client.HasClickHandlers;
 
 /**
  * The LinguisticTreeNode is the object that contains information to be displayed in a cell
@@ -113,13 +116,13 @@ public class LinguisticTreeNode
 		_cell = cell; 
 	} 
 		
-	public void refresh(final INTERFACETYPE iInterfaceType) 
+	public void refresh(final INTERFACETYPE iInterfaceType, final QuadrifoliumLemmasView parentView) 
 	{ 
 		if (null != _parent) 
-			_parent.refresh(iInterfaceType) ; 
+			_parent.refresh(iInterfaceType, parentView) ;
 
 		if (null != _cell)  
-			_cell.refresh(iInterfaceType) ; //refresh tree 
+			_cell.refresh(iInterfaceType, parentView) ; //refresh tree 
 	} 
 		
 	public String getName()

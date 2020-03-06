@@ -77,6 +77,10 @@ public class QuadrifoliumSupervisor {
 	public Person getUser() {
 		return _user ;
 	}
+	
+	/**
+	 * Called when user changes 
+	 */
 	public void setUser(final Person user)
 	{
 		// SetUserId reinits the supervisor
@@ -87,6 +91,8 @@ public class QuadrifoliumSupervisor {
 			setUserId(-1) ;
 		
 		_user.initFromPerson(user) ;
+		
+		_sUserLanguage = _user.getLanguage() ;
 		
 		// Tell interface elements that user changed
     //
