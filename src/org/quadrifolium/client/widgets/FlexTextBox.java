@@ -82,6 +82,9 @@ public class FlexTextBox extends TextBox implements ChangeHandler, HasConceptCha
     _flexList     = new ArrayList<Flex>() ;
   }
 
+  /**
+   * Is the key a "control key" for this control? (Enter, Escape, Up and Down arrows)
+   */
   public boolean isControlKey(KeyUpEvent event)
   {
   	if ((event.isDownArrow()) || (event.isUpArrow()))
@@ -102,6 +105,8 @@ public class FlexTextBox extends TextBox implements ChangeHandler, HasConceptCha
    */
   public boolean processKeyUp(KeyUpEvent event)
   {
+    // Down arrow, select the next proposal in the list (after the last one, go back to the first)
+    //
     if (event.isDownArrow())
     {
     	// Get getSelectedIndex() returns 0 for first element
@@ -116,7 +121,9 @@ public class FlexTextBox extends TextBox implements ChangeHandler, HasConceptCha
            
       return false ;
     }
-       
+    
+    // Up arrow, select the former proposal in the list (before the first one, cycle to the last)
+    //
     if (event.isUpArrow())
     {
       int iSelectedIndex = _choices.getSelectedIndex() ;
@@ -132,6 +139,8 @@ public class FlexTextBox extends TextBox implements ChangeHandler, HasConceptCha
        
     int iNativeKeyCode = event.getNativeKeyCode() ;
     
+    // Enter key, get current selection as user's choice
+    //
     if (KEY_ENTER == iNativeKeyCode)
     {
       if (_visible)
@@ -139,7 +148,9 @@ public class FlexTextBox extends TextBox implements ChangeHandler, HasConceptCha
            
       return false ;
     }
-       
+    
+    // Escape key, close the selection list
+    //
     if (KEY_ESCAPE == iNativeKeyCode)
     {
     	closeChoices()  ;
@@ -211,9 +222,13 @@ public class FlexTextBox extends TextBox implements ChangeHandler, HasConceptCha
     complete();
   }
    
-  // add selected item to textbox
+  /**
+   * Consider current selected item as the final choice, insert it's label in the textbox and close the list
+   */
   public void complete()
   {
+    // Consider selected Flex as user's choice and display its label in the box
+    //
     if (_choices.getItemCount() > 0)
     {
     	int iSelectedIndex = _choices.getSelectedIndex() ;
@@ -230,9 +245,13 @@ public class FlexTextBox extends TextBox implements ChangeHandler, HasConceptCha
     		}
     	}
     }
-       
+    
+    // Hide the selection list
+    //
     closeChoices() ;
     
+    // Fire a "concept changed" event
+    //
     ConceptChangedEvent event = new ConceptChangedEvent() ;
     _eventBus.fireEvent(event) ;
   }
@@ -281,17 +300,21 @@ public class FlexTextBox extends TextBox implements ChangeHandler, HasConceptCha
 		_flexList.add(flex) ;
 	}
 	
+	/**
+	 * Get the {@link org.quadrifolium.shared.ontology.Flex} object from the list for a given code
+	 * 
+	 * @param sCode Code of the {@link org.quadrifolium.shared.ontology.Flex} we are looking for
+	 *  
+	 * @return The {@link org.quadrifolium.shared.ontology.Flex} object, of <code>null</code> if not found
+	 */
 	protected Flex getFlexFromCode(final String sCode)
 	{
 		if (_flexList.isEmpty() || (null == sCode) || "".equals(sCode))
 			return null ;
 		
-		for (Iterator<Flex> it = _flexList.iterator() ; it.hasNext() ; )
-		{
-			Flex flex = it.next() ;
+		for (Flex flex : _flexList)
 			if (sCode.equals(flex.getCode()))
 				return flex ;
-		}
 		
 		return null ;
 	}

@@ -8,6 +8,6 @@ public class DispatchServletModule extends ServletModule {
 	@Override
 	public void configureServlets() {
 		// NOTE: the servlet context will probably need changing
-		serve("/quadrifolium/dispatch").with(GuiceStandardDispatchServlet.class) ;
+		serve("/base/quadrifolium/dispatch").with(GuiceStandardDispatchServlet.class) ;
 	}
 }

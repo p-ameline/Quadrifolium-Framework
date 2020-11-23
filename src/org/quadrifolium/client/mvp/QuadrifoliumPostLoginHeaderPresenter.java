@@ -5,12 +5,16 @@ import net.customware.gwt.presenter.client.EventBus;
 import net.customware.gwt.presenter.client.widget.WidgetDisplay;
 import net.customware.gwt.presenter.client.widget.WidgetPresenter;
 
+import org.quadrifolium.client.event.GoToAtelierPhpEvent;
 import org.quadrifolium.client.event.PostLoginHeaderDisplayEvent;
 import org.quadrifolium.client.event.PostLoginHeaderDisplayEventHandler;
 import org.quadrifolium.client.event.PostLoginHeaderEvent;
 import org.quadrifolium.client.event.PostLoginHeaderEventHandler;
 import org.quadrifolium.client.global.QuadrifoliumSupervisor;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.inject.Inject;
 
@@ -18,10 +22,12 @@ public class QuadrifoliumPostLoginHeaderPresenter extends WidgetPresenter<Quadri
 {	
 	public interface Display extends WidgetDisplay 
 	{	
-		FlowPanel getPanel() ;
+		public FlowPanel getPanel() ;
 		
-		void      setWelcomeText(String sPseudo) ;
-		void      setText(String sText) ;
+		public void      setWelcomeText(String sPseudo) ;
+		public void      setText(String sText) ;
+		
+		public HasClickHandlers getOpenAtelierPhpButton() ;
 	}
 
 	private final QuadrifoliumSupervisor _supervisor ;
@@ -62,6 +68,16 @@ public class QuadrifoliumPostLoginHeaderPresenter extends WidgetPresenter<Quadri
 					display.setWelcomeText(_supervisor.getUserPseudo()) ;
 				else
 					display.setText(sTextToDisplay) ;
+			}
+		});
+		
+		// Click to establish just entered concept as current concept
+		//
+		display.getOpenAtelierPhpButton().addClickHandler(new ClickHandler(){
+			@Override
+			public void onClick(final ClickEvent event)
+			{
+				eventBus.fireEvent(new GoToAtelierPhpEvent()) ;
 			}
 		});
 	}

@@ -13,9 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
-import org.quadrifolium.server.handler.QuadrifoliumActionHandler;
 import org.quadrifolium.server.ontology.TripleManager;
 import org.quadrifolium.server.util.QuadrifoliumServerFcts;
 import org.quadrifolium.shared.ontology.Triple;
@@ -27,8 +24,11 @@ import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class GetSemanticTriplesForConceptHandler extends QuadrifoliumActionHandler<GetSemanticTriplesAction, GetSemanticTriplesResult>
+public class GetSemanticTriplesForConceptHandler extends LdvActionHandler<GetSemanticTriplesAction, GetSemanticTriplesResult>
 {
 	protected SessionElements _sessionElements ;
 	protected int             _iUserId ;
@@ -39,11 +39,10 @@ public class GetSemanticTriplesForConceptHandler extends QuadrifoliumActionHandl
   protected final HashMap<String, String> _aLabelsForCodes = new HashMap<String, String>() ;
 	
 	@Inject
-	public GetSemanticTriplesForConceptHandler(final Logger logger,
-                                             final Provider<ServletContext> servletContext,       
+	public GetSemanticTriplesForConceptHandler(final Provider<ServletContext> servletContext,       
                                              final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 		
 		_sessionElements = null ;
 		_iUserId         = -1 ;

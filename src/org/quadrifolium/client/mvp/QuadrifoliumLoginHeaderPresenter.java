@@ -42,11 +42,11 @@ public class QuadrifoliumLoginHeaderPresenter extends WidgetPresenter<Quadrifoli
 		public Button             getSendLogin() ;
 		public HasKeyDownHandlers getPassKeyDown() ;
 		
-		public DialogBox getErrDialogBox() ;
-		public Button    getErrDialogBoxOkButton() ;
-		public Button    getErrDialogBoxSendIdsButton() ;
-		public void      showWaitCursor() ;
-		public void      showDefaultCursor() ;
+		public DialogBox          getErrDialogBox() ;
+		public Button             getErrDialogBoxOkButton() ;
+		public Button             getErrDialogBoxSendIdsButton() ;
+		public void               showWaitCursor() ;
+		public void               showDefaultCursor() ;
 	}
 
 	private final DispatchAsync          _dispatcher ;

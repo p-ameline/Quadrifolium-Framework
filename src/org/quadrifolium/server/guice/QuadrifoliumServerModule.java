@@ -3,7 +3,6 @@ package org.quadrifolium.server.guice;
 import net.customware.gwt.dispatch.server.guice.ActionHandlerModule;
 
 import org.quadrifolium.server.DbParameters;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.handler.CheckPseudoHandler;
 import org.quadrifolium.server.handler.CheckUserHandler;
 import org.quadrifolium.server.handler.GetLanguagesHandler;
@@ -16,6 +15,7 @@ import org.quadrifolium.server.handler4ontology.GetFullSynonymsForConceptHandler
 import org.quadrifolium.server.handler4ontology.GetLanguageTagsHandler;
 import org.quadrifolium.server.handler4ontology.GetLemmasForConceptHandler;
 import org.quadrifolium.server.handler4ontology.GetSemanticTriplesForConceptHandler;
+import org.quadrifolium.server.handler4ontology.GetStemmaForConceptHandler;
 import org.quadrifolium.server.handler4ontology.SaveDefinitionTripleHandler;
 import org.quadrifolium.server.handler4ontology.SaveLemmaHandler;
 import org.quadrifolium.server.handler_special.LexiqueTo4foliumHandler;
@@ -32,11 +32,13 @@ import org.quadrifolium.shared.rpc4ontology.GetFullSynonymsForConceptAction;
 import org.quadrifolium.shared.rpc4ontology.GetLanguageTagsAction;
 import org.quadrifolium.shared.rpc4ontology.GetLemmasForConceptAction;
 import org.quadrifolium.shared.rpc4ontology.GetSemanticTriplesAction;
+import org.quadrifolium.shared.rpc4ontology.GetStemmaForConceptAction;
 import org.quadrifolium.shared.rpc4ontology.SaveDefinitionAction;
 import org.quadrifolium.shared.rpc4ontology.SaveLemmaAction;
 import org.quadrifolium.shared.rpc_special.LexiqueTo4foliumAction;
 
 import com.google.inject.Singleton;
+import com.ldv.server.Logger;
 
 /**
  * Module which binds the handlers and configurations
@@ -61,6 +63,7 @@ public class QuadrifoliumServerModule extends ActionHandlerModule
 		bindHandler(GetFullSynonymsForConceptAction.class, GetFullSynonymsForConceptHandler.class) ;
 		bindHandler(GetSemanticTriplesAction.class,        GetSemanticTriplesForConceptHandler.class) ;
 		bindHandler(GetDefinitionsTriplesAction.class,     GetDefinitionsTriplesForConceptHandler.class) ;
+		bindHandler(GetStemmaForConceptAction.class,       GetStemmaForConceptHandler.class) ;
 		bindHandler(GetLanguageTagsAction.class,           GetLanguageTagsHandler.class) ;
 		
 		// Ontology management write functions

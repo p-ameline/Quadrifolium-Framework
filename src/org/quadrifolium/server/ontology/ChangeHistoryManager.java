@@ -4,10 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.ontology_base.ChangeHistory;
 
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 import com.ldv.shared.model.LdvTime;
 
 /** 

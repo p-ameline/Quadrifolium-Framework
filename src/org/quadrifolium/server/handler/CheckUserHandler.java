@@ -7,7 +7,6 @@ import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.quadrifolium.server.DbParameters;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.model.PersonManager;
 import org.quadrifolium.server.model.SessionsManager;
 import org.quadrifolium.shared.database.Person;
@@ -16,15 +15,16 @@ import org.quadrifolium.shared.rpc.SendLoginResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class CheckUserHandler extends QuadrifoliumActionHandler<SendLoginAction, SendLoginResult>
+public class CheckUserHandler extends LdvActionHandler<SendLoginAction, SendLoginResult>
 {
 	@Inject
-	public CheckUserHandler(final Logger logger,
-                          final Provider<ServletContext> servletContext,
+	public CheckUserHandler(final Provider<ServletContext> servletContext,
                           final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 	}
 
 	/**

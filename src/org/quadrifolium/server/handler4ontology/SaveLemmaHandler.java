@@ -11,9 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
-import org.quadrifolium.server.handler.QuadrifoliumActionHandler;
 import org.quadrifolium.server.model.SessionsManager;
 import org.quadrifolium.server.ontology.FlexManager;
 import org.quadrifolium.server.ontology.LemmaExtendedManager;
@@ -38,16 +35,19 @@ import org.quadrifolium.shared.util.QuadrifoliumFcts.PartOfSpeech;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class SaveLemmaHandler extends QuadrifoliumActionHandler<SaveLemmaAction, SaveLemmaResult>
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
+
+public class SaveLemmaHandler extends LdvActionHandler<SaveLemmaAction, SaveLemmaResult>
 {
 	protected SessionElements _sessionElements ;
 
 	@Inject
-	public SaveLemmaHandler(final Logger logger,
-                          final Provider<ServletContext> servletContext,       
+	public SaveLemmaHandler(final Provider<ServletContext> servletContext,       
                           final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 		
 		_sessionElements = null ;
 	}

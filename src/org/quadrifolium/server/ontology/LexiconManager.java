@@ -4,10 +4,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.shared.ontology.OntologyLexicon;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /** 
  * Object in charge of Read/Write operations in the <code>lexique</code> 

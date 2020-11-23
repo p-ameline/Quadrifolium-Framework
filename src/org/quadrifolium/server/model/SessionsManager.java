@@ -9,10 +9,11 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.database.Session;
 import org.quadrifolium.shared.rpc_util.SessionElements;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /**
  * Class in charge of the "sessions" table. Quadrifolium keeps a sessions history.

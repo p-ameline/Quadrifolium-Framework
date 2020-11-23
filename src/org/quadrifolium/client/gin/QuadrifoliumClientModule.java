@@ -7,6 +7,8 @@ import net.customware.gwt.presenter.client.gin.AbstractPresenterModule;
 import org.quadrifolium.client.CachingDispatchAsync;
 import org.quadrifolium.client.global.QuadrifoliumSupervisor;
 import org.quadrifolium.client.mvp.QuadrifoliumAppPresenter;
+import org.quadrifolium.client.mvp.QuadrifoliumAtelierPhpPresenter;
+import org.quadrifolium.client.mvp.QuadrifoliumAtelierPhpView;
 import org.quadrifolium.client.mvp.QuadrifoliumCommandPanelPresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumCommandPanelView;
 import org.quadrifolium.client.mvp.QuadrifoliumLoginHeaderPresenter;
@@ -27,6 +29,8 @@ import org.quadrifolium.client.mvp_components.QuadrifoliumLemmasPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumLemmasView;
 import org.quadrifolium.client.mvp_components.QuadrifoliumSemanticsPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumSemanticsView;
+import org.quadrifolium.client.mvp_components.QuadrifoliumStemmaPresenter;
+import org.quadrifolium.client.mvp_components.QuadrifoliumStemmaView;
 import org.quadrifolium.client.widgets.FlexTextBox;
 
 import com.google.inject.Singleton;
@@ -44,6 +48,7 @@ public class QuadrifoliumClientModule extends AbstractPresenterModule
 		bindPresenter(QuadrifoliumLoginHeaderPresenter.class,     QuadrifoliumLoginHeaderPresenter.Display.class,     QuadrifoliumLoginHeaderView.class) ;
 		bindPresenter(QuadrifoliumCommandPanelPresenter.class,    QuadrifoliumCommandPanelPresenter.Display.class,    QuadrifoliumCommandPanelView.class) ;
 		bindPresenter(QuadrifoliumPostLoginHeaderPresenter.class, QuadrifoliumPostLoginHeaderPresenter.Display.class, QuadrifoliumPostLoginHeaderView.class) ;
+		bindPresenter(QuadrifoliumAtelierPhpPresenter.class,      QuadrifoliumAtelierPhpPresenter.Display.class,      QuadrifoliumAtelierPhpView.class) ;
 		// bindPresenter(QuadrifoliumLoginResponsePresenter.class,   QuadrifoliumLoginResponsePresenter.Display.class,   QuadrifoliumLoginResponseView.class) ;
 		bindPresenter(QuadrifoliumRegisterPresenter.class,        QuadrifoliumRegisterPresenter.Display.class,        QuadrifoliumRegisterView.class) ;
 		
@@ -51,6 +56,7 @@ public class QuadrifoliumClientModule extends AbstractPresenterModule
 		bindPresenter(QuadrifoliumLemmasPresenter.class,          QuadrifoliumLemmasPresenter.Display.class,          QuadrifoliumLemmasView.class) ;
 		bindPresenter(QuadrifoliumSemanticsPresenter.class,       QuadrifoliumSemanticsPresenter.Display.class,       QuadrifoliumSemanticsView.class) ;
 		bindPresenter(QuadrifoliumDefinitionsPresenter.class,     QuadrifoliumDefinitionsPresenter.Display.class,     QuadrifoliumDefinitionsView.class) ;
+		bindPresenter(QuadrifoliumStemmaPresenter.class,          QuadrifoliumStemmaPresenter.Display.class,          QuadrifoliumStemmaView.class) ;
 		
 		bind(QuadrifoliumAppPresenter.class).in(Singleton.class) ;
 		bind(QuadrifoliumSupervisor.class).in(Singleton.class) ;

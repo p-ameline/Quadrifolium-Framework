@@ -43,6 +43,12 @@ public interface QuadrifoliumResources extends ClientBundle
 	@Source("cytoscape.js")
 	public TextResource cytoscapeJs() ;
 	
+	@Source("dagre.js")
+	public TextResource dagreJs() ;
+	
+	@Source("cytoscape-dagre.js")
+	public TextResource cytoscapeDagreJs() ;
+	
 /*
   @Source("config.xml")
   public TextResource initialConfiguration();

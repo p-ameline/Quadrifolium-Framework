@@ -11,9 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
-import org.quadrifolium.server.handler.QuadrifoliumActionHandler;
 import org.quadrifolium.server.model.SessionsManager;
 import org.quadrifolium.server.ontology.FreeTextManager;
 import org.quadrifolium.server.ontology.TripleManager;
@@ -28,17 +25,19 @@ import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class SaveDefinitionTripleHandler extends QuadrifoliumActionHandler<SaveDefinitionAction, SaveDefinitionResult>
+public class SaveDefinitionTripleHandler extends LdvActionHandler<SaveDefinitionAction, SaveDefinitionResult>
 {
 	protected SessionElements _sessionElements ;
 
 	@Inject
-	public SaveDefinitionTripleHandler(final Logger logger,
-                                     final Provider<ServletContext> servletContext,       
+	public SaveDefinitionTripleHandler(final Provider<ServletContext> servletContext,       
                                      final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 		
 		_sessionElements = null ;
 	}

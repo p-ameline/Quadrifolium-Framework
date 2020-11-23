@@ -4,6 +4,7 @@ import net.customware.gwt.dispatch.client.gin.StandardDispatchModule;
 
 import org.quadrifolium.client.global.QuadrifoliumSupervisor;
 import org.quadrifolium.client.mvp.QuadrifoliumAppPresenter;
+import org.quadrifolium.client.mvp.QuadrifoliumAtelierPhpPresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumCommandPanelPresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumLoginHeaderPresenter;
 import org.quadrifolium.client.mvp.QuadrifoliumPostLoginHeaderPresenter;
@@ -13,6 +14,7 @@ import org.quadrifolium.client.mvp.QuadrifoliumWelcomeTextPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumDefinitionsPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumLemmasPresenter;
 import org.quadrifolium.client.mvp_components.QuadrifoliumSemanticsPresenter;
+import org.quadrifolium.client.mvp_components.QuadrifoliumStemmaPresenter;
 import org.quadrifolium.client.widgets.FlexTextBox;
 
 import com.google.gwt.inject.client.GinModules;
@@ -39,11 +41,13 @@ public interface QuadrifoliumGinjector extends Ginjector
 	
 	QuadrifoliumWelcomeTextPresenter     getWelcomeTextPresenter() ;
 	QuadrifoliumWelcomePagePresenter     getWelcomePagePresenter() ;
+	QuadrifoliumAtelierPhpPresenter      getAtelierPhpPresenter() ;
 	// QuadrifoliumWorkshopPresenter        getWorkshopPresenter() ;
 	
 	QuadrifoliumLemmasPresenter          getLemmasPresenter() ;
 	QuadrifoliumSemanticsPresenter       getSemanticsPresenter() ;
 	QuadrifoliumDefinitionsPresenter     getDefinitionsPresenter() ;
+	QuadrifoliumStemmaPresenter          getStemmaPresenter() ;
 	
 	QuadrifoliumRegisterPresenter        getRegisterPresenter() ;
 	

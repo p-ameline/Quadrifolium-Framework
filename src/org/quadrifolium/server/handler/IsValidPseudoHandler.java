@@ -10,23 +10,23 @@ import javax.servlet.http.HttpServletRequest;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.shared.database.Person;
 import org.quadrifolium.shared.rpc.IsValidPseudoAction;
 import org.quadrifolium.shared.rpc.IsValidPseudoResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class IsValidPseudoHandler extends QuadrifoliumActionHandler<IsValidPseudoAction, IsValidPseudoResult>
+public class IsValidPseudoHandler extends LdvActionHandler<IsValidPseudoAction, IsValidPseudoResult>
 {
 	@Inject
-	public IsValidPseudoHandler(final Logger logger,
-                              final Provider<ServletContext> servletContext,       
+	public IsValidPseudoHandler(final Provider<ServletContext> servletContext,       
                               final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 	}
 	
 	/**

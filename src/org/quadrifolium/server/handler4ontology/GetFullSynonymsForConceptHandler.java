@@ -13,9 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
-import org.quadrifolium.server.handler.QuadrifoliumActionHandler;
 import org.quadrifolium.server.ontology.LemmaExtendedManager;
 import org.quadrifolium.server.ontology.LemmaManager;
 import org.quadrifolium.server.ontology.TripleManager;
@@ -31,8 +28,11 @@ import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<GetFullSynonymsForConceptAction, GetFullSynonymsForConceptResult>
+public class GetFullSynonymsForConceptHandler extends LdvActionHandler<GetFullSynonymsForConceptAction, GetFullSynonymsForConceptResult>
 {
 	protected SessionElements _sessionElements ;
 	protected int             _iUserId ;
@@ -49,11 +49,10 @@ public class GetFullSynonymsForConceptHandler extends QuadrifoliumActionHandler<
   protected final HashMap<String, String> _aLabelsForCodes = new HashMap<String, String>() ;
 	
 	@Inject
-	public GetFullSynonymsForConceptHandler(final Logger logger,
-                                          final Provider<ServletContext> servletContext,       
+	public GetFullSynonymsForConceptHandler(final Provider<ServletContext> servletContext,       
                                           final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 		
 		_sessionElements = null ;
 		_iUserId         = -1 ;

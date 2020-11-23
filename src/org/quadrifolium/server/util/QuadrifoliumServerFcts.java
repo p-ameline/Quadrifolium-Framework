@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.ontology.FlexManager;
 import org.quadrifolium.server.ontology.FreeTextManager;
 import org.quadrifolium.server.ontology.LemmaManager;
@@ -18,6 +16,9 @@ import org.quadrifolium.shared.ontology.TripleWithLabel;
 import org.quadrifolium.shared.rpc_util.SessionElements;
 import org.quadrifolium.shared.util.ParsedLanguageTag;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /**
  * Server's global functions

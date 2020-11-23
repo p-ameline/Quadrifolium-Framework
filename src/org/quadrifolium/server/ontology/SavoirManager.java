@@ -3,9 +3,10 @@ package org.quadrifolium.server.ontology;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.ontology_base.OntologySavoir;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /** 
  * Object in charge of Read/Write operations in the <code>lexique</code> 

@@ -12,9 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
-import org.quadrifolium.server.handler.QuadrifoliumActionHandler;
 import org.quadrifolium.server.ontology.FreeTextManager;
 import org.quadrifolium.server.ontology.TripleManager;
 import org.quadrifolium.shared.ontology.FreeText;
@@ -26,8 +23,11 @@ import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class GetDefinitionsTriplesForConceptHandler extends QuadrifoliumActionHandler<GetDefinitionsTriplesAction, GetDefinitionsTriplesResult>
+public class GetDefinitionsTriplesForConceptHandler extends LdvActionHandler<GetDefinitionsTriplesAction, GetDefinitionsTriplesResult>
 {
 	protected int    _iUserId ;
 
@@ -37,11 +37,10 @@ public class GetDefinitionsTriplesForConceptHandler extends QuadrifoliumActionHa
   protected final HashMap<String, String> _aLabelsForCodes = new HashMap<String, String>() ;
 	
 	@Inject
-	public GetDefinitionsTriplesForConceptHandler(final Logger logger,
-                                                final Provider<ServletContext> servletContext,       
+	public GetDefinitionsTriplesForConceptHandler(final Provider<ServletContext> servletContext,       
                                                 final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 		
 		_iUserId = -1 ;
 	}

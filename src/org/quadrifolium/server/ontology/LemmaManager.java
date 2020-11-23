@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.ontology_base.ChangeHistory;
 import org.quadrifolium.server.ontology_base.HistoryLemma;
 import org.quadrifolium.server.ontology_base.ChangeHistory.ChangeType;
@@ -14,6 +12,9 @@ import org.quadrifolium.server.ontology_base.ChangeHistory.TableType;
 import org.quadrifolium.server.util.QuadrifoliumServerFcts;
 import org.quadrifolium.shared.ontology.Lemma;
 import org.quadrifolium.shared.rpc_util.SessionElements;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /** 
  * Object in charge of Read/Write operations for the <code>lemma</code> table 

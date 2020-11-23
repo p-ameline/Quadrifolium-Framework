@@ -1,15 +1,14 @@
 package org.quadrifolium.server.ontology;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.util.QuadrifoliumServerFcts;
 import org.quadrifolium.shared.ontology.Flex;
 import org.quadrifolium.shared.ontology.Lemma;
 import org.quadrifolium.shared.ontology.OntologyLexicon;
-import org.quadrifolium.shared.ontology.OntologyLexicon.Declination;
-import org.quadrifolium.shared.ontology.OntologyLexicon.Gender;
 import org.quadrifolium.shared.rpc_util.SessionElements;
 import org.quadrifolium.shared.util.QuadrifoliumFcts;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /** 
  * Object in charge of operations to create a lemma and its flexed forms from a <code>lexique</code> 

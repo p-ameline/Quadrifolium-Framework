@@ -11,25 +11,25 @@ import javax.servlet.http.HttpServletRequest;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.quadrifolium.server.DBConnector;
 import org.quadrifolium.server.DbParameters;
 import org.quadrifolium.server.EMailer;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.model.PersonManager;
 import org.quadrifolium.shared.rpc.RegisterUserAction;
 import org.quadrifolium.shared.rpc.RegisterUserResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class RegisterUserHandler extends QuadrifoliumActionHandler<RegisterUserAction, RegisterUserResult>
+public class RegisterUserHandler extends LdvActionHandler<RegisterUserAction, RegisterUserResult>
 {
 	@Inject
-	public RegisterUserHandler(final Logger logger,
-                             final Provider<ServletContext> servletContext,       
+	public RegisterUserHandler(final Provider<ServletContext> servletContext,       
                              final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 	}
 
 	/**

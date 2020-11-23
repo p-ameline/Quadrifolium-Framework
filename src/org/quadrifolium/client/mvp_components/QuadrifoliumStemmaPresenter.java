@@ -5,46 +5,51 @@ import net.customware.gwt.presenter.client.EventBus;
 
 import java.util.ArrayList;
 
-import org.quadrifolium.client.event.GoToWorkshopDefinitionEvent;
-import org.quadrifolium.client.event.GoToWorkshopDefinitionEventHandler;
+import org.quadrifolium.client.event.GoToWorkshopStemmaEvent;
+import org.quadrifolium.client.event.GoToWorkshopStemmaEventHandler;
 import org.quadrifolium.client.global.QuadrifoliumSupervisor;
 import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
-import org.quadrifolium.shared.ontology.TripleWithLabel;
-import org.quadrifolium.shared.rpc4ontology.GetDefinitionsTriplesResult;
-import org.quadrifolium.shared.rpc4ontology.SaveDefinitionAction;
-import org.quadrifolium.shared.rpc4ontology.SaveDefinitionResult;
+import org.quadrifolium.shared.ontology.QuadrifoliumNode;
+import org.quadrifolium.shared.rpc4ontology.GetStemmaForConceptAction;
+import org.quadrifolium.shared.rpc4ontology.GetStemmaForConceptResult;
 
 import com.allen_sauer.gwt.log.client.Log;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ButtonBase;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.inject.Inject;
+import com.ldv.shared.graph.LdvModelNode;
+import com.ldv.shared.graph.LdvModelNodeArray;
+import com.ldv.shared.graph.LdvModelTree;
 
 public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresenter<QuadrifoliumStemmaPresenter.Display> 
 {	
 	public interface Display extends QuadrifoliumComponentInterface 
 	{
-		public void             feedStemma(final INTERFACETYPE iInterfaceType) ;
-
-		public void             updateView(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType) ;		
+		public void openStemmaViewer() ;
+		
+		public void feedStemma(final LdvModelTree stemma, final INTERFACETYPE iInterfaceType) ;
+		public void updateView(final LdvModelTree stemma, final INTERFACETYPE iInterfaceType) ;		
 	}
 
-	protected     ArrayList<TripleWithLabel> _aDefinitionsTriples ;
-	protected     TripleWithLabel            _editedDefinition ;
+	protected     LdvModelTree    _stemma ;
+	// protected     TripleWithLabel            _editedDefinition ;
 	
 	@Inject
 	public QuadrifoliumStemmaPresenter(final Display display, 
-			                                    final EventBus eventBus,
-			                                    final DispatchAsync dispatcher,
-			                                    final QuadrifoliumSupervisor supervisor) 
+			                               final EventBus eventBus,
+			                               final DispatchAsync dispatcher,
+			                               final QuadrifoliumSupervisor supervisor) 
 	{
 		super(display, eventBus, dispatcher, supervisor) ;
 		
-		_aDefinitionsTriples = null ;
-		_editedDefinition    = null ;
+		_stemma = null ;
 		
 		bind() ;
 	}
@@ -60,11 +65,24 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 		
 		// Message received when it is time to open the workshop
 		//
-		eventBus.addHandler(GoToWorkshopDefinitionEvent.TYPE, new GoToWorkshopDefinitionEventHandler() {
-			public void onGoToWorkshopDefinition(GoToWorkshopDefinitionEvent event) {
+		eventBus.addHandler(GoToWorkshopStemmaEvent.TYPE, new GoToWorkshopStemmaEventHandler() {
+			public void onGoToWorkshopStemma(GoToWorkshopStemmaEvent event) {
 				connectToWorkshop(event.getContent()) ;
 			}
 		});
+		
+		/**
+		 * React to resize
+		 */
+/*
+		Window.addResizeHandler(new ResizeHandler()
+		{
+			@Override
+			public void onResize(ResizeEvent event) {
+				display.openStemmaViewer() ;
+			}
+		});
+*/
 	}
 
 	/**
@@ -72,27 +90,23 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 	 */
 	protected void UpdateContent()
 	{
-/*
-		// Since the process is asynchronous, we better clear the display first so definitions don't remain out-of-date for some times   
+		// Since the process is asynchronous, we better clear the stemma first so it doesn't remain out-of-date for some times   
 		//
-		display.feedDefinitionsTable(null, INTERFACETYPE.readOnlyMode) ;
+		display.feedStemma(null, INTERFACETYPE.readOnlyMode) ;
 		
 		String sConcept = _supervisor.getConcept() ;
 		
 		if ((null == sConcept) || "".equals(sConcept))
 			return ;
 		
-		// The query language is set to "" meaning that all languages are to be displayed
-		//
-		_dispatcher.execute(new GetDefinitionsTriplesAction(_supervisor.getUserId(), "", sConcept), new GetDefinitionsTriplesForConceptCallback()) ;
-*/
+		_dispatcher.execute(new GetStemmaForConceptAction(_supervisor.getSessionElements(), _supervisor.getUserLanguage(), sConcept), new GetStemmaForConceptCallback()) ;
 	}
 	
 	/**
 	 * Refresh view
 	 */
 	protected void UpdateDisplay(final INTERFACETYPE iInterfaceType) {
-		display.updateView(_aDefinitionsTriples, iInterfaceType) ;
+		display.updateView(_stemma, iInterfaceType) ;
 	}
 	
 	/**
@@ -101,9 +115,9 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 	 * @author Philippe
 	 *
 	 */
-	public class GetDefinitionsTriplesForConceptCallback implements AsyncCallback<GetDefinitionsTriplesResult>
+	public class GetStemmaForConceptCallback implements AsyncCallback<GetStemmaForConceptResult>
 	{
-		public GetDefinitionsTriplesForConceptCallback() {
+		public GetStemmaForConceptCallback() {
 			super() ;
 		}
 
@@ -114,17 +128,28 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 		}
 
 		@Override
-		public void onSuccess(GetDefinitionsTriplesResult value) 
+		public void onSuccess(GetStemmaForConceptResult value) 
 		{
-			if (null == _aDefinitionsTriples)
-				_aDefinitionsTriples = new ArrayList<TripleWithLabel>() ;
+			if (null == _stemma)
+				_stemma = new LdvModelTree() ;
 			else
-				_aDefinitionsTriples.clear() ;
+				_stemma.reset() ;
 			
-			if (false == value.getTriplesArray().isEmpty())
-				_aDefinitionsTriples.addAll(value.getTriplesArray())  ;
+			LdvModelTree incomingStemma = value.getStemma() ;
 			
-			refreshDefinitionsList() ;
+			if ((null != incomingStemma) && (false == incomingStemma.isEmpty()))
+			{
+				// Doing it "manually" in order to make certain we really keep an array of QuadrifoliumNode 
+				// _stemma.initFromModelTree(incomingStemma) ;
+				
+				_stemma.setTreeID(incomingStemma.getTreeID()) ;
+				
+				LdvModelNodeArray aNodes = _stemma.getNodes() ; ;
+				for (LdvModelNode node : incomingStemma.getNodes())					
+					aNodes.add(new QuadrifoliumNode(node)) ;
+			}
+			
+			refreshStemma() ;
 		}
 	}
 		
@@ -143,18 +168,18 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 	{
 		super.closeEditingSession() ;
 		
-		_editedDefinition = null ;
+		// _editedDefinition = null ;
 	}
 	
 	/**
-	 * Save currently edited definition
+	 * Save modified stemma
 	 */
-	protected void saveEditedElement()
+	protected void saveStemma()
 	{
 		String sText = "" ;
 		
 		String sLanguage = "" ;
-		
+/*
 		// If editing an existing definition, check if something changed
 		//
 		if (null != _editedDefinition)
@@ -180,6 +205,7 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 		// Send the save query to the server
 		//
 		_dispatcher.execute(new SaveDefinitionAction(_supervisor.getSessionElements(), _supervisor.getConcept(), sLanguage, sText, _editedDefinition), new SaveDefinitionCallback()) ;
+*/
 	}
 	
 	/**
@@ -188,6 +214,7 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 	 * @author Philippe
 	 *
 	 */
+/*
 	public class SaveDefinitionCallback implements AsyncCallback<SaveDefinitionResult>
 	{
 		public SaveDefinitionCallback() {
@@ -231,6 +258,7 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 			display.feedStemma(getInterfaceType()) ;
 		}
 	}
+*/
 	
 	/**
 	 * Connect the buttons that control definitions edition and deletion actions 
@@ -266,21 +294,22 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 		if ((null == sAction) || "".equals(sAction) || (null == sDefinitionID) || "".equals(sDefinitionID))
 			return ;
 		
+/*
 		TripleWithLabel tripleToEdit = getDefinitionFromId(sDefinitionID) ;
 		if (null == tripleToEdit)
 		{
 			// If clicked definition not found, better refresh the list
 			//
-			refreshDefinitionsList() ;
+			refreshStemma() ;
 			return ;
 		}
-		
+*/		
 		// Edit
 		//
 		if ("edt".equals(sAction))
 		{
 			_bEditMode        = true ;
-			_editedDefinition = tripleToEdit ;
+			// _editedDefinition = tripleToEdit ;
 			
 			_bAdding = true ;
 			
@@ -296,30 +325,13 @@ public class QuadrifoliumStemmaPresenter extends QuadrifoliumComponentBasePresen
 			
 		}
 	}
-	
-	/**
-	 * Find a definition in the array from its ID
-	 * 
-	 * @return The definition if found, <code>null</code> if not
-	 */
-	protected TripleWithLabel getDefinitionFromId(final String sDefinitionID)
-	{
-		if (_aDefinitionsTriples.isEmpty() || (null == sDefinitionID) || "".equals(sDefinitionID))
-			return null ;
 		
-		for (TripleWithLabel triple : _aDefinitionsTriples)
-			if (sDefinitionID.equals(triple.getObject()))
-				return triple ;
-		
-		return null ;
-	}
-	
 	/**
-	 * Ask the display to refresh the definition list and, if they exist, connect action buttons
+	 * Ask the display to refresh the stemma and, if they exist, connect action buttons
 	 */
-	protected void refreshDefinitionsList() 
+	protected void refreshStemma() 
 	{
-		display.feedStemma(getInterfaceType()) ;
+		display.feedStemma(_stemma, getInterfaceType()) ;
 		
 		connectButtonsClickHandlers() ;
 	}

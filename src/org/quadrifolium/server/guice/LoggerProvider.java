@@ -1,7 +1,7 @@
 package org.quadrifolium.server.guice;
 
-import org.quadrifolium.server.DbParameters;
-import org.quadrifolium.server.Logger;
+import com.ldv.server.DbParametersModel;
+import com.ldv.server.Logger;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -10,10 +10,10 @@ import com.google.inject.Singleton;
 @Singleton
 public class LoggerProvider implements Provider<Logger>
 {
-	private DbParameters _dbparameters ;
+	private DbParametersModel _dbparameters ;
 	
 	@Inject
-	public LoggerProvider(DbParameters dbparameters)
+	public LoggerProvider(DbParametersModel dbparameters)
 	{
 		_dbparameters = dbparameters ;
 	}
@@ -21,6 +21,6 @@ public class LoggerProvider implements Provider<Logger>
 	@Override
 	public Logger get()
 	{
-		return new Logger(_dbparameters) ;
+		return new Logger() ;
 	}
 }

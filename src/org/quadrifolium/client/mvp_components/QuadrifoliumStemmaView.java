@@ -1,13 +1,12 @@
 package org.quadrifolium.client.mvp_components;
 
-import java.util.ArrayList;
-
 import org.quadrifolium.client.cytoscape.CytoscapePanel;
 import org.quadrifolium.client.mvp_components.QuadrifoliumComponentBaseDisplayModel.INTERFACETYPE;
-import org.quadrifolium.shared.ontology.TripleWithLabel;
 
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+
+import com.ldv.shared.graph.LdvModelTree;
 
 public class QuadrifoliumStemmaView extends QuadrifoliumComponentBaseFlowDisplay implements QuadrifoliumStemmaPresenter.Display 
 {
@@ -19,7 +18,7 @@ public class QuadrifoliumStemmaView extends QuadrifoliumComponentBaseFlowDisplay
 	{
 		super() ;
 		
-		addStyleName("semanticsWorshopPanel") ;
+		addStyleName("stemmaWorkshopPanel") ;
 		
 		// Panels
 		//
@@ -35,11 +34,20 @@ public class QuadrifoliumStemmaView extends QuadrifoliumComponentBaseFlowDisplay
 	protected void initStemmaPanel()
 	{
 		_stemmaPanel = new CytoscapePanel() ;
-		_stemmaPanel.addStyleName("lemmasCellTreePanel") ;
+		_stemmaPanel.addStyleName("stemmaCytoscapePanel") ;
 		
     add(_stemmaPanel) ;
     
     // _stemmaPanel.open() ;
+	}
+	
+	/**
+	 * Open the stemma viewer (cytoscape)
+	 */
+	@Override
+	public void openStemmaViewer()
+	{
+		_stemmaPanel.open() ;
 	}
 	
 	/**
@@ -50,7 +58,7 @@ public class QuadrifoliumStemmaView extends QuadrifoliumComponentBaseFlowDisplay
 		// Create command pannel
 		//
 		_baseDisplayModel.createCommandPanel() ;
-		_baseDisplayModel.getCommandPanel().addStyleName("definitionsCommand") ;
+		_baseDisplayModel.getCommandPanel().addStyleName("stemmaCommand") ;
 		
 		showCaption() ;
 			
@@ -74,15 +82,17 @@ public class QuadrifoliumStemmaView extends QuadrifoliumComponentBaseFlowDisplay
 	 * Update the view depending on what the user is entitled to doing
 	 */
 	@Override
-	public void updateView(final ArrayList<TripleWithLabel> aTriples, final INTERFACETYPE iInterfaceType)
+	public void updateView(final LdvModelTree stemma, final INTERFACETYPE iInterfaceType)
 	{
 		_baseDisplayModel.getCommandPanel().clear() ;
 		showCaption() ;
 		
+		/*
 		if (false == _stemmaPanel.isOpen())
 			_stemmaPanel.open() ;
+		*/
 		
-		feedStemma(iInterfaceType) ;
+		feedStemma(stemma, iInterfaceType) ;
 		
 		if (INTERFACETYPE.readOnlyMode == iInterfaceType)
 			return ;
@@ -106,11 +116,13 @@ public class QuadrifoliumStemmaView extends QuadrifoliumComponentBaseFlowDisplay
 	 * Feed and refresh the left semantic table (the one with current concept as the object of all triples)
 	 */
 	@Override
-	public void feedStemma(final INTERFACETYPE iInterfaceType)
+	public void feedStemma(final LdvModelTree stemma, final INTERFACETYPE iInterfaceType)
 	{
-		// _stemmaPanel.clear() ;
-		
-		_stemmaPanel.addNode() ;
+		if ((false == _stemmaPanel.isOpen()) && (null != stemma))
+			_stemmaPanel.open() ;
+			
+		if (_stemmaPanel.isOpen())
+			_stemmaPanel.addNodes(stemma) ;
 		
 		_baseDisplayModel.clearButtons() ;
 	}
@@ -125,7 +137,6 @@ public class QuadrifoliumStemmaView extends QuadrifoliumComponentBaseFlowDisplay
 	@Override
 	public void closeAddPanel() {
 	}
-	
 	
 	/**
 	 * Set the proper text message in the error box dialog 

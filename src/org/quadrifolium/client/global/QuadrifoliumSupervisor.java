@@ -73,7 +73,7 @@ public class QuadrifoliumSupervisor {
 	public void setSessionElements(final SessionElements sessionElements) {
 		_sessionElements = sessionElements ;
 	}
-		
+			
 	public Person getUser() {
 		return _user ;
 	}

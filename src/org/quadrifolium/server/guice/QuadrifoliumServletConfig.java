@@ -1,11 +1,11 @@
 package org.quadrifolium.server.guice;
 
 import org.quadrifolium.server.DbParameters;
-import org.quadrifolium.server.Logger;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.ldv.server.Logger;
 
 /**
  * This class starts the quadrifolium server

@@ -6,6 +6,8 @@ import java.io.*;
 import javax.mail.*;
 import javax.mail.internet.*;
 
+import com.ldv.server.Logger;
+
 public class EMailer 
 {
 	//PRIVATE //

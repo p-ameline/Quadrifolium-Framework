@@ -4,9 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.ontology_base.FreeTextModel;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /** 
  * Object in charge of Read/Write operations for the <code>freeText</code> table 

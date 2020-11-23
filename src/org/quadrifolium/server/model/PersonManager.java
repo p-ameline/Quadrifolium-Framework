@@ -4,9 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.shared.database.Person;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /**
  * Class in charge of the "persons" table

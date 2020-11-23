@@ -12,21 +12,21 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.io.FileUtils;
 
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.shared.rpc.GetWelcomeTextAction;
 import org.quadrifolium.shared.rpc.GetWelcomeTextResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class GetWelcomeTextHandler extends QuadrifoliumActionHandler<GetWelcomeTextAction, GetWelcomeTextResult>
+public class GetWelcomeTextHandler extends LdvActionHandler<GetWelcomeTextAction, GetWelcomeTextResult>
 {
 	@Inject
-	public GetWelcomeTextHandler(final Logger logger,
-                               final Provider<ServletContext> servletContext,       
+	public GetWelcomeTextHandler(final Provider<ServletContext> servletContext,       
                                final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 	}
 	
 	/**

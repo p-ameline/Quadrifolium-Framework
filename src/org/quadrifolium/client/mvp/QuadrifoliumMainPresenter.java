@@ -6,11 +6,14 @@ import net.customware.gwt.presenter.client.place.PlaceRequest;
 import net.customware.gwt.presenter.client.widget.WidgetDisplay;
 import net.customware.gwt.presenter.client.widget.WidgetPresenter;
 
+import org.quadrifolium.client.event.AtelierPhpEvent;
 import org.quadrifolium.client.event.BackToWelcomePageEvent;
 import org.quadrifolium.client.event.BackToWelcomePageEventHandler;
 import org.quadrifolium.client.event.BackToWelcomeTextEvent;
 import org.quadrifolium.client.event.BackToWelcomeTextEventHandler;
 import org.quadrifolium.client.event.CommandLoadLanguagesEvent;
+import org.quadrifolium.client.event.GoToAtelierPhpEvent;
+import org.quadrifolium.client.event.GoToAtelierPhpEventHandler;
 import org.quadrifolium.client.event.GoToLoginResponseEvent;
 import org.quadrifolium.client.event.GoToLoginResponseEventHandler;
 import org.quadrifolium.client.event.GoToWorkshopCommandEvent;
@@ -23,17 +26,19 @@ import org.quadrifolium.client.event.WelcomePageEvent;
 import org.quadrifolium.client.event.WelcomeTextEvent;
 import org.quadrifolium.client.gin.QuadrifoliumGinjector;
 import org.quadrifolium.client.global.QuadrifoliumSupervisor;
-import org.quadrifolium.shared.database.Language;
 import org.quadrifolium.shared.ontology.LanguageTag;
 import org.quadrifolium.shared.rpc.GetLanguagesAction;
 import org.quadrifolium.shared.rpc.GetLanguagesResult;
 import org.quadrifolium.shared.rpc4ontology.GetLanguageTagsAction;
 import org.quadrifolium.shared.rpc4ontology.GetLanguageTagsResult;
+import org.quadrifolium.shared.rpc_util.SessionElements;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.inject.Inject;
@@ -64,6 +69,7 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 	private       boolean          _isLoginCreated ;
 	private       boolean          _isCommandCreated ;
 	private       boolean          _isWorkshopPageCreated ;
+	private       boolean          _isAtelierPhpCreated ;
 	private       boolean          _isPostLoginHeaderCreated ;
 	private       boolean          _isRegisterPageCreated ;
 	
@@ -86,6 +92,7 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 		_isLoginCreated           = false ;
 		_isCommandCreated         = false ;
 		_isWorkshopPageCreated    = false ;
+		_isAtelierPhpCreated      = false ;
 		_isPostLoginHeaderCreated = false ;
 		_isWelcomeTextCreated     = false ;
 		_isWelcomePageCreated     = false ;
@@ -153,7 +160,36 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 				doLoadConcept() ;	
 			}
 		});
-						
+				
+		eventBus.addHandler(GoToAtelierPhpEvent.TYPE, new GoToAtelierPhpEventHandler() 
+		{
+			@Override
+			public void onGoToAtelierPhp(GoToAtelierPhpEvent event) 
+			{
+				Log.info("Call to go to atelier PHP") ;
+				// doLoadAtelierPhp() ;
+				
+				SessionElements sessionElements = _supervisor.getSessionElements() ; 
+				if (null == sessionElements)
+					return ;
+				
+				if (Storage.isLocalStorageSupported())
+				{
+					Storage localStorage = Storage.getLocalStorageIfSupported() ;
+					if (null != localStorage)
+					{
+						localStorage.setItem("QuadrifoliumToken",   sessionElements.getToken()) ;
+						localStorage.setItem("QuadrifoliumSession", "" + sessionElements.getSessionId()) ;
+					}
+				}
+				
+				String sUrl = "https://quadrifolium.org/atelier" ;
+				// sUrl += "?token=" + sessionElements.getToken() + "&session=" + sessionElements.getSessionId() ;
+				
+				Window.open(sUrl, "_blank", "") ;
+			}
+		});
+		
 		doLoad() ;
 		doLogin() ;
 		loadCommand() ;
@@ -349,6 +385,41 @@ public class QuadrifoliumMainPresenter extends WidgetPresenter<QuadrifoliumMainP
 		}
 		else
 			eventBus.fireEvent(new PostLoginHeaderEvent(display.getHeader())) ;	
+	}
+	
+	/**
+	 * Load the French preliminary workshop
+	 */
+	public void doLoadAtelierPhp()
+	{
+		Log.info("Calling LoadAtelierPhp") ;
+
+		if ((false == _isAtelierPhpCreated) && (null != _supervisor) && (null != _supervisor.getInjector()))
+		{
+			QuadrifoliumGinjector injector = _supervisor.getInjector() ;
+			injector.getAtelierPhpPresenter() ; 
+			_isAtelierPhpCreated = true ;
+		}
+		display.getWorkspace().clear() ;
+		
+		// If AtelierPhpEvent is not handled yet, we have to defer fireEvent
+		//
+		if (false == eventBus.isEventHandled(AtelierPhpEvent.TYPE))
+		{
+			if (null == _pendingEvents) 
+			{
+				_pendingEvents = new ScheduledCommand() 
+				{
+	        public void execute() {
+	        	_pendingEvents = null ;
+	        	eventBus.fireEvent(new AtelierPhpEvent(display.getWorkspace())) ;
+	        }
+	      };
+	      Scheduler.get().scheduleDeferred(_pendingEvents) ;
+	    }
+		}
+		else
+			eventBus.fireEvent(new AtelierPhpEvent(display.getWorkspace())) ;		
 	}
 	
 	/**

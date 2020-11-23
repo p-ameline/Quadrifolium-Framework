@@ -1,7 +1,6 @@
 package org.quadrifolium.client.widgets;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.quadrifolium.shared.ontology.Flex;
 import org.quadrifolium.shared.rpc4ontology.GetFlexListAction;
@@ -13,7 +12,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 /**
- * Object used to operate an array of LexiqueTextBoxIndex  
+ * Object used to operate an array of {@link FlexTextBoxIndex} 
  * 
  */
 public class FlexTextBoxManager
@@ -124,12 +123,9 @@ public class FlexTextBoxManager
 		if (_aFlexTextBoxBuffer.isEmpty() || (null == flexTextBox))
 			return -1 ;
 		
-		for (Iterator<FlexTextBoxIndex> it = _aFlexTextBoxBuffer.iterator() ; it.hasNext() ; )
-		{
-			FlexTextBoxIndex index = it.next() ;
+		for (FlexTextBoxIndex index : _aFlexTextBoxBuffer)
 			if (flexTextBox == index.getLexiqueTextBox())
 				return index.getIndex() ;
-		}
 		
 		return -1 ;
 	}
@@ -145,12 +141,9 @@ public class FlexTextBoxManager
 		if (_aFlexTextBoxBuffer.isEmpty() || (null == flexTextBox))
 			return null ;
 		
-		for (Iterator<FlexTextBoxIndex> it = _aFlexTextBoxBuffer.iterator() ; it.hasNext() ; )
-		{
-			FlexTextBoxIndex index = it.next() ;
+		for (FlexTextBoxIndex index : _aFlexTextBoxBuffer)
 			if (flexTextBox == index.getLexiqueTextBox())
 				return index ;
-		}
 		
 		return null ;
 	}
@@ -166,12 +159,9 @@ public class FlexTextBoxManager
 		if (_aFlexTextBoxBuffer.isEmpty())
 			return (FlexTextBoxIndex) null ;
 		
-		for (Iterator<FlexTextBoxIndex> it = _aFlexTextBoxBuffer.iterator() ; it.hasNext() ; )
-		{
-			FlexTextBoxIndex lexiqueTxtBx = it.next() ;
+		for (FlexTextBoxIndex lexiqueTxtBx : _aFlexTextBoxBuffer)
 			if (iIndex == lexiqueTxtBx.getIndex())
 				return lexiqueTxtBx ;
-		}
 		
 		return (FlexTextBoxIndex) null ;
 	}
@@ -208,14 +198,11 @@ public class FlexTextBoxManager
 			
 		// Index no longer in use, remove it from buffer
 		//
-		for (Iterator<FlexTextBoxIndex> it = _aFlexTextBoxBuffer.iterator() ; it.hasNext() ; )
-		{
-			FlexTextBoxIndex flexTxtBx = it.next() ;
+		for (FlexTextBoxIndex flexTxtBx : _aFlexTextBoxBuffer)
 			if (iIndex == flexTxtBx.getIndex())
 			{
 				_aFlexTextBoxBuffer.remove(flexTxtBxIdx) ;
 				return ;
 			}
-		}
 	}
 }

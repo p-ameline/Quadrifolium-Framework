@@ -6,9 +6,9 @@ import java.util.Iterator;
 import org.quadrifolium.shared.ontology.Flex;
 
 /**
- * Object used to reference a LexiqueTextBox in order to benefit from asynchronous connection to
- * the Lexicon server: Requests are sent with requesting TextBox's index so that answer can be used
- * to populate proper LexiqueTextBox  
+ * Object used to reference a {@link FlexTextBox} in order to benefit from asynchronous connection to
+ * the Quadrifolium: Requests are sent with requesting TextBox's index so that answer can be used
+ * to populate proper FlexTextBox  
  * 
  * Inspired from http://sites.google.com/site/gwtcomponents/auto-completiontextbox
  */

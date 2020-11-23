@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.util.QuadrifoliumServerFcts;
 import org.quadrifolium.shared.ontology.Flex;
 import org.quadrifolium.shared.ontology.FlexWithTraits;
@@ -18,6 +16,9 @@ import org.quadrifolium.shared.ontology.LemmaWithInflections;
 import org.quadrifolium.shared.ontology.Triple;
 import org.quadrifolium.shared.ontology.TripleWithLabel;
 import org.quadrifolium.shared.rpc_util.SessionElements;
+
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
 
 /** 
  * Object in charge of Read/Write operations for <code>LemmaWithInflections</code> objects 

@@ -10,23 +10,23 @@ import javax.servlet.http.HttpServletRequest;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.quadrifolium.server.DBConnector;
-import org.quadrifolium.server.Logger;
 import org.quadrifolium.shared.database.Language;
 import org.quadrifolium.shared.rpc.GetLanguagesAction;
 import org.quadrifolium.shared.rpc.GetLanguagesResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.ldv.server.DBConnector;
+import com.ldv.server.Logger;
+import com.ldv.server.handler.LdvActionHandler;
 
-public class GetLanguagesHandler extends QuadrifoliumActionHandler<GetLanguagesAction, GetLanguagesResult>
+public class GetLanguagesHandler extends LdvActionHandler<GetLanguagesAction, GetLanguagesResult>
 {
 	@Inject
-	public GetLanguagesHandler(final Logger logger,
-                             final Provider<ServletContext> servletContext,       
+	public GetLanguagesHandler(final Provider<ServletContext> servletContext,       
                              final Provider<HttpServletRequest> servletRequest)
 	{
-		super(logger, servletContext, servletRequest) ;
+		super(servletContext, servletRequest) ;
 	}
 	
 	/**

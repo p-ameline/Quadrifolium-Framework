@@ -40,10 +40,17 @@ table td, select {
   // line-height:      0.25em;
 }
 
-.successWelcomeLabel{
+.successWelcomeLabel {
+	display:    inline-block;
 	text-align: center;
 	width:      100%;
 	// margin-top: 0.5em;
+}
+
+.headerButtonsPanel {
+	position:  absolute;
+	right:     1em;
+	top:       3px;
 }
 
 .workspace {
@@ -218,6 +225,39 @@ table td, select {
   text-align:  left;
 }
 
+/** --------- Workshop, stemma --------- */
+
+.stemmaWorkshopPanel {
+	display:   block;
+  width:     100%;
+  height:    100%;
+}
+
+.stemmaCommand {
+	display:          block;
+	background-color: #CDEE6A;
+  width:            auto;
+  height:           2em;
+  margin:           5px;
+  border:           3px;
+  padding:          3px;
+}
+
+.stemmaCommandControl {
+	display:          inline-block;
+	background-color: #FFFBA8;
+	align:            right;
+	border:           solid 1px #980c10;
+	background:       #00B050;
+}
+
+.stemmaCytoscapePanel {
+	display:   block;
+  width:     100%;
+  height:    100%;
+  overflow:  visible;
+}
+
 /** --------- Welcome --------- */
 
 .welcomeWorkspace{
@@ -299,6 +339,20 @@ table td, select {
 	display:          inline-block;
 	width:            50%;
 	height:           auto;
+}
+
+/** --------- Atelier --------- */
+
+.atelierWorkspace {
+	display:   block;
+  width:     100%;
+  height:    100%;
+}
+
+.atelierArea {
+	display:       block;
+  width:     100%;
+  height:    100%;
 }
 
 /* buttons for fit scores */
