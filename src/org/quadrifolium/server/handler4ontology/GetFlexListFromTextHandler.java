@@ -14,8 +14,8 @@ import net.customware.gwt.dispatch.shared.ActionException;
 // import org.quadrifolium.server.Logger;
 import org.quadrifolium.server.ontology.FlexManager;
 import org.quadrifolium.shared.ontology.Flex;
-import org.quadrifolium.shared.rpc4ontology.GetFlexListAction;
-import org.quadrifolium.shared.rpc4ontology.GetFlexListResult;
+import org.quadrifolium.shared.rpc4ontology.GetFlexListFromTextAction;
+import org.quadrifolium.shared.rpc4ontology.GetFlexListFromTextResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -24,7 +24,7 @@ import com.ldv.server.DBConnector;
 import com.ldv.server.Logger;
 import com.ldv.server.handler.LdvActionHandler;
 
-public class GetFlexListFromTextHandler extends LdvActionHandler<GetFlexListAction, GetFlexListResult>
+public class GetFlexListFromTextHandler extends LdvActionHandler<GetFlexListFromTextAction, GetFlexListFromTextResult>
 {
 	protected int _iUserId ;
 	
@@ -48,7 +48,7 @@ public class GetFlexListFromTextHandler extends LdvActionHandler<GetFlexListActi
 	}
 
 	@Override
-	public GetFlexListResult execute(final GetFlexListAction action, final ExecutionContext context) throws ActionException 
+	public GetFlexListFromTextResult execute(final GetFlexListFromTextAction action, final ExecutionContext context) throws ActionException 
   {	
 		try 
 		{			
@@ -61,7 +61,7 @@ public class GetFlexListFromTextHandler extends LdvActionHandler<GetFlexListActi
    		//
    		DBConnector dbconnector = new DBConnector(true, -1, DBConnector.databaseType.databaseOntology) ;
    		
-   		GetFlexListResult FlexListResult = new GetFlexListResult("", action.getBoxIndex()) ;
+   		GetFlexListFromTextResult FlexListResult = new GetFlexListFromTextResult("", action.getBoxIndex()) ;
 
    		boolean bGotResult = false ;
    		
@@ -79,7 +79,7 @@ public class GetFlexListFromTextHandler extends LdvActionHandler<GetFlexListActi
    		if (bGotResult)
    			return FlexListResult ;
    		
-			return new GetFlexListResult("Error", action.getBoxIndex()) ;
+			return new GetFlexListFromTextResult("Error", action.getBoxIndex()) ;
 		}
 		catch (Exception cause) 
 		{
@@ -97,7 +97,7 @@ public class GetFlexListFromTextHandler extends LdvActionHandler<GetFlexListActi
 	 * @param lexicon     Record content
 	 * 
 	 **/	
-	private boolean getFlexListFromText(DBConnector dbConnector, final String sLanguage, final String sText, GetFlexListResult flexListResult)
+	private boolean getFlexListFromText(DBConnector dbConnector, final String sLanguage, final String sText, GetFlexListFromTextResult flexListResult)
 	{
 		String sFctName = "GetFlexListFromTextHandler.getLexiconListFromText" ;
 		
@@ -157,16 +157,16 @@ public class GetFlexListFromTextHandler extends LdvActionHandler<GetFlexListActi
 	}
 		
 	@Override
-	public void rollback(final GetFlexListAction action,
-        							 final GetFlexListResult result,
+	public void rollback(final GetFlexListFromTextAction action,
+        							 final GetFlexListFromTextResult result,
                        final ExecutionContext context) throws ActionException
   {
 		// Nothing to do here
   }
  
 	@Override
-	public Class<GetFlexListAction> getActionType()
+	public Class<GetFlexListFromTextAction> getActionType()
 	{
-		return GetFlexListAction.class ;
+		return GetFlexListFromTextAction.class ;
 	}
 }

@@ -1,8 +1,5 @@
 package org.quadrifolium.server.handler4ontology;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,6 +21,7 @@ import org.quadrifolium.shared.util.QuadrifoliumFcts;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.ldv.server.DBConnector;
 import com.ldv.server.Logger;
 import com.ldv.server.handler.LdvActionHandler;
@@ -134,14 +132,18 @@ public class GetSemanticTriplesForConceptHandler extends LdvActionHandler<GetSem
 		
 		Logger.trace(sFctName + ": entering for concept = " + sCode, _iUserId, Logger.TraceLevel.STEP) ;
 		
+		// We need a TripleManager
+		//
+		TripleManager tripleManager = new TripleManager(_sessionElements, dbConnector) ;
+		
 		// First step, get all triples for the concept as object
 		//
 		ArrayList<TripleWithLabel> aLeftTriples = new ArrayList<TripleWithLabel>() ; 
 		
-		boolean bLIsA  = getTriplesFromConceptAndPredicate(dbConnector, sLanguage, "object", sCode, QuadrifoliumFcts.getConceptCodeForIsA(), aLeftTriples) ;
-		boolean bLIsA0 = getTriplesFromConceptAndPredicate(dbConnector, sLanguage, "object", sCode, QuadrifoliumFcts.getConceptCodeForIntransitiveIsA(), aLeftTriples) ;
-		boolean bLAt   = getTriplesFromConceptAndPredicate(dbConnector, sLanguage, "object", sCode, QuadrifoliumFcts.getConceptCodeForAt(), aLeftTriples) ;
-		boolean bLMe   = getTriplesFromConceptAndPredicate(dbConnector, sLanguage, "object", sCode, QuadrifoliumFcts.getConceptCodeForHasUnit(), aLeftTriples) ;
+		boolean bLIsA  = getTriplesFromPredicateAndConceptAsSubject(tripleManager, sLanguage, sCode, QuadrifoliumFcts.getConceptCodeForIsA(), aLeftTriples) ;
+		boolean bLIsA0 = getTriplesFromPredicateAndConceptAsSubject(tripleManager, sLanguage, sCode, QuadrifoliumFcts.getConceptCodeForIntransitiveIsA(), aLeftTriples) ;
+		boolean bLAt   = getTriplesFromPredicateAndConceptAsSubject(tripleManager, sLanguage, sCode, QuadrifoliumFcts.getConceptCodeForAt(), aLeftTriples) ;
+		boolean bLMe   = getTriplesFromPredicateAndConceptAsSubject(tripleManager, sLanguage, sCode, QuadrifoliumFcts.getConceptCodeForHasUnit(), aLeftTriples) ;
 		
 		fillLabels(dbConnector, sLanguage, aLeftTriples) ;
 		
@@ -151,10 +153,10 @@ public class GetSemanticTriplesForConceptHandler extends LdvActionHandler<GetSem
 		//
 		ArrayList<TripleWithLabel> aRightTriples = new ArrayList<TripleWithLabel>() ; 
 			
-		boolean bRIsA  = getTriplesFromConceptAndPredicate(dbConnector, sLanguage, "subject", sCode, QuadrifoliumFcts.getConceptCodeForIsA(), aRightTriples) ;
-		boolean bRIsA0 = getTriplesFromConceptAndPredicate(dbConnector, sLanguage, "subject", sCode, QuadrifoliumFcts.getConceptCodeForIntransitiveIsA(), aRightTriples) ;
-		boolean bRAt   = getTriplesFromConceptAndPredicate(dbConnector, sLanguage, "subject", sCode, QuadrifoliumFcts.getConceptCodeForAt(), aRightTriples) ;
-		boolean bRMe   = getTriplesFromConceptAndPredicate(dbConnector, sLanguage, "subject", sCode, QuadrifoliumFcts.getConceptCodeForHasUnit(), aRightTriples) ;
+		boolean bRIsA  = getTriplesFromPredicateAndConceptAsObject(tripleManager, sLanguage, sCode, QuadrifoliumFcts.getConceptCodeForIsA(), aRightTriples) ;
+		boolean bRIsA0 = getTriplesFromPredicateAndConceptAsObject(tripleManager, sLanguage, sCode, QuadrifoliumFcts.getConceptCodeForIntransitiveIsA(), aRightTriples) ;
+		boolean bRAt   = getTriplesFromPredicateAndConceptAsObject(tripleManager, sLanguage, sCode, QuadrifoliumFcts.getConceptCodeForAt(), aRightTriples) ;
+		boolean bRMe   = getTriplesFromPredicateAndConceptAsObject(tripleManager, sLanguage, sCode, QuadrifoliumFcts.getConceptCodeForHasUnit(), aRightTriples) ;
 			
 		fillLabels(dbConnector, sLanguage, aRightTriples) ;
 			
@@ -166,82 +168,70 @@ public class GetSemanticTriplesForConceptHandler extends LdvActionHandler<GetSem
 	}
 
 	/**
-	 * Get all triples for a given predicate, with the concept as an object
+	 * Get all triples for a given predicate, with the concept as the object
 	 * 
-	 * @param dbconnector       Database connector
+	 * @param tripleManager     TripleManager used for database query
 	 * @param sLanguage         Language to get triples labels for
-	 * @param sCode             Code of the concepts to be looked for
-	 * @param sPredicate        Predicate
+	 * @param sObject           Code as object of the triples to look for
+	 * @param sPredicate        Predicate of the triples to look for
 	 * @param triplesListResult Result structure to be filled
 	 * 
 	 * @return <code>true</code> if all went well and <code>false</code> if not 
 	 */
-	private boolean getTriplesFromConceptAndPredicate(DBConnector dbConnector, final String sLanguage, final String sPosition, final String sCode, final String sPredicate, ArrayList<TripleWithLabel> aResultList)
+	protected boolean getTriplesFromPredicateAndConceptAsObject(TripleManager tripleManager, final String sLanguage, final String sObject, final String sPredicate, ArrayList<TripleWithLabel> aResultList)
 	{
-		String sFctName = "GetSemanticTriplesForConceptHandler.getLeftSemanticTriplesFromConcept" ;
+		String sFctName = "GetSemanticTriplesForConceptHandler.getTriplesFromPredicateAndConceptAsObject" ;
 			
-		if ((null == dbConnector) || (null == sCode) || "".equals(sCode))
+		if ((null == tripleManager) || (null == sObject) || "".equals(sObject))
 		{
 			Logger.trace(sFctName + ": bad parameter", _iUserId, Logger.TraceLevel.ERROR) ;
 			return false ;
 		}
 		
-		// SQL query to get all lemmas for a language and a concept
-		//
-		String sqlText = "SELECT * FROM triple WHERE " + sPosition + " = ? AND predicate = ?" ;
+		ArrayList<Triple> aResults = new ArrayList<Triple>() ;
 		
-		dbConnector.prepareStatememt(sqlText, Statement.NO_GENERATED_KEYS) ;
-		dbConnector.setStatememtString(1, sCode) ;
-		dbConnector.setStatememtString(2, sPredicate) ;
+		if (false == tripleManager.getSubjects(sObject, sPredicate, "", aResults))
+		  return false ;
 		
-		if (false == dbConnector.executePreparedStatement())
-		{
-			Logger.trace(sFctName + ": failed query " + sqlText + " for " + sPosition + " = " + sCode + " and predicate = " + sPredicate, _iUserId, Logger.TraceLevel.ERROR) ;
-			return false ;
-		}
-		
-		int iNbRecords = 0 ;
-		
-		ResultSet rs = dbConnector.getResultSet() ;
-		try
-		{
-			// Browse results
-			//
-			while (rs.next())
-			{
-				Triple triple = new Triple() ;
-				TripleManager.fillDataFromResultSet(rs, triple, _iUserId) ;
-			
-				// TODO remove when the DRC will have been treated properly
-				//
-				if ((false == "0000MRS".equals(triple.getSubject())) && (false == "0000MRS".equals(triple.getObject())))
-					aResultList.add(new TripleWithLabel(triple, sLanguage, null, null, null)) ;
-				
-				iNbRecords++ ;
-			}
-			
-			if (0 == iNbRecords)
-			{
-				Logger.trace(sFctName + ": no triple found for object \"" + sCode + "\" and predicate \"" + sPredicate + "\".", _iUserId, Logger.TraceLevel.SUBSTEP) ;
-				dbConnector.closePreparedStatement() ;
-				return true ;
-			}
-		}
-		catch(SQLException ex)
-		{
-			Logger.trace(sFctName + ": DBConnector.dbSelectPreparedStatement: executeQuery failed for preparedStatement " + sqlText, -1, Logger.TraceLevel.ERROR) ;
-			Logger.trace(sFctName + ": SQLException: " + ex.getMessage(), -1, Logger.TraceLevel.ERROR) ;
-			Logger.trace(sFctName + ": SQLState: " + ex.getSQLState(), -1, Logger.TraceLevel.ERROR) ;
-			Logger.trace(sFctName + ": VendorError: " +ex.getErrorCode(), -1, Logger.TraceLevel.ERROR) ;        
-		}
-		
-		Logger.trace(sFctName + ": found " + iNbRecords + " triples for concept " + sCode + " and predicate " + sPredicate, _iUserId, Logger.TraceLevel.SUBDETAIL) ;
-		
-		dbConnector.closeResultSet() ;
-		dbConnector.closePreparedStatement() ;
+		if (false == aResults.isEmpty())
+		  for (Triple triple : aResults)
+		    aResultList.add(new TripleWithLabel(triple, sLanguage, null, null, null)) ;
 		
 		return true ;
 	}
+	
+	 /**
+   * Get all triples for a given predicate, with the concept as the subject
+   * 
+   * @param tripleManager     TripleManager used for database query
+   * @param sLanguage         Language to get triples labels for
+   * @param sObject           Code as subject of the triples to look for
+   * @param sPredicate        Predicate of the triples to look for
+   * @param triplesListResult Result structure to be filled
+   * 
+   * @return <code>true</code> if all went well and <code>false</code> if not 
+   */
+  protected boolean getTriplesFromPredicateAndConceptAsSubject(TripleManager tripleManager, final String sLanguage, final String sSubject, final String sPredicate, ArrayList<TripleWithLabel> aResultList)
+  {
+    String sFctName = "GetSemanticTriplesForConceptHandler.getTriplesFromPredicateAndConceptAsSubject" ;
+      
+    if ((null == tripleManager) || (null == sSubject) || "".equals(sSubject) || (null == sPredicate) || "".equals(sPredicate))
+    {
+      Logger.trace(sFctName + ": bad parameter", _iUserId, Logger.TraceLevel.ERROR) ;
+      return false ;
+    }
+    
+    ArrayList<Triple> aResults = new ArrayList<Triple>() ;
+    
+    if (false == tripleManager.getObjects(sSubject, sPredicate, "", aResults))
+      return false ;
+    
+    if (false == aResults.isEmpty())
+      for (Triple triple : aResults)
+        aResultList.add(new TripleWithLabel(triple, sLanguage, null, null, null)) ;
+    
+    return true ;
+  }
 	
 	/**
 	 * Fill a list of triples with their labels

@@ -511,7 +511,7 @@ public class QuadrifoliumServerFcts
 		// Getting all preferred terms triples for this concept
 		//
 		ArrayList<Triple> aResults = new ArrayList<Triple>() ;
-		tripleManager.getObjects(sCode, QuadrifoliumFcts.getConceptCodeForPreferredTerm(), aResults) ;
+		tripleManager.getObjects(sCode, QuadrifoliumFcts.getConceptCodeForPreferredTerm(), "", aResults) ;
 				
 		// Check if there is a result for this specific language
 		//

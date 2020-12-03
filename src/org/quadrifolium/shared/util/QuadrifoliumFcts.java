@@ -1,6 +1,9 @@
 package org.quadrifolium.shared.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.quadrifolium.shared.rpc4ontology.SearchAttribute;
 
 /**
  * <p>
@@ -546,5 +549,70 @@ public class QuadrifoliumFcts
 			return ;
 		
 		aLabelsForCodes.put(sCode + ":" + sLanguage, sLabel) ;
+	}
+	
+	/**
+   * Get the attribute(s) of the preferred flex to display to represent a lemma
+   * 
+   * @param sLanguage     Language for the lemma
+   * @param sPartOfSpeech Part of speech of the lemma as a concept code
+   * @param aResult       Attributes that allow for selecting the proper flex
+   */
+  public static void getAttributesForPreferredFlex(final String sLanguage, final String sPartOfSpeech, ArrayList<SearchAttribute> aResult)
+  {
+    if ((null == sLanguage) || "".equals(sLanguage) || (null == aResult))
+      return ;
+    
+    PartOfSpeech iPOS = PartOfSpeech.nullPoS ;
+    
+    if (null != sPartOfSpeech)
+      iPOS = getPartOfSpeechFromConceptCode(sPartOfSpeech) ;
+    
+    getAttributesForPreferredFlex(sLanguage, iPOS, aResult) ;
+  }
+	
+	/**
+	 * Get the attribute(s) of the preferred flex to display to represent a lemma
+	 * 
+	 * @param sLanguage Language for the lemma
+	 * @param iPOS      Part of speech of the lemma
+	 * @param aResult   Attributes that allow for selecting the proper flex
+	 */
+	public static void getAttributesForPreferredFlex(final String sLanguage, final PartOfSpeech iPOS, ArrayList<SearchAttribute> aResult)
+	{
+	  if ((null == sLanguage) || "".equals(sLanguage) || (null == aResult))
+	    return ;
+	  
+	  // For currently addressed languages, the Part of Speech is demanded
+	  //
+	  if (PartOfSpeech.nullPoS == iPOS)
+	    return ;
+	      
+	  if (PartOfSpeech.commonNoun == iPOS)
+	  {
+	    // For noons, always select the singular flex
+	    //
+	    SearchAttribute attribute = new SearchAttribute(getConceptCodeForGrammaticalNumber(), getGrammaticalNumberConceptCode(Number.singular)) ;
+	    if (false == aResult.contains(attribute))
+	      aResult.add(attribute) ;
+	  }
+	  
+	  if (PartOfSpeech.adjective == iPOS)
+    {
+	    // In English, adjectives don't agree 
+	    //
+	    if (sLanguage.startsWith("en"))
+	      return ;
+	    
+      // For adjectives, always select the singular masculine flex
+      //
+      SearchAttribute attribute1 = new SearchAttribute(getConceptCodeForGrammaticalNumber(), getGrammaticalNumberConceptCode(Number.singular)) ;
+      if (false == aResult.contains(attribute1))
+        aResult.add(attribute1) ;
+      
+      SearchAttribute attribute2 = new SearchAttribute(getConceptCodeForGrammaticalGender(), getGrammaticalGenderConceptCode(Gender.masculine)) ;
+      if (false == aResult.contains(attribute2))
+        aResult.add(attribute2) ;
+    }
 	}
 }

@@ -617,7 +617,7 @@ public class QuadrifoliumLemmasPresenter extends QuadrifoliumComponentBasePresen
 			if (lemma.isPreferred() && isBetterCompatibleLanguage(lemma, bestCandidate, sSelectedLanguage))
 				bestCandidate = lemma ;
 		
-		// If nothing found among the "preferred terms", try with ordinay ones
+		// If nothing found among the "preferred terms", try with ordinary ones
 		//
 		if (null == bestCandidate)
 			for (LemmaWithInflections lemma : _aSynonyms)

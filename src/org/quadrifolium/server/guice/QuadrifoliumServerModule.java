@@ -27,7 +27,7 @@ import org.quadrifolium.shared.rpc.IsValidPseudoAction;
 import org.quadrifolium.shared.rpc.RegisterUserAction;
 import org.quadrifolium.shared.rpc.SendLoginAction;
 import org.quadrifolium.shared.rpc4ontology.GetDefinitionsTriplesAction;
-import org.quadrifolium.shared.rpc4ontology.GetFlexListAction;
+import org.quadrifolium.shared.rpc4ontology.GetFlexListFromTextAction;
 import org.quadrifolium.shared.rpc4ontology.GetFullSynonymsForConceptAction;
 import org.quadrifolium.shared.rpc4ontology.GetLanguageTagsAction;
 import org.quadrifolium.shared.rpc4ontology.GetLemmasForConceptAction;
@@ -58,7 +58,7 @@ public class QuadrifoliumServerModule extends ActionHandlerModule
 		
 		// Ontology management display
 		// 
-		bindHandler(GetFlexListAction.class,               GetFlexListFromTextHandler.class) ;
+		bindHandler(GetFlexListFromTextAction.class,       GetFlexListFromTextHandler.class) ;
 		bindHandler(GetLemmasForConceptAction.class,       GetLemmasForConceptHandler.class) ;
 		bindHandler(GetFullSynonymsForConceptAction.class, GetFullSynonymsForConceptHandler.class) ;
 		bindHandler(GetSemanticTriplesAction.class,        GetSemanticTriplesForConceptHandler.class) ;

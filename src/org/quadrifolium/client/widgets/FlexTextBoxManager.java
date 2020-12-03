@@ -3,8 +3,8 @@ package org.quadrifolium.client.widgets;
 import java.util.ArrayList;
 
 import org.quadrifolium.shared.ontology.Flex;
-import org.quadrifolium.shared.rpc4ontology.GetFlexListAction;
-import org.quadrifolium.shared.rpc4ontology.GetFlexListResult;
+import org.quadrifolium.shared.rpc4ontology.GetFlexListFromTextAction;
+import org.quadrifolium.shared.rpc4ontology.GetFlexListFromTextResult;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -55,13 +55,13 @@ public class FlexTextBoxManager
 		if (null == index)
 			return ;
 		
-		dispatcher.execute(new GetFlexListAction(iUserId, index.getLanguage(), sText, index.getIndex()), new GetFlexBoxListCallback()) ;
+		dispatcher.execute(new GetFlexListFromTextAction(iUserId, index.getLanguage(), sText, index.getIndex()), new GetFlexBoxListCallback()) ;
 	}
 	
 	/**
 	*  Asynchronous callback function for calls to GetLexiconFromCodeHandler
 	**/
-	public class GetFlexBoxListCallback implements AsyncCallback<GetFlexListResult> 
+	public class GetFlexBoxListCallback implements AsyncCallback<GetFlexListFromTextResult> 
 	{
 		public GetFlexBoxListCallback() {
 			super();
@@ -74,7 +74,7 @@ public class FlexTextBoxManager
 		}
 
 		@Override
-		public void onSuccess(final GetFlexListResult result)
+		public void onSuccess(final GetFlexListFromTextResult result)
 		{
 			if (null == result)
 				return ;
