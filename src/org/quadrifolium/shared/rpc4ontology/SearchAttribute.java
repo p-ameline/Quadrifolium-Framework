@@ -18,7 +18,10 @@ public class SearchAttribute implements IsSerializable
 	/**
 	 * Null constructor
 	 */
-	public SearchAttribute() {
+	public SearchAttribute()
+	{
+	  super() ;
+	  
 		reset() ;
 	}
 		
@@ -27,6 +30,8 @@ public class SearchAttribute implements IsSerializable
 	 */
 	public SearchAttribute(final String sPredicate, final String sObject) 
 	{
+	  super() ;
+	  
 		reset() ;
 		
 		_sPredicate = sPredicate ;
@@ -36,7 +41,10 @@ public class SearchAttribute implements IsSerializable
 	/**
 	 * Copy constructor
 	 */
-	public SearchAttribute(final SearchAttribute model) {
+	public SearchAttribute(final SearchAttribute model)
+	{
+	  super() ;
+	  
 		initFromModel(model) ;
 	}
 	
